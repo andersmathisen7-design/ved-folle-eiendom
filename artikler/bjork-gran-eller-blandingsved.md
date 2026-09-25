@@ -55,7 +55,7 @@ Tabellen bygger på vanlig erfaring blant vedselgere og brukere. Gnistene fra gr
 - **Litt gran eller opptenningsved** for å få fyr raskt. Se [slik fyrer du riktig](/artikler/slik-fyrer-du-riktig/).
 - **Tørr ved** uansett treslag. Våt ved gir lite varme. Se [er veden min tørr?](/artikler/er-veden-min-torr/)
 
-Vi selger bare bjørkeved, tørket og lagret innendørs.
+Vi selger bare bjørkeved, tørket og lagret under tak.
 
 [[bestill]]
 

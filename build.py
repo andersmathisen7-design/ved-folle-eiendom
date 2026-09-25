@@ -80,7 +80,7 @@ def product_ld():
         "@type": "Product",
         "@id": f"{URL}/#product",
         "name": P["name"],
-        "description": f"Tørr bjørkeved lagret innendørs. {P['liters']} liter, ca. {P['kg']} kg, kubber ca. {P['length_cm']} cm. Levert på døra i Follo.",
+        "description": f"Tørr bjørkeved lagret under tak. {P['liters']} liter, ca. {P['kg']} kg, kubber ca. {P['length_cm']} cm. Levert på døra i Follo.",
         "image": f"{URL}/img/og-bjorkeved-follo.jpg",
         "brand": {"@type": "Brand", "name": C.BRAND},
         "category": "Ved / brensel",
@@ -261,7 +261,7 @@ def hero(h1, lead):
       <p class="lead">{lead}</p>
       <ul class="usp">
         <li><strong>{P['price']} kr</strong> per 40-liters sekk</li>
-        <li>Tørr og lagret <strong>innendørs</strong></li>
+        <li>Tørr og lagret <strong>under tak</strong></li>
         <li>Vi <strong>bærer veden inn</strong> for deg</li>
       </ul>
       <div class="hero-cta">
@@ -296,7 +296,7 @@ def price_section():
         <ul class="facts">
           <li>{P['liters']} liter, ca. {P['kg']} kg per sekk</li>
           <li>Kubber ca. {P['length_cm']} cm lange, {P['diameter_cm']} cm tykke</li>
-          <li>Tørket og lagret innendørs</li>
+          <li>Tørket og lagret under tak</li>
           <li>Produsert etter norsk standard</li>
           <li>Hjemlevering: {kr(C.DELIVERY_FEE) + ' per bestilling' if C.DELIVERY_FEE else 'avtales'}</li>
         </ul>
@@ -480,7 +480,7 @@ def trust_section():
     <h2>Derfor kjøper naboene ved av oss</h2>
     <div class="trust">
       <div class="card"><h3>Lokale</h3><p>Vi holder til i Ås og kjører bare i Follo. Det gir kort vei og raske leveringer. Når du ringer, snakker du med de som faktisk kjører veden.</p></div>
-      <div class="card"><h3>Tørr ved som brenner godt</h3><p>Veden er lagret innendørs, så den er klar for peisen med en gang. Tørr ved gir mer varme, mindre sot og mindre røyk.</p></div>
+      <div class="card"><h3>Tørr ved som brenner godt</h3><p>Veden er lagret under tak, så den holder seg tørr og er klar for peisen med en gang. Tørr ved gir mer varme, mindre sot og mindre røyk.</p></div>
       <div class="card"><h3>Båret helt inn</h3><p>Vi kan sette veden i garasjen, i kjelleren eller helt opp til 6. etasje. Du trenger ikke løfte noe selv.</p></div>
       <div class="card"><h3>Ordentlig firma</h3><p>{esc(CO['legal_name'])} (org.nr. {CO['org_nr']}) driver også med vaktmester-, vinter- og hagetjenester i Follo.</p></div>
     </div>
@@ -749,7 +749,7 @@ def llms_txt():
 
 ## Fakta
 - Produkt: {P['name']}, ca. {P['kg']} kg, kubber ca. {P['length_cm']} cm lange og {P['diameter_cm']} cm i diameter
-- Kvalitet: tørket og lagret innendørs, produsert etter norsk standard
+- Kvalitet: tørket og lagret under tak, produsert etter norsk standard
 - Pris: {P['price']} kr per sekk {P['vat_text']} (10 sekker = {kr(10 * P['price'])})
 - Hjemlevering: {kr(C.DELIVERY_FEE) + ' per bestilling' if C.DELIVERY_FEE else 'avtales'}
 - Bestilling: skjema på {URL}/#bestill eller telefon {CO['phone']}

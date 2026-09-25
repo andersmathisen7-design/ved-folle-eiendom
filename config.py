@@ -142,7 +142,7 @@ FAQ = [
     ("Hvor mye ved er det i en sekk?",
      "Hver sekk er på 40 liter og veier ca. {kg} kg. Kubbene er ca. {length} cm lange og {dia} cm tykke, så de passer i de fleste ovner og peiser."),
     ("Er veden tørr?",
-     "Ja. Veden er tørket og lagret innendørs, og den er klar til bruk med en gang. Den er produsert etter norsk standard og har høy brennverdi."),
+     "Ja. Veden er tørket og lagret under tak, så den holder seg tørr og er klar til bruk med en gang. Den er produsert etter norsk standard og har høy brennverdi."),
     ("Hvor mange sekker trenger jeg?",
      "Det kommer an på hvor mye du fyrer. Tenk på det slik: En sekk rekker omtrent 1–2 kvelder med peisen. Fyrer du nesten hver kveld hele vinteren, går det gjerne 30–60 sekker. Ring oss hvis du vil ha hjelp til å regne ut."),
     ("Kan dere bære veden inn?",

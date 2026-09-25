@@ -42,7 +42,7 @@ På **kalde, tørre og vindstille dager**. Da legger røyken seg lavt i stedet f
 
 ## Tørr ved gir renere luft
 
-Vår bjørkeved er tørket og lagret innendørs, og produsert etter norsk standard. Det er det viktigste enkelttiltaket for mindre røyk.
+Vår bjørkeved er tørket og lagret under tak, og produsert etter norsk standard. Det er det viktigste enkelttiltaket for mindre røyk.
 
 [[bestill]]
 

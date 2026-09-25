@@ -46,7 +46,7 @@ I tillegg er våt ved nesten umulig å tenne, og mye av varmen går med til å k
 
 Vedfyring er den største kilden til fint svevestøv (PM2,5) i Norge (Miljødirektoratet). I Nordre Follo er vedfyring den største kilden til helseskadelige utslipp om vinteren, mer enn trafikken (Nordre Follo kommune). Våt ved kan gi 10–30 ganger mer svevestøv enn tørr ved (Bærum kommune). Tørr ved er altså bra både for lommeboka og for naboene.
 
-Vår bjørkeved er tørket og lagret innendørs, og produsert etter norsk standard. Les også [hvordan du fyrer riktig](/artikler/slik-fyrer-du-riktig/) og [hvordan du lagrer veden tørt](/artikler/hvordan-lagre-ved/).
+Vår bjørkeved er tørket og lagret under tak, og produsert etter norsk standard. Les også [hvordan du fyrer riktig](/artikler/slik-fyrer-du-riktig/) og [hvordan du lagrer veden tørt](/artikler/hvordan-lagre-ved/).
 
 [[bestill]]
 
