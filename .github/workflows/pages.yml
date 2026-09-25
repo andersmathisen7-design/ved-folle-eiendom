@@ -2,7 +2,7 @@ name: Publiser nettsiden
 
 on:
   push:
-    branches: [main, claude/practical-rubin-6ubv77]
+    branches: [main]
   workflow_dispatch:
 
 permissions:

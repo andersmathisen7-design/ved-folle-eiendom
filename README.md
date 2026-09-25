@@ -43,7 +43,7 @@ Hvis sending feiler, ser kunden telefonnummeret og kan ringe i stedet.
 ## Hosting (gratis): GitHub Pages
 
 Siden er live på **https://follobjorkeved.no** (domenet er registrert hos Domeneshop og peker til GitHub Pages).
-Hver push bygger siden og legger den på `gh-pages`-branchen, som GitHub Pages publiserer (se `.github/workflows/pages.yml`).
+Hver push til `main` bygger siden og legger den på `gh-pages`-branchen, som GitHub Pages publiserer (se `.github/workflows/pages.yml`).
 
 ### Koble til eget domene
 1. Kjøp **follobjorkeved.no** hos for eksempel Domeneshop. Se begrunnelsen i ANALYSE.md.
