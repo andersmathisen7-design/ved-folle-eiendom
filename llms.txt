@@ -13,17 +13,17 @@
 
 ## Tillegg for bæring
 - Ingen bæring – settes ved innkjørsel: ingen tillegg
-- Utendørs 0–15 meter: +12 kr per sekk
-- Utendørs 15–50 meter: +16 kr per sekk
-- Inn i garasje: +15 kr per sekk
-- Til kjeller, 0–15 meter: +16 kr per sekk
-- Til kjeller, 15–50 meter: +20 kr per sekk
-- Til 1. etasje: +16 kr per sekk
-- Til 2. etasje: +20 kr per sekk
-- Til 3. etasje: +24 kr per sekk
-- Til 4. etasje: +28 kr per sekk
-- Til 5. etasje: +34 kr per sekk
-- Til 6. etasje: +36 kr per sekk
+- Utendørs 0–15 meter: +12 kr per bestilling
+- Utendørs 15–50 meter: +16 kr per bestilling
+- Inn i garasje: +15 kr per bestilling
+- Til kjeller, 0–15 meter: +16 kr per bestilling
+- Til kjeller, 15–50 meter: +20 kr per bestilling
+- Til 1. etasje: +16 kr per bestilling
+- Til 2. etasje: +20 kr per bestilling
+- Til 3. etasje: +24 kr per bestilling
+- Til 4. etasje: +28 kr per bestilling
+- Til 5. etasje: +34 kr per bestilling
+- Til 6. etasje: +36 kr per bestilling
 
 ## Leveringsområder
 - [Ved i Ås](https://andersmathisen7-design.github.io/ved-folle-eiendom/ved-as/): Ås sentrum, Nordby, Vinterbro, Kroer, Brekke, Togrenda, Solberg (postnr. 1430–1435 og 1407)
@@ -36,7 +36,7 @@
 
 ## Spørsmål og svar
 ### Hva koster bjørkeved hos dere?
-En 40-liters sekk med tørr bjørkeved koster 89 kr inkl. mva. Vil du ha veden båret inn, koster det 12–36 kr ekstra per sekk. Prisen avhenger av hvor langt og hvor høyt den skal bæres. Hjemlevering koster 499 kr per bestilling. Du ser totalprisen i skjemaet før du sender bestillingen.
+En 40-liters sekk med tørr bjørkeved koster 89 kr inkl. mva. Vil du ha veden båret inn, koster det 12–36 kr ekstra per bestilling. Prisen avhenger av hvor langt og hvor høyt den skal bæres. Hjemlevering koster 499 kr per bestilling. Du ser totalprisen i skjemaet før du sender bestillingen.
 
 ### Hvor leverer dere ved?
 Vi leverer i hele Follo: Ås, Ski, Langhus, Kolbotn, Oppegård, Vestby, Son, Drøbak, Nesodden og Enebakk.
