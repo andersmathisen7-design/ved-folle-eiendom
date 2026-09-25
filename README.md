@@ -42,10 +42,8 @@ Hvis sending feiler, ser kunden telefonnummeret og kan ringe i stedet.
 
 ## Hosting (gratis): GitHub Pages
 
-Dette må gjøres én gang:
-1. Gå til GitHub → **Settings → Pages → Source: «GitHub Actions»**.
-2. Kjør workflowen «Publiser nettsiden» under **Actions**, eller push en endring.
-3. Siden er nå live på `https://andersmathisen7-design.github.io/ved-folle-eiendom/`.
+Siden er live på **https://andersmathisen7-design.github.io/ved-folle-eiendom/**.
+Hver push bygger siden og legger den på `gh-pages`-branchen, som GitHub Pages publiserer (se `.github/workflows/pages.yml`).
 
 ### Koble til eget domene
 1. Kjøp **follobjorkeved.no** hos for eksempel Domeneshop. Se begrunnelsen i ANALYSE.md.
@@ -54,7 +52,7 @@ Dette må gjøres én gang:
    - `AAAA` @ → `2606:50c0:8000::153`, `2606:50c0:8001::153`, `2606:50c0:8002::153`, `2606:50c0:8003::153`
    - `CNAME` www → `andersmathisen7-design.github.io`
 3. Gå til GitHub → Settings → Pages → Custom domain. Skriv inn `follobjorkeved.no` og kryss av for **Enforce HTTPS**.
-4. Kjør workflowen på nytt. Da blir alle lenker og sitemap oppdatert til det nye domenet.
+4. Kjør workflowen «Publiser nettsiden» på nytt. Den finner det nye domenet selv, og oppdaterer alle lenker og sitemap.
 
 ## Måling (valgfritt, men anbefalt)
 

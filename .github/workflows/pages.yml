@@ -6,9 +6,8 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
+  pages: read
 
 concurrency:
   group: pages
@@ -17,23 +16,27 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - id: pages
-        uses: actions/configure-pages@v5
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      # base_url/base_path blir riktig både på github.io og etter at eget domene er koblet til.
-      - run: python3 build.py
+      # Leser siden sin adresse fra GitHub, så lenker blir riktige både på
+      # github.io og etter at eget domene er koblet til.
+      - name: Finn adressen til siden
         env:
-          SITE_URL: ${{ steps.pages.outputs.base_url }}
-          BASE_PATH: ${{ steps.pages.outputs.base_path }}
-      - uses: actions/upload-pages-artifact@v3
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          url=$(gh api "repos/${GITHUB_REPOSITORY}/pages" --jq .html_url 2>/dev/null || echo "https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/")
+          url=${url%/}
+          path=$(echo "$url" | sed -E 's#^https?://[^/]+##')
+          echo "SITE_URL=$url" >> "$GITHUB_ENV"
+          echo "BASE_PATH=$path" >> "$GITHUB_ENV"
+          echo "Publiserer til $url (base: '$path')"
+      - run: python3 build.py
+      - uses: peaceiris/actions-gh-pages@v4
         with:
-          path: public
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          github_token: ${{ github.token }}
+          publish_dir: ./public
+          publish_branch: gh-pages
+          keep_files: true
