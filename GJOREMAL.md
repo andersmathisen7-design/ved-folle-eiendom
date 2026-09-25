@@ -1,8 +1,8 @@
 # Gjøremål
 
 ## GitHub (nå)
-1. **Settings → General → Default branch:** bytt til `main`.
-2. **Settings → Pages:** fjern `follobjorkeved.no`, lagre, og legg domenet inn igjen. Når sertifikatet er klart, kryss av for **Enforce HTTPS**.
+1. ~~**Settings → General → Default branch:** bytt til `main`.~~ ✅ Gjort
+2. ~~**Settings → Pages:** HTTPS.~~ ✅ Gjort – https://follobjorkeved.no virker, og http/www sender videre til https.
 
 ## Når https://follobjorkeved.no virker
 3. **Google Search Console:**
@@ -34,7 +34,7 @@
 ### 4. Bing Webmaster Tools
 **Hvorfor:** ChatGPT-søk og Microsoft Copilot henter mye av søkeresultatene sine fra Bing. Er siden ikke i Bing, blir den sjelden nevnt der.
 
-**Allerede gjort:** Bing får automatisk beskjed om alle sidene via IndexNow hver gang siden publiseres. Det virker fra HTTPS er i orden. Webmaster Tools trengs for å se statistikk og feil.
+**Allerede gjort:** Bing får automatisk beskjed om alle sidene via IndexNow hver gang siden publiseres (første varsling godtatt 25.09.2026). Webmaster Tools trengs for å se statistikk og feil.
 
 **Slik gjør du det (ca. 5 min, gjør punkt 3 først):**
 1. Gå til https://www.bing.com/webmasters og logg inn med Google-kontoen.
