@@ -149,3 +149,18 @@ FAQ = [
     ("Hvordan betaler jeg?",
      "Vi avtaler betaling når vi ringer for å bekrefte bestillingen. Du betaler ingenting når du sender skjemaet."),
 ]
+
+# Lokale tall per kommune (vises på områdesidene og i artikkelen om vedfyring i Follo).
+# Kilder: SSB 07459 (innbyggere 1.1.2026), 14917 (husstander 2025), 05467 (fritidsbygg 2026).
+# Vedfyrende husstander er et anslag: Akershus-snittet 51 % (SSB 09703, 2025) × husstander.
+KOMMUNE_STATS = {
+    "Nordre Follo kommune": {"innbyggere": 65381, "husstander": 26593, "enebolig": 9562, "enebolig_pst": 36, "smahus_pst": 65.9, "hytter": 463},
+    "Ås kommune": {"innbyggere": 22725, "husstander": 10925, "enebolig": 4569, "enebolig_pst": 42, "smahus_pst": 59.9, "hytter": 544},
+    "Nesodden kommune": {"innbyggere": 21005, "husstander": 8770, "enebolig": 5009, "enebolig_pst": 57, "smahus_pst": 84.5, "hytter": 1432},
+    "Vestby kommune": {"innbyggere": 20167, "husstander": 8467, "enebolig": 4472, "enebolig_pst": 53, "smahus_pst": 78.2, "hytter": 1545},
+    "Frogn kommune": {"innbyggere": 16429, "husstander": 7590, "enebolig": 4295, "enebolig_pst": 57, "smahus_pst": 74.3, "hytter": 2886},
+    "Enebakk kommune": {"innbyggere": 11697, "husstander": 4682, "enebolig": 3182, "enebolig_pst": 68, "smahus_pst": 89.6, "hytter": 1032},
+}
+WOOD_SHARE = 0.51        # andel husstander i Akershus som fyrer med ved (SSB 09703, 2025)
+KG_PER_HOUSEHOLD = 655   # kg ved per vedfyrende husstand i Akershus (SSB 09703, 2025)
+FEIER = {"default": "Follo Brannvesen IKS (tlf. 64 85 10 00)", "Vestby kommune": "Vestby kommune – sjekk kommunens nettside for hvem som feier"}

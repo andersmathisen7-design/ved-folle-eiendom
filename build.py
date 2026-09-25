@@ -503,6 +503,39 @@ def page_index():
     return head(title, desc, "/", ld) + body + footer()
 
 
+def nb(n):
+    return f"{round(n):,}".replace(",", "\u00a0")
+
+
+def local_stats(a):
+    s = C.KOMMUNE_STATS.get(a["kommune"])
+    if not s:
+        return ""
+    wood_hh = s["husstander"] * C.WOOD_SHARE
+    sacks = wood_hh * C.KG_PER_HOUSEHOLD / P["kg"]
+    feier = C.FEIER.get(a["kommune"], C.FEIER["default"])
+    k = esc(a["kommune"])
+    return f"""
+<section class="section alt">
+  <div class="wrap narrow prose">
+    <h2>Vedfyring i {k} i tall</h2>
+    <div class="table-wrap"><table><tbody>
+      <tr><th>Innbyggere (1.1.2026)</th><td>{nb(s['innbyggere'])}</td></tr>
+      <tr><th>Husstander</th><td>{nb(s['husstander'])}</td></tr>
+      <tr><th>Husstander i enebolig</th><td>{nb(s['enebolig'])} ({s['enebolig_pst']}&nbsp;%)</td></tr>
+      <tr><th>Andel i småhus (enebolig, tomannsbolig, rekkehus)</th><td>{str(s['smahus_pst']).replace('.', ',')}&nbsp;%</td></tr>
+      <tr><th>Fritidsboliger/hytter</th><td>{nb(s['hytter'])}</td></tr>
+      <tr><th>Vedfyrende husstander (anslag)</th><td>ca. {nb(round(wood_hh, -2))}</td></tr>
+      <tr><th>Ved brent i året (anslag)</th><td>ca. {nb(round(sacks, -4))} sekker à 40 liter</td></tr>
+    </tbody></table></div>
+    <p class="muted small">Kilder: SSB tabell 07459, 14917 og 05467. Anslagene bygger på at 51 % av husstandene i Akershus fyrer med ved, og at de i snitt brenner 655 kg i året (SSB 09703, 2025). I eneboliger har tre av fire vedovn, i blokkleiligheter rundt én av åtte (SSB 10568), så andelen er trolig høyere der det er mange eneboliger.</p>
+    <p><strong>Feiing:</strong> {esc(feier)}. Les mer om <a href="/artikler/feiing-og-brannsikkerhet-follo/">feiing og brannsikkerhet i Follo</a>.<br>
+    <strong>Luftkvalitet:</strong> Følg varselet på <a href="https://luftkvalitet.miljodirektoratet.no/" rel="noopener">luftkvalitet.miljodirektoratet.no</a> på kalde, stille dager. Se <a href="/artikler/vedfyring-og-luftkvalitet-i-follo/">vedfyring og luftkvalitet i Follo</a>.</p>
+    <p>Se også <a href="/artikler/vedfyring-i-follo-tall-per-kommune/">vedfyring i Follo – tall for alle kommunene</a>.</p>
+  </div>
+</section>"""
+
+
 def page_area(a):
     name = a["name"]
     items = [
@@ -531,6 +564,7 @@ def page_area(a):
     <p class="muted">Postnummer: {esc(a['postnr'])}. Bor du like utenfor? Ring oss, så finner vi en løsning.</p>
   </div>
 </section>"""
+    local += local_stats(a)
     body = (hero(f"Bjørkeved levert i {esc(name)}",
                  f"Tørr bjørkeved i 40-liters sekker, kjørt hjem til deg i {esc(name)}. Vi kan bære veden helt inn. {P['price']} kr per sekk.")
             + local + order_form(name) + price_section() + steps_section()
