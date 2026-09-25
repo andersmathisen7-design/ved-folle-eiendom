@@ -130,6 +130,8 @@ def ld_tags(*objs):
 
 def analytics_head():
     parts = []
+    if C.GOATCOUNTER:
+        parts.append(f'<script data-goatcounter="https://{C.GOATCOUNTER}.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>')
     tag = C.GA4_ID or C.GADS_ID
     if tag:
         cfg = "".join(f"gtag('config','{i}');" for i in (C.GA4_ID, C.GADS_ID) if i)
@@ -545,7 +547,7 @@ def page_personvern():
     <h2>Hvor lenge vi lagrer dem</h2>
     <p>Vi sletter opplysningene når de ikke lenger trengs. Unntaket er det bokføringsloven krever at vi tar vare på, som er 5 år.</p>
     <h2>Informasjonskapsler (cookies)</h2>
-    <p>Siden bruker ingen sporings-cookies med mindre vi har slått på statistikk. I så fall ser du et eget varsel om det.</p>
+    <p>Siden bruker ingen cookies. Vi teller besøk med GoatCounter, som ikke lagrer noe på enheten din og ikke samler personopplysninger. Vi ser bare hvilke sider som besøkes, hvor besøkende kommer fra og hvor mange som sender bestilling.</p>
     <h2>Dine rettigheter</h2>
     <p>Du kan be om å få se, rette eller slette opplysningene vi har om deg. Send en e-post til <a href="mailto:{CO['email']}">{CO['email']}</a>. Du kan også klage til <a href="https://www.datatilsynet.no/" rel="noopener">Datatilsynet</a>.</p>
   </div>

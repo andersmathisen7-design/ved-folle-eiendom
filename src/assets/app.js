@@ -1,9 +1,18 @@
 (function () {
   var S = window.SITE || {};
   var fmt = function (n) { return n.toLocaleString("nb-NO") + " kr"; };
+  var EVENT_NAMES = {
+    click_tel: "Trykket på telefonnummer", begin_checkout: "Begynte på bestilling",
+    generate_lead: "Bestilling sendt", order_error: "Feil ved sending av bestilling",
+    purchase_lead_view: "Så takkesiden"
+  };
   var track = function (name, params) {
     try { if (window.gtag) gtag("event", name, params || {}); } catch (e) {}
     try { if (window.fbq) fbq("trackCustom", name, params || {}); } catch (e) {}
+    try {
+      if (window.goatcounter && goatcounter.count)
+        goatcounter.count({ path: name, title: EVENT_NAMES[name] || name, event: true });
+    } catch (e) {}
   };
 
   document.querySelectorAll('[data-track="tel"]').forEach(function (a) {

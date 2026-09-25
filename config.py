@@ -58,6 +58,10 @@ CARRY_OPTIONS = [
 # Hjemlevering i kroner per bestilling (samme som gammel side). None = "avtales".
 DELIVERY_FEE = 499
 
+# Besøksstatistikk (GoatCounter: gratis, uten cookies, trenger ikke samtykkebanner).
+# Dashbord: https://follobjorkeved.goatcounter.com
+GOATCOUNTER = "follobjorkeved"
+
 # Valgfritt: måle-ID-er. La stå tomme til kontoene er opprettet.
 # GA4: "G-XXXXXXX". Google Ads: "AW-XXXXXXX" og konverteringsetikett "AW-XXXXXXX/abcDEF".
 GA4_ID = ""

@@ -147,7 +147,7 @@ Disse koster 0 kr og betyr mest for lokale søk:
    - Legg inn nettsiden, telefonnummer, åpningstider og minst 10 bilder av ved, bil og levering.
    - Publiser et innlegg hver uke i sesongen.
 2. **Anmeldelser.** Send en SMS med lenke til Google-anmeldelse etter hver levering. **Mål: 20 anmeldelser innen jul.** Antall anmeldelser og hvor gode de er, er blant de viktigste faktorene for plassering på Google Maps.
-3. **Den gamle siden, folloes.no/salg-av-bjorkeved/.** Den må sende besøkende videre til follobjorkeved.no med en 301-omdirigering. Den gamle siden har samlet opp «tillit» hos Google, og den tilliten overføres da til den nye. Ellers konkurrerer de to sidene mot hverandre.
+3. **Den gamle siden, folloes.no.** Begge sidene skal leve hver for seg. Legg inn en lenke fra folloes.no/salg-av-bjorkeved/ til den nye siden. En lenke fra et etablert firma-nettsted hjelper den nye siden i Google.
 4. **Oppføringer i kataloger.** Registrer det samme navnet, telefonnummeret og adressen hos Gule Sider, 1881, Proff, [Vednett](https://vednett.no) (118 selgere) og [Vedbod](https://vedbod.no). KI-søk henter ofte svar fra slike lister.
 5. **Facebook-grupper.** Lokale kjøp-og-salg-grupper som «Ås», «Nesodden», «Ski» og «Vestby». Legg ut ett innlegg per gruppe per måned i sesongen, med bilde, pris og lenke.
 6. **FINN Torget.** En annonse for bedrifter koster fra 59 kr ([FINN](https://www.finn.no/bedriftskunde/torget/priser-pa-finn-torget)). Mange søker etter ved der.
@@ -216,7 +216,7 @@ Betalt reklame lønner seg likevel av to grunner:
 | Uke | Tiltak | Kostnad |
 |---|---|---:|
 | 39 (nå) | Kjøp domenet og slå på GitHub Pages (se README). Test skjemaet og aktiver FormSubmit. | 30 kr |
-| 39 | Google-bedriftsprofil, 301-omdirigering fra folloes.no, Facebook-side med lenke | 0 kr |
+| 39 | Google-bedriftsprofil, lenke fra folloes.no til ny side, Facebook-side med lenke | 0 kr |
 | 40 | FINN-annonser (Ås, Ski, Vestby). Innlegg i 6 lokale Facebook-grupper. | ca. 180 kr |
 | 40–41 | Test Google Ads for Nordre Follo og Ås: 100 kr per dag i 14 dager | 1 400 kr |
 | 40–41 | Test Facebook for alle 6 kommuner: 100 kr per dag i 14 dager | 1 400 kr |

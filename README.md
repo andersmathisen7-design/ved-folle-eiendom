@@ -54,7 +54,18 @@ Hver push bygger siden og legger den på `gh-pages`-branchen, som GitHub Pages p
 3. Gå til GitHub → Settings → Pages → Custom domain. Skriv inn `follobjorkeved.no` og kryss av for **Enforce HTTPS**.
 4. Kjør workflowen «Publiser nettsiden» på nytt. Den finner det nye domenet selv, og oppdaterer alle lenker og sitemap.
 
-## Måling (valgfritt, men anbefalt)
+## Besøksstatistikk
+
+Dashbord: **https://follobjorkeved.goatcounter.com**. Du logger inn med amkleven@gmail.com.
+Det viser besøk per side, hvor folk kommer fra (Google, Facebook osv.) og disse hendelsene:
+«Bestilling sendt», «Begynte på bestilling», «Trykket på telefonnummer» og «Feil ved sending av bestilling».
+GoatCounter bruker ingen cookies, så siden trenger ikke samtykkebanner.
+
+## Folloes.no og denne siden
+
+Begge sidene lever hver for seg. Den nye siden har egne tekster og er ikke en kopi av den gamle, så Google ser dem ikke som duplikater. Anbefalt: legg inn en lenke fra folloes.no/salg-av-bjorkeved/ til den nye siden.
+
+## Google Analytics / Ads / Meta (valgfritt)
 
 Fyll inn `GA4_ID`, `GADS_ID`/`GADS_CONVERSION` og `META_PIXEL_ID` i `config.py`. Siden sender da disse hendelsene:
 - `generate_lead`: en bestilling er sendt. Verdien er i NOK.
