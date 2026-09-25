@@ -34,6 +34,8 @@
 ### 4. Bing Webmaster Tools
 **Hvorfor:** ChatGPT-søk og Microsoft Copilot henter mye av søkeresultatene sine fra Bing. Er siden ikke i Bing, blir den sjelden nevnt der.
 
+**Allerede gjort:** Bing får automatisk beskjed om alle sidene via IndexNow hver gang siden publiseres. Det virker fra HTTPS er i orden. Webmaster Tools trengs for å se statistikk og feil.
+
 **Slik gjør du det (ca. 5 min, gjør punkt 3 først):**
 1. Gå til https://www.bing.com/webmasters og logg inn med Google-kontoen.
 2. Velg **Import from Google Search Console**, og velg follobjorkeved.no. Da blir eierskap og sitemap hentet automatisk.
