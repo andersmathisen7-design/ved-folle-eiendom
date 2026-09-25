@@ -1,13 +1,13 @@
 {
   "name": "Follo Bjørkeved",
   "short_name": "Follo Bjørkeved",
-  "start_url": "/ved-folle-eiendom/",
+  "start_url": "/",
   "display": "browser",
   "background_color": "#faf7f0",
   "theme_color": "#1f3a2b",
   "icons": [
     {
-      "src": "/ved-folle-eiendom/img/icon-192.png",
+      "src": "/img/icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     }

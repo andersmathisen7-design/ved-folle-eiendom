@@ -1,5 +1,5 @@
 User-agent: *
 Allow: /
-Disallow: /ved-folle-eiendom/takk/
+Disallow: /takk/
 
-Sitemap: https://andersmathisen7-design.github.io/ved-folle-eiendom/sitemap.xml
+Sitemap: https://follobjorkeved.no/sitemap.xml

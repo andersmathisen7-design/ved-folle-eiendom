@@ -7,7 +7,7 @@
 - Kvalitet: tørket og lagret innendørs, produsert etter norsk standard
 - Pris: 89 kr per sekk inkl. mva (10 sekker = 890 kr)
 - Hjemlevering: 499 kr per bestilling
-- Bestilling: skjema på https://andersmathisen7-design.github.io/ved-folle-eiendom/#bestill eller telefon +47 48 99 39 00
+- Bestilling: skjema på https://follobjorkeved.no/#bestill eller telefon +47 48 99 39 00
 - E-post: post@min-eiendom.no
 - Oppdatert: 2026-09-25
 
@@ -26,13 +26,13 @@
 - Til 6. etasje: +36 kr per bestilling
 
 ## Leveringsområder
-- [Ved i Ås](https://andersmathisen7-design.github.io/ved-folle-eiendom/ved-as/): Ås sentrum, Nordby, Vinterbro, Kroer, Brekke, Togrenda, Solberg (postnr. 1430–1435 og 1407)
-- [Ved i Ski og Langhus](https://andersmathisen7-design.github.io/ved-folle-eiendom/ved-ski/): Ski sentrum, Langhus, Siggerud, Kråkstad, Skotbu, Finstadjordet, Hebekk (postnr. 1400–1409)
-- [Ved i Kolbotn og Oppegård](https://andersmathisen7-design.github.io/ved-folle-eiendom/ved-kolbotn/): Kolbotn, Oppegård, Sofiemyr, Tårnåsen, Greverud, Myrvoll, Svartskog (postnr. 1410–1421)
-- [Ved i Vestby og Son](https://andersmathisen7-design.github.io/ved-folle-eiendom/ved-vestby/): Vestby sentrum, Son, Hølen, Pepperstad, Garder, Hvitsten (postnr. 1540–1556)
-- [Ved i Drøbak](https://andersmathisen7-design.github.io/ved-folle-eiendom/ved-drobak/): Drøbak sentrum, Heer, Dal, Seiersten, Ullerud, Skiphelle (postnr. 1440–1449)
-- [Ved i Nesodden](https://andersmathisen7-design.github.io/ved-folle-eiendom/ved-nesodden/): Nesoddtangen, Fagerstrand, Bjørnemyr, Fjellstrand, Berger, Tangenåsen (postnr. 1450–1459)
-- [Ved i Enebakk](https://andersmathisen7-design.github.io/ved-folle-eiendom/ved-enebakk/): Ytre Enebakk, Kirkebygda, Flateby, Mjær (postnr. 1911–1914)
+- [Ved i Ås](https://follobjorkeved.no/ved-as/): Ås sentrum, Nordby, Vinterbro, Kroer, Brekke, Togrenda, Solberg (postnr. 1430–1435 og 1407)
+- [Ved i Ski og Langhus](https://follobjorkeved.no/ved-ski/): Ski sentrum, Langhus, Siggerud, Kråkstad, Skotbu, Finstadjordet, Hebekk (postnr. 1400–1409)
+- [Ved i Kolbotn og Oppegård](https://follobjorkeved.no/ved-kolbotn/): Kolbotn, Oppegård, Sofiemyr, Tårnåsen, Greverud, Myrvoll, Svartskog (postnr. 1410–1421)
+- [Ved i Vestby og Son](https://follobjorkeved.no/ved-vestby/): Vestby sentrum, Son, Hølen, Pepperstad, Garder, Hvitsten (postnr. 1540–1556)
+- [Ved i Drøbak](https://follobjorkeved.no/ved-drobak/): Drøbak sentrum, Heer, Dal, Seiersten, Ullerud, Skiphelle (postnr. 1440–1449)
+- [Ved i Nesodden](https://follobjorkeved.no/ved-nesodden/): Nesoddtangen, Fagerstrand, Bjørnemyr, Fjellstrand, Berger, Tangenåsen (postnr. 1450–1459)
+- [Ved i Enebakk](https://follobjorkeved.no/ved-enebakk/): Ytre Enebakk, Kirkebygda, Flateby, Mjær (postnr. 1911–1914)
 
 ## Spørsmål og svar
 ### Hva koster bjørkeved hos dere?
