@@ -335,6 +335,7 @@ def order_form(area_name=""):
       <input type="hidden" name="_next" value="{URL}/takk/">
       <input type="text" name="_honey" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
       <input type="hidden" name="Side" value="">
+      <input type="hidden" name="Kampanje" value="">
 
       <fieldset>
         <legend>Ved</legend>
@@ -383,6 +384,19 @@ def order_form(area_name=""):
           <div><label for="f-epost">E-post</label>
           <input id="f-epost" name="email" type="email" autocomplete="email" required></div>
         </div>
+        <label for="f-kilde">Hvor fant du oss?</label>
+        <select id="f-kilde" name="Hvor fant du oss">
+          <option value="">Velg …</option>
+          <option>Google-søk</option>
+          <option>Google Maps</option>
+          <option>Facebook / Instagram</option>
+          <option>FINN.no</option>
+          <option>Flygeblad i postkassen</option>
+          <option>Anbefalt av noen</option>
+          <option>Har kjøpt før</option>
+          <option>ChatGPT / KI-søk</option>
+          <option>Annet</option>
+        </select>
         <label for="f-melding">Melding (valgfritt)</label>
         <textarea id="f-melding" name="Melding" rows="3" placeholder="F.eks. port-kode, hvor sekkene skal stå, eller et ønsket tidspunkt"></textarea>
       </fieldset>

@@ -76,6 +76,13 @@
   });
   form.addEventListener("change", calc);
   form.querySelector('[name="Side"]').value = location.pathname;
+  // Husk kampanjen (utm_*) kunden kom fra, så vi ser hvilken reklame som gir bestillinger.
+  try {
+    var q = new URLSearchParams(location.search), utm = [];
+    ["utm_source", "utm_medium", "utm_campaign"].forEach(function (k) { if (q.get(k)) utm.push(q.get(k)); });
+    if (utm.length) sessionStorage.setItem("utm", utm.join(" / "));
+    form.querySelector('[name="Kampanje"]').value = sessionStorage.getItem("utm") || document.referrer || "direkte";
+  } catch (e) {}
   calc();
 
   function validate() {
