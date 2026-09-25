@@ -37,7 +37,7 @@ Bransjen ser det samme. Norsk Skogbruk beskriver at salget øker kraftig fra mid
 
 - **Å vente til det blir kaldt.** Når gradestokken kryper under minus ti, øker etterspørselen raskt. I januar 2026 meldte Maxbo at etterspørselen mer enn doblet seg.
 - **Å kjøpe for lite.** Det er dyrere å bestille levering tre ganger enn én gang. Regn ut behovet med [vedkalkulatoren](/artikler/hvor-mye-ved-trenger-jeg/).
-- **Å lagre veden feil.** God ved blir dårlig hvis den blir våt. Lagre den tørt, luftig og under tak.
+- **Å lagre veden feil.** God ved blir dårlig hvis den blir våt. Les [hvordan du lagrer ved](/artikler/hvordan-lagre-ved/).
 
 ## Hva betyr det for prisen?
 
