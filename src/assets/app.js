@@ -4,7 +4,8 @@
   var EVENT_NAMES = {
     click_tel: "Trykket på telefonnummer", begin_checkout: "Begynte på bestilling",
     generate_lead: "Bestilling sendt", order_error: "Feil ved sending av bestilling",
-    purchase_lead_view: "Så takkesiden"
+    purchase_lead_view: "Så takkesiden", article_cta: "Klikket bestill i artikkel",
+    calculator_to_order: "Brukte vedkalkulatoren"
   };
   var track = function (name, params) {
     try { if (window.gtag) gtag("event", name, params || {}); } catch (e) {}
@@ -48,6 +49,29 @@
   }
 
   var form = document.getElementById("order-form");
+
+  // Vedkalkulator i artikler.
+  var kb = document.getElementById("k-bruk");
+  if (kb) {
+    var km = document.getElementById("k-mnd");
+    var kcalc = function () {
+      var p = kb.value.split("|"), perDay = +p[0], days = +p[1];
+      var sacks = Math.max(5, Math.round(perDay * days * (+km.value) * 4.33));
+      document.getElementById("k-sekker").textContent = sacks;
+      document.getElementById("k-pris").textContent = fmt(sacks * S.price + (S.deliveryFee || 0)) + " inkl. hjemlevering";
+      return sacks;
+    };
+    kb.addEventListener("change", kcalc); km.addEventListener("change", kcalc); kcalc();
+    document.getElementById("k-bestill").addEventListener("click", function () {
+      var n = kcalc(), q = document.getElementById("f-antall");
+      if (q) { q.value = n; q.dispatchEvent(new Event("change", { bubbles: true })); }
+      track("calculator_to_order", { sacks: n });
+    });
+  }
+  document.querySelectorAll('[data-track="article_cta"]').forEach(function (a) {
+    a.addEventListener("click", function () { track("article_cta"); });
+  });
+
   if (!form) return;
 
   var qty = form.querySelector("#f-antall");

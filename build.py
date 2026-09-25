@@ -15,6 +15,7 @@ from datetime import date
 from pathlib import Path
 
 import config as C
+import artikler_build as AB
 
 ROOT = Path(__file__).parent
 SRC = ROOT / "src"
@@ -193,6 +194,7 @@ def head(title, desc, path, ld="", noindex=False):
       <a href="/#priser">Priser</a>
       <a href="/#omrader">Områder</a>
       <a href="/#sporsmal">Spørsmål</a>
+      <a href="/artikler/">Råd om ved</a>
       <a class="tel" href="tel:{CO['phone'].replace(' ', '')}" data-track="tel">☎ {CO['phone_display']}</a>
       <a class="btn btn-sm" href="#bestill">Bestill</a>
     </nav>
@@ -222,7 +224,7 @@ def footer():
     <div>
       <p class="footer-h">Vi leverer i</p>
       <p class="footer-areas">{areas}</p>
-      <p><a href="{CO['facebook']}" rel="noopener">Facebook</a> · <a href="{CO['main_site']}" rel="noopener">Andre tjenester</a> · <a href="/personvern/">Personvern</a></p>
+      <p><a href="{CO['facebook']}" rel="noopener">Facebook</a> · <a href="/artikler/">Råd om ved</a> · <a href="{CO['main_site']}" rel="noopener">Andre tjenester</a> · <a href="/personvern/">Personvern</a></p>
     </div>
   </div>
 </footer>
@@ -454,6 +456,22 @@ def faq_section(items):
 </section>"""
 
 
+def guides_section():
+    if not ARTICLES:
+        return ""
+    items = "".join(
+        f'<li><a href="/artikler/{a["slug"]}/"><strong>{esc(a["title"])}</strong><span>{esc(a["description"][:90])}…</span></a></li>'
+        for a in ARTICLES[:6])
+    return f"""
+<section class="section">
+  <div class="wrap">
+    <h2>Råd om ved</h2>
+    <ul class="areas">{items}</ul>
+    <p><a href="/artikler/">Se alle artikler →</a></p>
+  </div>
+</section>"""
+
+
 def trust_section():
     return f"""
 <section class="section">
@@ -481,7 +499,7 @@ def page_index():
                  f"Vi kjører tørr og god bjørkeved hjem til deg i hele Follo. Du kan få den satt i garasjen, i kjelleren eller båret opp trappa. "
                  f"Én sekk koster {P['price']} kr.")
             + price_section() + order_form() + steps_section() + trust_section()
-            + areas_section() + faq_section(items))
+            + areas_section() + guides_section() + faq_section(items))
     return head(title, desc, "/", ld) + body + footer()
 
 
@@ -563,6 +581,125 @@ def page_404():
     return head(f"Fant ikke siden | {C.BRAND}", "Siden finnes ikke.", "/404.html", noindex=True) + body + footer()
 
 
+# ---------------------------------------------------------------- artikler
+
+ARTICLES = AB.load()
+
+
+def cta_block():
+    fee = C.DELIVERY_FEE or 0
+    return f"""<aside class="cta-box">
+  <p class="cta-title">Tørr bjørkeved levert på døra i Follo</p>
+  <p>{P['price']} kr per 40-liters sekk. Hjemlevering {kr(fee)} per bestilling. Vi bærer veden inn hvis du vil.
+  Eksempel: 20 sekker = {kr(20 * P['price'] + fee)} levert.</p>
+  <a class="btn" href="#bestill" data-track="article_cta">Regn ut pris og bestill</a>
+</aside>"""
+
+
+def calculator_block():
+    return f"""<div class="calc card" id="vedkalkulator">
+  <p class="cta-title">Vedkalkulator: hvor mange sekker trenger du?</p>
+  <div class="row2">
+    <div><label for="k-bruk">Hvor mye fyrer du?</label>
+    <select id="k-bruk">
+      <option value="0.6|1.5">Helgekos (1–2 kvelder i uka)</option>
+      <option value="0.6|3.5" selected>Noen kvelder i uka (3–4)</option>
+      <option value="0.6|6">Nesten hver kveld</option>
+      <option value="0.8|7">Hovedoppvarming (hele døgnet)</option>
+    </select></div>
+    <div><label for="k-mnd">Hvor mange måneder?</label>
+    <select id="k-mnd">
+      <option value="3">3 måneder (des–feb)</option>
+      <option value="5">5 måneder (nov–mar)</option>
+      <option value="6" selected>6 måneder (okt–mar)</option>
+      <option value="7">7 måneder (okt–apr)</option>
+    </select></div>
+  </div>
+  <p class="calc-out" aria-live="polite">Du trenger ca. <strong id="k-sekker">–</strong> sekker. Levert pris: <strong id="k-pris">–</strong>.</p>
+  <a class="btn" id="k-bestill" href="#bestill">Bestill dette antallet</a>
+  <p class="muted small">Anslaget bygger på ca. 0,6 sekk per fyringskveld (1 sekk rekker 1–2 kvelder) og ca. 0,8 sekk per døgn når ovnen er hovedoppvarming. En gjennomsnittlig vedfyrende husstand i Akershus brenner ca. 47 sekker i året (SSB).</p>
+</div>"""
+
+
+def article_ld(a):
+    return {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": a["title"],
+        "description": a["description"],
+        "datePublished": a["date"],
+        "dateModified": a["updated"],
+        "inLanguage": "nb-NO",
+        "mainEntityOfPage": f"{URL}/artikler/{a['slug']}/",
+        "image": f"{URL}/img/og-bjorkeved-follo.jpg",
+        "author": {"@type": "Organization", "name": CO["legal_name"], "url": f"{URL}/"},
+        "publisher": {"@id": f"{URL}/#business"},
+    }
+
+
+def nb_date(iso):
+    y, m, d = iso.split("-")
+    months = ["januar", "februar", "mars", "april", "mai", "juni", "juli", "august",
+              "september", "oktober", "november", "desember"]
+    return f"{int(d)}. {months[int(m) - 1]} {y}"
+
+
+def page_article(a):
+    path = f"/artikler/{a['slug']}/"
+    blocks = {"bestill": cta_block(), "kalkulator": calculator_block()}
+    body_html = AB.markdown(a["body"], blocks)
+    lds = [article_ld(a), business_ld(), breadcrumb_ld(a["title"], path)]
+    if a["faq"]:
+        lds.append(faq_ld(a["faq"]))
+    kort = f'<aside class="callout kort"><p class="cta-title">Kort svar</p><p>{esc(a["kort"])}</p></aside>' if a.get("kort") else ""
+    faq = ""
+    if a["faq"]:
+        faq = "<h2 id=\"sporsmal\">Spørsmål og svar</h2>" + "".join(
+            f"<details><summary>{esc(q)}</summary><p>{esc(ans)}</p></details>" for q, ans in a["faq"])
+    others = [x for x in ARTICLES if x["slug"] != a["slug"]][:4]
+    rel = "".join(f'<li><a href="/artikler/{x["slug"]}/"><strong>{esc(x["title"])}</strong><span>{esc(x["description"][:90])}…</span></a></li>' for x in others)
+    body = f"""
+<article class="section">
+  <div class="wrap narrow prose">
+    <nav class="crumbs" aria-label="Brødsmuler"><a href="/">Bjørkeved i Follo</a> › <a href="/artikler/">Råd om ved</a></nav>
+    <h1>{esc(a['title'])}</h1>
+    <p class="meta muted small">Av {esc(CO['legal_name'])} · Oppdatert {nb_date(a['updated'])}</p>
+    {kort}
+    {body_html}
+    {faq}
+    {"" if "[[bestill]]" in a["body"] else cta_block()}
+  </div>
+</article>
+<section class="section alt">
+  <div class="wrap">
+    <h2>Mer om ved</h2>
+    <ul class="areas">{rel}</ul>
+  </div>
+</section>""" + order_form() + areas_section()
+    title = f"{a['title']} | {C.BRAND}"
+    return head(title, a["description"], path, ld_tags(*lds)) + body + footer()
+
+
+def page_articles_index():
+    items = "".join(
+        f'<li><a href="/artikler/{a["slug"]}/"><strong>{esc(a["title"])}</strong><span>{esc(a["description"])}</span></a></li>'
+        for a in ARTICLES)
+    body = f"""
+<section class="section">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Brødsmuler"><a href="/">Bjørkeved i Follo</a> › Råd om ved</nav>
+    <h1>Råd om ved og vedfyring</h1>
+    <p class="lead">Her får du svar på det folk i Follo lurer mest på om ved: hvor mye du trenger, hva det koster, hvordan du lagrer veden og hvordan du fyrer riktig. Svarene bygger på tall fra SSB, Miljødirektoratet og egen erfaring.</p>
+    <ul class="areas articles">{items}</ul>
+  </div>
+</section>""" + order_form()
+    ld = {"@context": "https://schema.org", "@type": "CollectionPage", "name": "Råd om ved og vedfyring",
+          "hasPart": [{"@type": "Article", "headline": a["title"], "url": f"{URL}/artikler/{a['slug']}/"} for a in ARTICLES]}
+    return head(f"Råd om ved: hvor mye, hvilken type og hvordan fyre | {C.BRAND}",
+                "Guider om bjørkeved: hvor mange sekker du trenger, pris i Follo, lagring, tørr ved og riktig fyring.",
+                "/artikler/", ld_tags(ld, breadcrumb_ld("Råd om ved", "/artikler/"))) + body + footer()
+
+
 # ---------------------------------------------------------------- machine-readable files
 
 def llms_txt():
@@ -570,6 +707,7 @@ def llms_txt():
                       for a in C.AREAS)
     carry = "\n".join(f"- {label}: {'ingen tillegg' if fee == 0 else f'+{fee} kr per bestilling'}" for _, label, fee in C.CARRY_OPTIONS)
     faq = "\n\n".join(f"### {q}\n{a}" for q, a in faq_items())
+    arts = "\n".join(f"- [{a['title']}]({URL}/artikler/{a['slug']}/): {a.get('kort') or a['description']}" for a in ARTICLES)
     return f"""# {C.BRAND}
 
 > {C.BRAND} selger og leverer tørr bjørkeved i 40-liters sekker til privatpersoner og hytteeiere i Follo (Akershus): Ås, Nordre Follo (Ski, Langhus, Kolbotn, Oppegård), Vestby, Frogn (Drøbak), Nesodden og Enebakk. Pris {P['price']} kr per sekk {P['vat_text']}. Veden kan bæres inn. Drives av {CO['legal_name']}, org.nr. {CO['org_nr']}, {CO['street']}, {CO['postal_code']} {CO['city']}.
@@ -591,6 +729,9 @@ def llms_txt():
 
 ## Spørsmål og svar
 {faq}
+
+## Artikler
+{arts}
 """
 
 
@@ -642,7 +783,11 @@ def main():
     write("personvern/index.html", page_personvern())
     write("404.html", page_404())
 
-    indexable = ["/"] + [f"/{a['slug']}/" for a in C.AREAS] + ["/personvern/"]
+    write("artikler/index.html", page_articles_index())
+    for a in ARTICLES:
+        write(f"artikler/{a['slug']}/index.html", page_article(a))
+    indexable = (["/"] + [f"/{a['slug']}/" for a in C.AREAS] + ["/artikler/"]
+                 + [f"/artikler/{a['slug']}/" for a in ARTICLES] + ["/personvern/"])
     write("sitemap.xml", sitemap(indexable))
     write("robots.txt", robots())
     write("llms.txt", llms_txt())
