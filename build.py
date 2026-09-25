@@ -174,6 +174,7 @@ def head(title, desc, path, ld="", noindex=False):
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="geo.region" content="NO-32">
+{f'<meta name="google-site-verification" content="{C.GOOGLE_SITE_VERIFICATION}">' if path == "/" and getattr(C, "GOOGLE_SITE_VERIFICATION", "") else ""}
 <meta name="geo.placename" content="Follo">
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">

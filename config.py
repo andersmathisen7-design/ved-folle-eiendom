@@ -58,6 +58,9 @@ CARRY_OPTIONS = [
 # Hjemlevering i kroner per bestilling (samme som gammel side). None = "avtales".
 DELIVERY_FEE = 499
 
+# Google Search Console-bekreftelse (meta-tag på forsiden).
+GOOGLE_SITE_VERIFICATION = "vnXKmoMZizKbBLImYNoyt1EmqXKDaXkpEYQngFIkxhA"
+
 # Besøksstatistikk (GoatCounter: gratis, uten cookies, trenger ikke samtykkebanner).
 # Dashbord: https://follobjorkeved.goatcounter.com
 GOATCOUNTER = "follobjorkeved"
