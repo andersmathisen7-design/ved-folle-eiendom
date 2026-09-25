@@ -50,10 +50,10 @@
   function calc() {
     var n = Math.max(0, parseInt(qty.value, 10) || 0);
     var fee = parseInt(carry.options[carry.selectedIndex].dataset.fee, 10) || 0;
-    var wood = n * S.price, carryTotal = n * fee;
+    var wood = n * S.price, carryTotal = fee; // bæring er per bestilling, som på gammel side
     var total = wood + carryTotal + (S.deliveryFee || 0);
     document.getElementById("s-ved").textContent = n + " × " + S.price + " kr = " + fmt(wood);
-    document.getElementById("s-baering").textContent = fee ? n + " × " + fee + " kr = " + fmt(carryTotal) : "–";
+    document.getElementById("s-baering").textContent = fee ? fmt(carryTotal) : "–";
     document.getElementById("s-total").textContent = fmt(total);
     document.getElementById("f-total").value = fmt(total) + (S.deliveryFee == null ? " + levering (avtales)" : "");
     chips.forEach(function (c) { c.classList.toggle("on", parseInt(c.dataset.qty, 10) === n); });

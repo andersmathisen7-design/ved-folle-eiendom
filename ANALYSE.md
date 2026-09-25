@@ -72,7 +72,7 @@ Tabellen sammenligner **levert pris** for 40-liters sekker uten bæring. Innsaml
 
 | Selger (område) | Pris per 40 L | Levering | **10 sekker levert** | **20 sekker levert** | Bæring |
 |---|---:|---:|---:|---:|---|
-| **Follo Bjørkeved (oss)** | **89 kr** | 499 kr | **1 389 kr** | **2 279 kr** | 12–36 kr per sekk |
+| **Follo Bjørkeved (oss)** | **89 kr** | 499 kr | **1 389 kr** | **2 279 kr** | 12–36 kr per bestilling |
 | Follo Vedservice, Vestby ([fjv.no](https://fjv.no)) | 135 kr | 400 kr | 1 750 kr | 3 100 kr | ikke oppgitt |
 | Riiser bjørkeved ([vednett](https://www.vednett.no/vedselger/riiser-bjorkeved)) | 130 kr | ikke oppgitt | 1 300 kr + frakt | 2 600 kr + frakt | – |
 | Ved24, Kolbotn/Oppegård ([ved24.no](https://www.ved24.no/)) | 86 kr | etter område | 860 kr + frakt | 1 720 kr + frakt | 8–23 kr per sekk |
@@ -157,7 +157,7 @@ Disse koster 0 kr og betyr mest for lokale søk:
 ## 7. Betalt reklame: kostnad per bestilling
 
 **Antakelser:**
-- En gjennomsnittlig ordre er 20 sekker med bæring = ca. 2 100 kr **(antakelse)**. Snittforbruket i Akershus er ca. 47 sekker per år, så dette er realistisk.
+- En gjennomsnittlig ordre er 20 sekker med bæring og levering = 1 780 + 16 + 499 = ca. 2 300 kr **(antakelse)**. Snittforbruket i Akershus er ca. 47 sekker per år, så dette er realistisk.
 - 3–6 % av dem som klikker seg inn fra Facebook bestiller **(antakelse)**.
 - 5–10 % av dem som klikker seg inn fra Google-søk bestiller **(antakelse)**. Andelen er høyere enn fra Facebook fordi de allerede leter etter ved.
 

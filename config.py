@@ -39,7 +39,7 @@ PRODUCT = {
     "diameter_cm": "5–12",
 }
 
-# Bæring, tillegg per sekk (fra gammel side).
+# Bæring, tillegg per bestilling (fra gammel side: legges på én gang, ikke per sekk).
 CARRY_OPTIONS = [
     ("ingen", "Ingen bæring – settes ved innkjørsel", 0),
     ("ute-15", "Utendørs 0–15 meter", 12),
@@ -127,7 +127,7 @@ AREAS = [
 
 FAQ = [
     ("Hva koster bjørkeved hos dere?",
-     "En 40-liters sekk med tørr bjørkeved koster {price} kr {vat}. Vil du ha veden båret inn, koster det 12–36 kr ekstra per sekk. Prisen avhenger av hvor langt og hvor høyt den skal bæres. Hjemlevering koster {delivery} kr per bestilling. Du ser totalprisen i skjemaet før du sender bestillingen."),
+     "En 40-liters sekk med tørr bjørkeved koster {price} kr {vat}. Vil du ha veden båret inn, koster det 12–36 kr ekstra per bestilling. Prisen avhenger av hvor langt og hvor høyt den skal bæres. Hjemlevering koster {delivery} kr per bestilling. Du ser totalprisen i skjemaet før du sender bestillingen."),
     ("Hvor leverer dere ved?",
      "Vi leverer i hele Follo: Ås, Ski, Langhus, Kolbotn, Oppegård, Vestby, Son, Drøbak, Nesodden og Enebakk."),
     ("Hva koster levering?",
