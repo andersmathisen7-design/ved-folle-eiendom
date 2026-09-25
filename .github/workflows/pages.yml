@@ -7,7 +7,6 @@ on:
 
 permissions:
   contents: write
-  pages: read
 
 concurrency:
   group: pages
@@ -21,18 +20,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      # Leser siden sin adresse fra GitHub, så lenker blir riktige både på
-      # github.io og etter at eget domene er koblet til.
-      - name: Finn adressen til siden
-        env:
-          GH_TOKEN: ${{ github.token }}
+      # Eget domene: follobjorkeved.no (CNAME-filen under forteller GitHub Pages hvilket domene siden har).
+      - name: Sett adressen til siden
         run: |
-          url=$(gh api "repos/${GITHUB_REPOSITORY}/pages" --jq .html_url 2>/dev/null || echo "https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/")
-          url=${url%/}
-          path=$(echo "$url" | sed -E 's#^https?://[^/]+##')
-          echo "SITE_URL=$url" >> "$GITHUB_ENV"
-          echo "BASE_PATH=$path" >> "$GITHUB_ENV"
-          echo "Publiserer til $url (base: '$path')"
+          echo "SITE_URL=https://follobjorkeved.no" >> "$GITHUB_ENV"
+          echo "BASE_PATH=" >> "$GITHUB_ENV"
       - run: python3 build.py
       - uses: peaceiris/actions-gh-pages@v4
         with:
@@ -40,3 +32,4 @@ jobs:
           publish_dir: ./public
           publish_branch: gh-pages
           keep_files: true
+          cname: follobjorkeved.no
