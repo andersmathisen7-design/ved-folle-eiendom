@@ -6,8 +6,8 @@
 
 ## Når https://follobjorkeved.no virker
 3. **Google Search Console:**
-   - Legg inn domenet, og bekreft eierskapet med TXT-posten hos Domeneshop.
-   - Send inn `https://follobjorkeved.no/sitemap.xml`.
+   - ~~Bekreft eierskapet.~~ ✅
+   - ~~Send inn `https://follobjorkeved.no/sitemap.xml`.~~ ✅ 23 sider funnet (25.09.2026)
    - Be om indeksering av forsiden og områdesidene.
 4. **Bing Webmaster Tools.** Se forklaring under.
 
@@ -22,7 +22,7 @@
 10. **FormSubmit (valgfritt):** bytt ut e-postadressen i `config.py` med den tilfeldige koden fra aktiverings-e-posten.
 
 ## Avklar med broren din
-11. Er 89 kr inkl. mva? Hvor mye fuktighet er det i veden? Hvor mange sekker har han på lager? Hvordan skal kundene betale?
+11. Er 89 kr inkl. mva? Hvor mye fuktighet er det i veden? Hvor mange sekker har han på lager? Hvordan skal kundene betale? Hvor lang er leveringstiden (f.eks. «1–3 virkedager»)? Tar dere imot retur? (Google ber om begge i produktdataene.)
 
 ## Hver mandag
 12. Les rapporten fra den ukentlige jobben, og godkjenn forslagene (PR) du er enig i.
