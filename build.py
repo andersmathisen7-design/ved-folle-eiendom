@@ -36,7 +36,8 @@ def kr(n):
 
 def faq_items():
     fmt = dict(price=P["price"], vat=P["vat_text"], kg=P["kg"], length=P["length_cm"],
-               dia=P["diameter_cm"], phone=CO["phone_display"])
+               dia=P["diameter_cm"], phone=CO["phone_display"],
+               delivery=C.DELIVERY_FEE if C.DELIVERY_FEE is not None else "–")
     return [(q, a.format(**fmt)) for q, a in C.FAQ]
 
 
@@ -91,6 +92,11 @@ def product_ld():
             "url": f"{URL}/#bestill",
             "seller": {"@id": f"{URL}/#business"},
             "areaServed": "Follo",
+            **({"shippingDetails": {
+                "@type": "OfferShippingDetails",
+                "shippingRate": {"@type": "MonetaryAmount", "value": str(C.DELIVERY_FEE), "currency": "NOK"},
+                "shippingDestination": {"@type": "DefinedRegion", "addressCountry": "NO", "addressRegion": "Akershus"},
+            }} if C.DELIVERY_FEE else {}),
         },
     }
 
@@ -271,6 +277,9 @@ def price_section():
         f"<tr><td>{esc(label)}</td><td>{'–' if fee == 0 else '+ ' + str(fee) + ' kr'}</td></tr>"
         for _, label, fee in C.CARRY_OPTIONS)
     ex10 = 10 * P["price"]
+    fee = C.DELIVERY_FEE
+    delivery_ex = (f" + hjemlevering {kr(fee)} = <strong>{kr(ex10 + fee)}</strong>" if fee
+                   else "")
     return f"""
 <section id="priser" class="section">
   <div class="wrap">
@@ -284,8 +293,9 @@ def price_section():
           <li>Kubber ca. {P['length_cm']} cm lange, {P['diameter_cm']} cm tykke</li>
           <li>Tørket og lagret innendørs</li>
           <li>Produsert etter norsk standard</li>
+          <li>Hjemlevering: {kr(C.DELIVERY_FEE) + ' per bestilling' if C.DELIVERY_FEE else 'avtales'}</li>
         </ul>
-        <p class="example">Eksempel: 10 sekker = <strong>{kr(ex10)}</strong></p>
+        <p class="example">Eksempel: 10 sekker = {kr(ex10)}{delivery_ex}</p>
         <a class="btn" href="#bestill">Regn ut pris og bestill</a>
       </div>
       <div class="card">
@@ -480,7 +490,8 @@ def page_area(a):
          f"Ja. Vi leverer tørr bjørkeved i hele {name} ({a['kommune']}), blant annet til {', '.join(a['places'])}. Postnummer {a['postnr']}."),
         (f"Hva koster ved levert i {name}?",
          f"En 40-liters sekk koster {P['price']} kr {P['vat_text']}. Skal vi bære veden inn, koster det 12–36 kr ekstra per sekk. "
-         f"10 sekker koster {kr(10 * P['price'])} uten bæring."),
+         f"10 sekker koster {kr(10 * P['price'])} uten bæring"
+         + (f", pluss hjemlevering {kr(C.DELIVERY_FEE)} per bestilling." if C.DELIVERY_FEE else ".")),
         (f"Hvor raskt kan jeg få ved i {name}?",
          "Vi ringer deg, som regel innen én arbeidsdag etter at du har bestilt, og avtaler en leveringsdag som passer deg."),
     ] + faq_items()[2:5]
@@ -565,6 +576,7 @@ def llms_txt():
 - Produkt: {P['name']}, ca. {P['kg']} kg, kubber ca. {P['length_cm']} cm lange og {P['diameter_cm']} cm i diameter
 - Kvalitet: tørket og lagret innendørs, produsert etter norsk standard
 - Pris: {P['price']} kr per sekk {P['vat_text']} (10 sekker = {kr(10 * P['price'])})
+- Hjemlevering: {kr(C.DELIVERY_FEE) + ' per bestilling' if C.DELIVERY_FEE else 'avtales'}
 - Bestilling: skjema på {URL}/#bestill eller telefon {CO['phone']}
 - E-post: {CO['email']}
 - Oppdatert: {TODAY}

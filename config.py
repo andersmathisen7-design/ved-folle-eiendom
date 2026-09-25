@@ -55,8 +55,8 @@ CARRY_OPTIONS = [
     ("etg-6", "Til 6. etasje", 36),
 ]
 
-# Leveringsgebyr i kroner. None = "avtales ved bekreftelse" (slik gammel side hadde det).
-DELIVERY_FEE = None
+# Hjemlevering i kroner per bestilling (samme som gammel side). None = "avtales".
+DELIVERY_FEE = 499
 
 # Valgfritt: måle-ID-er. La stå tomme til kontoene er opprettet.
 # GA4: "G-XXXXXXX". Google Ads: "AW-XXXXXXX" og konverteringsetikett "AW-XXXXXXX/abcDEF".
@@ -127,9 +127,11 @@ AREAS = [
 
 FAQ = [
     ("Hva koster bjørkeved hos dere?",
-     "En 40-liters sekk med tørr bjørkeved koster {price} kr {vat}. Vil du ha veden båret inn, koster det 12–36 kr ekstra per sekk. Prisen avhenger av hvor langt og hvor høyt den skal bæres. Du ser totalprisen i skjemaet før du sender bestillingen."),
+     "En 40-liters sekk med tørr bjørkeved koster {price} kr {vat}. Vil du ha veden båret inn, koster det 12–36 kr ekstra per sekk. Prisen avhenger av hvor langt og hvor høyt den skal bæres. Hjemlevering koster {delivery} kr per bestilling. Du ser totalprisen i skjemaet før du sender bestillingen."),
     ("Hvor leverer dere ved?",
      "Vi leverer i hele Follo: Ås, Ski, Langhus, Kolbotn, Oppegård, Vestby, Son, Drøbak, Nesodden og Enebakk."),
+    ("Hva koster levering?",
+     "Hjemlevering koster {delivery} kr per bestilling, uansett hvor mange sekker du bestiller. Vi leverer i hele Follo. Bæring kommer i tillegg hvis du vil ha det."),
     ("Hvor mye ved er det i en sekk?",
      "Hver sekk er på 40 liter og veier ca. {kg} kg. Kubbene er ca. {length} cm lange og {dia} cm tykke, så de passer i de fleste ovner og peiser."),
     ("Er veden tørr?",

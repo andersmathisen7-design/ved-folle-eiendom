@@ -7,7 +7,7 @@
 ## 1. Kort oppsummering
 
 1. **Markedet er stort.** Rundt 34 000 husstander i Follo fyrer med ved. De bruker til sammen ca. **1,6 millioner sekker i året**, som tilsvarer ca. 140 mill. kr (utregning i kap. 2). Har vi 1 % av markedet, blir det ca. 16 000 sekker og ca. 1,4 mill. kr.
-2. **Prisen er konkurransedyktig.** 89 kr per sekk er like billig som de billigste i området. Ser vi på levert pris, er den **nesten halvparten av Follo Vedservice**: 10 sekker koster 890 kr hos oss mot 1 750 kr hos dem. Dette bør stå tydelig på nettsiden og i all reklame.
+2. **Prisen er konkurransedyktig.** 89 kr per sekk er like billig som de billigste i området. Med hjemlevering (499 kr) koster 10 sekker 1 389 kr hos oss mot 1 750 kr hos Follo Vedservice, og 20 sekker 2 279 kr mot 3 100 kr. Fra 3 sekker og oppover er vi billigst levert.
 3. **Marginen er liten.** Kjøper dere inn ved til engrospris, har dere bare ca. 12–16 kr fortjeneste per sekk. Da må dere først bruke kanalene som er gratis. Betalt reklame bør først skaleres når vi vet hva én bestilling faktisk koster.
 4. **Nå er høysesong.** På Google søkes det nesten 10 ganger så mye på «bjørkeved» i september og oktober som i mai. Nettsiden og Google-profilen må derfor ut **denne uka**.
 5. **Domene: `follobjorkeved.no`.** Det er ledig og koster 30 kr første året. Navnet kan ikke forveksles med konkurrenten «Follo Vedservice».
@@ -72,7 +72,7 @@ Tabellen sammenligner **levert pris** for 40-liters sekker uten bæring. Innsaml
 
 | Selger (område) | Pris per 40 L | Levering | **10 sekker levert** | **20 sekker levert** | Bæring |
 |---|---:|---:|---:|---:|---|
-| **Follo Bjørkeved (oss)** | **89 kr** | avtales | **890 kr** | **1 780 kr** | 12–36 kr per sekk |
+| **Follo Bjørkeved (oss)** | **89 kr** | 499 kr | **1 389 kr** | **2 279 kr** | 12–36 kr per sekk |
 | Follo Vedservice, Vestby ([fjv.no](https://fjv.no)) | 135 kr | 400 kr | 1 750 kr | 3 100 kr | ikke oppgitt |
 | Riiser bjørkeved ([vednett](https://www.vednett.no/vedselger/riiser-bjorkeved)) | 130 kr | ikke oppgitt | 1 300 kr + frakt | 2 600 kr + frakt | – |
 | Ved24, Kolbotn/Oppegård ([ved24.no](https://www.ved24.no/)) | 86 kr | etter område | 860 kr + frakt | 1 720 kr + frakt | 8–23 kr per sekk |
@@ -84,24 +84,21 @@ Tabellen sammenligner **levert pris** for 40-liters sekker uten bæring. Innsaml
 Kilder: nettsidene som er lenket over, pluss [Byggmax](https://www.byggmax.no/ved-p4557), [Felleskjøpet](https://www.felleskjopet.no/produkt/hjem-og-fritid/fyring-og-oppvarming/ved-og-pellets/bjoerkeved-norsk-40-l-50313621_BASE) og [Dinside](https://dinside.dagbladet.no/bolig/tatt-helt-av/84057699).
 
 **Hva tabellen viser:**
-- **Levering er det dyreste for kunden.** Konkurrentene tar 350–400 kr for å kjøre ut veden. Vi viser prisen for bæring åpent, noe bare 3 av de 11 konkurrentene gjør.
+- **Levering er det dyreste for kunden.** Vi tar 499 kr, konkurrentene 350–400 kr. Fordi sekkprisen er lav, er vi likevel billigst totalt fra 3 sekker: 89n + 499 er mindre enn 135n + 400 når n ≥ 3. Reklamen bør derfor vise totalprisen for 10–20 sekker, ikke bare leveringsgebyret. Vi viser prisen for bæring åpent, noe bare 3 av de 11 konkurrentene gjør.
 - **Empo i Ski er utsolgt**, og Ved24 har stengt for sesongen. Folk i Nordre Follo, som er den største kommunen, mangler derfor en lokal leverandør **akkurat nå**.
 - **De fleste konkurrentene er svake på nett.** Mange gårder har sidetitler som bare er gårdsnavnet, for eksempel «Mellemdahl Gård». Da finner ikke Google dem på «ved Ski». Nettsiden vår har en egen side for hvert område.
 
-### Anbefaling om pris og levering (må avklares med broren din)
+### Fortjeneste per bestilling
 
-Engrosprisen på ved er 55–59 kr per sekk eks. mva ([Norsk Skogbruk](https://www.norsk-skogbruk.no/debatt/hvor-gar-prisene-pa-ved/111510)). 89 kr inkl. mva blir 71,20 kr eks. mva. **Kjøpes veden inn, blir fortjenesten altså bare 12–16 kr per sekk.**
+Engrosprisen på ved er 55–59 kr per sekk eks. mva ([Norsk Skogbruk](https://www.norsk-skogbruk.no/debatt/hvor-gar-prisene-pa-ved/111510)). 89 kr inkl. mva blir 71,20 kr eks. mva. **Kjøpes veden inn, blir fortjenesten på selve veden 12–16 kr per sekk.** Hjemleveringen på 499 kr (399 kr eks. mva) skal dekke kjøreturen.
 
-| Ordre | Fortjeneste på veden (ca. 14 kr per sekk) | Med leveringsgebyr på 299 kr (239 kr eks. mva) |
+| Ordre | Fortjeneste på veden (ca. 14 kr per sekk) | Pluss hjemlevering (399 kr eks. mva) |
 |---|---:|---:|
-| 10 sekker | 142 kr | 381 kr |
-| 20 sekker | 284 kr | 523 kr (eller gratis levering fra 20 sekker: 284 kr) |
-| 40 sekker | 568 kr | 568 kr (gratis levering) |
+| 10 sekker | 142 kr | 541 kr |
+| 20 sekker | 284 kr | 683 kr |
+| 40 sekker | 568 kr | 967 kr |
 
-Hvis dere kjøper inn veden, dekker ikke fortjenesten på 10 sekker en kjøretur. Da anbefaler jeg:
-- **«Levering 299 kr. Gratis levering fra 20 sekker.»** Selv da er vi 100 kr billigere enn Follo Vedservice, og vi får kundene til å bestille mer. Det er enkelt å endre: sett `DELIVERY_FEE` i `config.py`.
-- **Prøv 99 kr per sekk i høysesongen.** Høsten 2023 kostet sekken 109–119 kr, mens den kostet 79–89 kr på senvinteren (Norsk Skogbruk). Vi ville fortsatt vært billigst når levering er regnet med.
-- Hvis dere hugger og tørker veden selv, er marginen høyere. Da kan dere beholde 89 kr og konkurrere hardt på pris.
+Prisene (89 kr per sekk og 499 kr for levering) er beholdt som på den gamle siden.
 
 ---
 
@@ -173,11 +170,11 @@ Disse koster 0 kr og betyr mest for lokale søk:
 | Flygeblad i postkassen (Bring) | 1,45 kr per stk. + 900 kr i oppstart. 31 % av husstandene har reservert seg mot reklame ([bring.no](https://www.bring.no/tjenester/post/like-formater/uadressert-post-og-reklame)) | 5 000 stk. = 8 150 kr og når ca. 3 450 husstander. Svarer 0,5–1 % **(antakelse)**, blir det **230–480 kr** |
 | Lokalavis (Ås Avis, Amta, Østlandets Blad) | Prisene er ikke offentlige. Må hentes fra Amedia Annonse. | ukjent. Test bare hvis de andre kanalene ikke gir nok. |
 
-**Det viktigste å forstå:** Kjøper dere inn veden, er fortjenesten på en ordre på 20 sekker ca. 284 kr, pluss eventuelt leveringsgebyr og bæring. **En Facebook-bestilling til 167 kr tar da over halvparten av fortjenesten.**
+**Det viktigste å forstå:** Kjøper dere inn veden, er fortjenesten på en ordre på 20 sekker ca. 683 kr inkludert hjemlevering, men før kostnaden for bil og sjåfør. **En Facebook-bestilling til 167 kr tar da ca. en fjerdedel.**
 
 Betalt reklame lønner seg likevel av to grunner:
-- Kunden kommer tilbake år etter år. Over 3 år gir en kunde ca. 850 kr i fortjeneste.
-- Dere innfører leveringsgebyr eller har egen produksjon.
+- Kunden kommer tilbake år etter år. Over 3 år gir en kunde ca. 2 000 kr i fortjeneste (3 × 683 kr).
+- Har dere egen produksjon, er marginen høyere.
 
 **Regel: Øk budsjettet bare i kanaler der en bestilling koster under 150 kr.**
 
@@ -245,8 +242,7 @@ Dette kan føres i et enkelt regneark:
 ## 11. Må avklares med broren din
 
 1. Er 89 kr inkl. mva? Siden sier det nå, og norsk lov krever at priser til forbrukere viser totalpris.
-2. Skal det være leveringsgebyr eller minstebestilling? Se kap. 3. I dag står det «avtales».
-3. Hvor mye fuktighet er det i veden (mål med fuktmåler)? Konkurrentene oppgir 16–20 %. Et konkret tall styrker både Google-treff og KI-svar.
-4. **Kapasitet:** Hvor mange sekker har dere på lager, og hvor mange leveranser rekker dere per dag? Empo er allerede utsolgt. Reklame uten nok ved gir misfornøyde kunder.
-5. Hvordan skal kundene betale: faktura, Vipps eller kort ved levering?
-6. Bør dere selge 1000-liters storsekk? Konkurrentene tar 1 495–2 000 kr for den, og mange kunder med vedbod foretrekker det.
+2. Hvor mye fuktighet er det i veden (mål med fuktmåler)? Konkurrentene oppgir 16–20 %. Et konkret tall styrker både Google-treff og KI-svar.
+3. **Kapasitet:** Hvor mange sekker har dere på lager, og hvor mange leveranser rekker dere per dag? Empo er allerede utsolgt. Reklame uten nok ved gir misfornøyde kunder.
+4. Hvordan skal kundene betale: faktura, Vipps eller kort ved levering?
+5. Bør dere selge 1000-liters storsekk? Konkurrentene tar 1 495–2 000 kr for den, og mange kunder med vedbod foretrekker det.
