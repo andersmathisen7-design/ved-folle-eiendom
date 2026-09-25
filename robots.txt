@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /ved-folle-eiendom/takk/
+
+Sitemap: https://andersmathisen7-design.github.io/ved-folle-eiendom/sitemap.xml
