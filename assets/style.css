@@ -163,3 +163,25 @@ details p { padding: 0 18px 16px; margin: 0; color: #3b423c; }
 @media (max-width: 760px) { .footer-grid { grid-template-columns: 1fr; } }
 .sticky-cta { position: fixed; left: 16px; right: 16px; bottom: 14px; z-index: 30; box-shadow: 0 8px 24px rgba(0,0,0,.25); display: none; }
 @media (max-width: 760px) { .sticky-cta.show { display: flex; } }
+
+/* artikler */
+.prose h2 { font-size: 1.45rem; margin-top: 1.8em; }
+.prose h3 { margin-top: 1.4em; }
+.prose ul, .prose ol { padding-left: 1.3em; }
+.prose li { margin-bottom: .3em; }
+.meta { margin-top: -.4em; }
+.table-wrap { overflow-x: auto; margin: 0 0 1.2em; }
+.prose table { width: 100%; border-collapse: collapse; font-size: .95rem; background: var(--card); }
+.prose th, .prose td { text-align: left; padding: .55em .7em; border-bottom: 1px solid var(--line); vertical-align: top; }
+.prose th { background: var(--bg-alt); font-weight: 700; }
+.callout { background: #eef4ee; border-left: 4px solid var(--green-2); border-radius: 10px; padding: 14px 18px; margin: 0 0 1.4em; }
+.callout p:last-child { margin-bottom: 0; }
+.cta-box { background: var(--green); color: #eef3ee; border-radius: var(--radius); padding: 20px 22px; margin: 1.8em 0; }
+.cta-box p { color: #dfe9e1; }
+.cta-title { font-weight: 800; font-size: 1.08rem; margin-bottom: .35em; }
+.cta-box .cta-title { color: #fff; }
+.calc { margin: 1.6em 0; }
+.calc label { display: block; font-weight: 600; font-size: .92rem; margin: 8px 0 4px; }
+.calc select { width: 100%; font: inherit; font-size: 16px; padding: .6em .7em; border: 1.5px solid #cfc8b6; border-radius: 10px; background: #fff; }
+.calc-out { font-size: 1.1rem; margin: 14px 0; }
+.articles span { display: block; margin-top: 2px; }
