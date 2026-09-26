@@ -167,3 +167,42 @@ KOMMUNE_STATS = {
 WOOD_SHARE = 0.51        # andel husstander i Akershus som fyrer med ved (SSB 09703, 2025)
 KG_PER_HOUSEHOLD = 655   # kg ved per vedfyrende husstand i Akershus (SSB 09703, 2025)
 FEIER = {"default": "Follo Brannvesen IKS (tlf. 64 85 10 00)", "Vestby kommune": "Vestby kommune – sjekk kommunens nettside for hvem som feier"}
+
+# «Lønner det seg å fyre i dag?» (/fyre-i-dag/). Dagens strømpris hentes fra hvakosterstrommen.no i nettleseren.
+# Verdiene under brukes til å regne ut hva strømmen faktisk koster per kWh, og hva varmen fra ved koster.
+STROM = {
+    "zone": "NO1",                 # Follo ligger i prisområde NO1 (Øst-Norge)
+    "support_threshold": 0.77,     # strømstøtte 2026: terskel i kr/kWh eks. mva, per time (NVE)
+    "support_share": 0.90,         # strømstøtte: andel av prisen over terskelen som dekkes
+    "norgespris_kr": 0.50,         # Norgespris i kr/kWh inkl. mva (ut 2026)
+    "markup_kr": 0.0,              # påslag i strømavtalen, kr/kWh eks. mva (vanlige spotavtaler: ca. −2 til +7 øre)
+    # Elvia energiledd fra 1.7.2026, inkl. elavgift, Enova-avgift og mva (elvia.no):
+    "nett_day_ore": 46.40,         # hverdager kl. 06–22
+    "nett_night_ore": 31.40,       # natt (22–06), helg og helligdager
+    "kwh_per_kg": 4.32,            # NIBIO: 1 kg tørr ved (20 % fuktighet) gir 4,32 kWh
+    "efficiency": 0.75,            # virkningsgrad i ny, rentbrennende ovn (SSB: 70–80 %)
+    "cop": 3,                      # luft-til-luft-varmepumpe, årsvarmefaktor (Norsk Varmepumpeforening)
+    "no_mva_zones": ["NO4"],       # Nord-Norge: ingen mva på strøm
+}
+
+# Vedprisindeksen (/vedpris/). Dataene ligger i src/data/vedpriser-2026.csv.
+VEDPRIS = {
+    "name": "Sekkprisindeksen",
+    "year": 2026,
+    "collected": "2026-09-26",
+    "csv": "vedpriser-2026.csv",
+    # Hovedfunnene (vises øverst på siden). Oppdater når prisene samles inn på nytt.
+    "funn": [
+        "**Kjedene har nesten samme pris.** Seks av ni kjeder tar 89 kr (Byggmax 88,95 kr) for en 40-liters sekk bjørk. Billigst er Obs Bygg og jem & fix med 77,90 kr.",
+        "**Levering kan koste mer enn veden.** Lokale selgere tar 350–590 kr for levering. Kjøper du 10 sekker, legger det til 35–59 kr per sekk.",
+        "**Storsekk er ca. 20 prosent billigere per liter.** Medianen er ca. 72 kr per 40 liter, mot 89 kr for en sekk fra en kjede. Da må du ha plass og kunne stable selv.",
+        "**Samme pris i fire byer.** Nettbutikkene Oslo, Bergen, Trondheim og Stavanger Vedsentral tar alle 109 kr for 40 liter norsk bjørk.",
+        "**Tørr ved er utsolgt flere steder på Østlandet.** Lier ASVO, Vedslottet og Empo i Ski var utsolgt da vi sjekket, og Oslo Vedhandel var tom for den billigste sekken.",
+        "**Dyrest var Julelevering med 149 kr per sekk**, inkludert levering. Billigst per sekk var Vedhandel på Gjerdrum med 69 kr, men da må du hente selv og kjøpe minst 10.",
+    ],
+    # Andre prisoversikter vi viser til (bygger på annonser, ikke butikkpriser).
+    "andre": [
+        ("Vedbod: vedprisindeks fra annonser", "https://www.vedbod.no/vedprisindeks/"),
+        ("Vednett: vedpriser", "https://www.vednett.no/vedpriser"),
+    ],
+}

@@ -1,0 +1,43 @@
+kategori,selger,sted,produkt,liter,pris_kr,levering_kr,kilde_url,notat
+kjede,Obs Bygg (Coop),Hele landet,Bjørkeved 15 kg (CleanFlame),40,77.89,Henter selv,https://www.obsbygg.no/varme/ved/vedsekker,Størrelse regnet som 40 L (15 kg)
+kjede,jem & fix,Hele landet,Bjørkeved 40 L,40,77.90,Henter selv,https://www.jemogfix.no/bjoerkeved-40-liter-ca-15-kg/1212/9052044/,
+kjede,Felleskjøpet,Hele landet,Bjørkeved norsk 10 × 40 L,400,799.00,Henter selv,https://www.felleskjopet.no/produkt/hjem-og-fritid/fyring-og-oppvarming/ved-og-pellets/bjoerkeved-norsk-10-sekker-a-40-l-50345704_BASE,10-pakk: 79,90 kr per sekk
+kjede,Byggmax,Hele landet,Bjørkeved 12–14 kg,40,88.95,Henter selv,https://www.byggmax.no/ved-p4557,Størrelse regnet som 40 L
+kjede,Monter (Optimera),Hele landet,Bjørkeved 40 L,40,89.00,Henter selv,https://www.monter.no/varme-og-inneklima/ved-og-opptenning/bjorkeved/bjorkeved-sekk-40-liter,
+kjede,Byggmakker,Hele landet,Bjørkeved 40 L,40,89.00,Henter selv,https://www.byggmakker.no/produkt/bjorkeved-40l/4742622000018,
+kjede,Felleskjøpet,Hele landet,Bjørkeved norsk 40 L,40,89.00,Henter selv,https://www.felleskjopet.no/produkt/hjem-og-fritid/fyring-og-oppvarming/ved-og-pellets/bjoerkeved-norsk-40-l-50313621_BASE,
+kjede,Plantasjen,Hele landet,Bjørkeved ca. 15 kg,40,89.00,Henter selv,https://plantasjen.no/no/p/bjorkeved-ca-15-kg-514572,Størrelse regnet som 40 L
+kjede,Europris,Hele landet,Bjørkeved 10 kg,30,59.90,Henter selv,https://www.europris.no/p-bjorkeved-10-kg-25-cm-197850,30 L-sekk
+lokal,Follo Bjørkeved,Follo,Bjørkeved 40 L,40,89.00,499,https://follobjorkeved.no/,Vår egen pris
+lokal,Vedora,Oslo og Akershus,Bjørkeved 40 L,40,89.00,Bæring 12–36 kr/sekk,https://vedora.no/produkt/bjorkeved-40l-sekker/,
+lokal,Vedbua,Oslo,Bjørkeved 40 L,40,89.00,Bæring 8–20 kr/sekk,https://vedbua.no/produkt/bjorkeved-40l-sekker/,
+lokal,KingBrensel,Oslo,Bjørkeved 15 × 40 L,600,1230.00,Gratis fra 30 sekker,https://kingbrensel.no/product/bjorkved-40-liter/,82 kr per sekk
+lokal,Oslo Vedhandel,Oslo og Akershus,Bjørkeved 40 L,40,94.00,475,https://www.oslovedhandel.no/bjorkeved-40-liter-30-cm/,B-vare til 89 kr er utsolgt
+lokal,Oslo Vedsentral,Oslo og Akershus,Norsk bjørkeved 40 L,40,109.00,,https://oslovedsentral.no/bjorkeved/norsk-bjorkeved-i-sekk-30cm,
+lokal,Ved På Døra,Østlandet,Norsk bjørkeved 40 L,40,109.00,590,https://www.vedpadora.no/produkt/bjorkeved-i-40-liters-sekk/,Gratis levering over 3 500 kr
+lokal,Vedhandel,Gjerdrum,Bjørkeved 40 L (min. 10),40,69.00,Henter selv,https://www.vedhandel.no/prisliste,
+lokal,Vedhandel,Gjerdrum,Bjørkeved 40 L levert (min. 30),40,89.00,Inkludert,https://www.vedhandel.no/prisliste,
+lokal,Lier ASVO,Lier og Drammen,Bjørkeved 40 L,40,99.00,99 per 20 sekker,https://lier-asvo.no/ved/,Tørr ved utsolgt
+lokal,Empo,Ski,Bjørkeved 60 L,60,130.00,350,https://nettbutikk.empo.no/produkt/VED-OG-FYRINGSPRODUKTER/bjorkeved-60-liters-sekker,Utsolgt
+lokal,Julelevering,Oslo og Sør-Norge,Bjørkeved 40 L,40,149.00,Inkludert,https://julelevering.no/products/bjorkeved-40l,
+lokal,Hamar Vedsentral,Hamar,Bjørkeved 40 L (min. 10),40,95.00,500,https://www.hamarvedsentral.no/,
+lokal,Vedslottet,Land,Bjørkeved 40 L,40,95.00,,https://vedslottet.no/products/bjorkeved-i-sekk,Utsolgt
+lokal,Bergen Vedsentral,Bergen,Norsk bjørkeved 40 L,40,109.00,,https://bergenvedsentral.no/bjorkeved/norsk-bjorkeved-i-sekk-30cm,
+lokal,LaksevaagVed,Bergen,Bjørkeved 40 L,40,129.00,590,https://www.laksevaagved.com/product-page/bj%C3%B8rkeved-40-liter-pr-sekk-Bergen,
+lokal,Trondheim Vedsentral,Trondheim,Norsk bjørkeved 40 L,40,109.00,,https://trondheimvedsentral.no/bjorkeved/norsk-bjorkeved-i-sekk-30cm,
+lokal,Stavanger Vedsentral,Stavanger,Norsk bjørkeved 40 L,40,109.00,,https://stavangervedsentral.no/bjorkeved/norsk-bjorkeved-i-sekk-30cm,
+lokal,Fyra,Stavanger og Sandnes,Bjørkeved 40 L,40,100.00,490,https://fyra.no/produkt/ved-1/bjorkeved-i-1500-liters-sekk-nykloyvd,
+lokal,Fyra,Stavanger og Sandnes,Bjørkeved 36 × 40 L på pall,1440,3490.00,490,https://www.fyra.no/produkt/ved-1/bjorkeved-pa-pall,96,94 kr per sekk
+lokal,Vedbutikk Høyland,Kristiansand,Bjørkeved 40 L,40,99.00,499,https://vedbutikk.hoyland.no/,
+lokal,Tindra,Bardu,Bjørkeved 60 L,60,119.00,200–350,https://tindrabardu.no/ved/,Udatert side
+storsekk,Ved På Døra,Østlandet,Bjørkeved storsekk,1000,2090.00,590,https://www.vedpadora.no/bjorkeved/bjorkeved-storsekk-1000l/,
+storsekk,KingBrensel,Oslo,Norsk bjørk storsekk,1000,1600.00,Gratis fra 3 sekker,https://kingbrensel.no/product/norsk-bjork-30cm-1000l/,
+storsekk,Kanmer,Årnes,Bjørkeved storsekk,1000,1595.00,Etter postnummer,https://nettbutikk.kanmer.no/products/1000-l-1klextra-bjork,
+storsekk,Riiser bjørkeved,Indre Østfold,Bjørk storsekk,1000,2000.00,Etter adresse,https://www.vednett.no/produkt/bjork-1000-l-storsekk-49,
+storsekk,Lier ASVO,Lier og Drammen,Bjørkeved storsekk,1000,1690.00,99,https://lier-asvo.no/ved/,Utsolgt
+storsekk,Hamar Vedsentral,Hamar,Storsekk,1000,1800.00,500,https://www.hamarvedsentral.no/,Består av 19 sekker à 40 L
+storsekk,Vedspesialisten,Trondheim,Tørr norsk bjørk,1000,2590.00,Gratis i Trondheim,https://www.vedspesialisten.no/category/bj%C3%B8rkeved,
+storsekk,Vedspesialisten,Trondheim,Tørr norsk bjørk,1500,2999.00,Gratis i Trondheim,https://www.vedspesialisten.no/category/bj%C3%B8rkeved,
+storsekk,Fyra,Stavanger og Sandnes,Norsk bjørk på pall,1500,2500.00,490,https://fyra.no/produkt/ved-1/bjorkeved-i-1500-liters-sekk-nykloyvd,Tilbud (før 2 850 kr)
+storsekk,Vedbutikk Høyland,Kristiansand,Bjørkeved storsekk,1000,1799.00,499,https://vedbutikk.hoyland.no/,
+storsekk,Tindra,Bardu,Bjørkeved på pall,1500,2300.00,200–350,https://tindrabardu.no/ved/,Udatert side

@@ -34,6 +34,8 @@ Hjemlevering (499 kr per bestilling) kommer i tillegg. Fordelt på 50 sekker er 
 
 Kilder: SSB (strømpriser for husholdninger, landsgjennomsnitt inkl. nettleie og avgifter), Norsk Varmepumpeforening (årsvarmefaktor 3). Varmepumpen er regnet med ca. 1,20 kr per kWh strøm.
 
+> **Hva med i dag?** Se [Lønner det seg å fyre i dag?](/fyre-i-dag/). Der sammenligner vi dagens strømpris, time for time, med varme fra ved.
+
 Norgespris (fast 50 øre per kWh inkl. mva pluss nettleie og avgifter) har gjort strøm forutsigbar. Dinside skrev at dette var en av grunnene til svakt vedsalg i november 2025.
 
 ## Så hvorfor fyre med ved?

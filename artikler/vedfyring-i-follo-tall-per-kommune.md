@@ -22,7 +22,7 @@ Follo består av seks kommuner: Nordre Follo (Ski, Kolbotn, Langhus, Oppegård),
 | Enebakk | 11 697 | 4 682 | 68 % | ca. 2 400 | ca. 112 000 | 1 032 |
 | **Follo** | **157 404** | **67 027** | **46 %** | **ca. 34 200** | **ca. 1,6 mill.** | **7 902** |
 
-Kilder: SSB tabell 07459 (innbyggere 1.1.2026), 14917 (husstander etter bygningstype, 2025) og 05467 (fritidsbygninger, 2026).
+Kilder: SSB tabell 07459 (innbyggere 1.1.2026), 14917 (husstander etter bygningstype, 2025) og 05467 (fritidsbygninger, 2026). Tallene kan [lastes ned som CSV](/data/) og brukes fritt.
 
 \*Anslag: 51 prosent av husstandene × 655 kg ved per år, omregnet til sekker à 14 kg. Begge tallene er Akershus-snitt for 2025 (SSB 09703). Tallet inkluderer ved folk hugger selv og kjøper i butikk.
 
