@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="nb"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex"><title>Lønner det seg å fyre i dag?</title>
+<style>body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:15px;line-height:1.45;color:#1d231f;background:#fff}
+.w{border:1px solid #e2dccd;border-radius:12px;padding:14px 16px;max-width:560px}
+h2{font-size:1.05rem;margin:0 0 8px;color:#1f3a2b}
+label{display:block;font-weight:600;font-size:.85rem;margin:6px 0 3px}
+select,input{width:100%;box-sizing:border-box;font:inherit;padding:.45em .6em;border:1.5px solid #cfc8b6;border-radius:8px;background:#fff}
+.row2,.fyre-set{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.out{font-size:1.05rem;margin:10px 0 6px}.muted{color:#5b6259}.small{font-size:.8rem}
+a{color:#2e5a41}.fyre-svar{font-weight:800;font-size:1.05rem;margin:0 0 8px}.fyre-svar.ja{color:#8a4a0e}.fyre-svar.nei{color:#1f3a2b}
+.fyre-tall{display:grid;grid-template-columns:1fr 1fr;gap:6px}.fyre-tall div{background:#f6f3ea;border-radius:8px;padding:6px 8px}
+.fyre-tall span{display:block;font-size:.75rem;color:#5b6259}.fyre-tall strong{font-size:1.05rem}
+.fyre-set{margin-top:8px}.fyre-set div:nth-child(n+3){display:none}#fbe{display:none}
+#finfo{margin:6px 0 0}
+.credit{margin:8px 0 0;font-size:.8rem}
+@media(prefers-color-scheme:dark){body{background:#16211b;color:#e8ede9}.w{border-color:#34443a}select,input{background:#1f2c24;color:#e8ede9;border-color:#44564a}
+.fyre-tall div{background:#1f2c24}.fyre-tall span,.muted{color:#aab6ad}a{color:#9fd4b0}h2{color:#cfe6d6}.fyre-svar.nei{color:#9fd4b0}.fyre-svar.ja{color:#f0b070}}</style></head>
+<body><div class="w"><h2>Lønner det seg å fyre med ved i dag?</h2><div id="fyre" class="fyre compact">
+  <p id="fsvar" class="fyre-svar" aria-live="polite">Henter dagens strømpris …</p>
+  <div class="fyre-tall">
+    <div><span>Strøm nå, per kWh</span><strong id="fel">–</strong></div>
+    <div><span>Varme fra ved, per kWh</span><strong id="fvedkwh">1,96 kr</strong></div>
+    <div><span>Varmepumpe nå, per kWh</span><strong id="fvp">–</strong></div>
+    <div><span>Strøm, snitt i dag</span><strong id="fsnitt">–</strong></div>
+  </div>
+  <p id="finfo" class="muted small"></p>
+  <p id="fbe" class="muted small"></p>
+  
+  
+  <div class="fyre-set">
+    <div><label for="fz">Prisområde</label><select id="fz"><option value="NO1" selected>NO1 – Øst-Norge</option><option value="NO2">NO2 – Sør-Norge</option><option value="NO3">NO3 – Midt-Norge</option><option value="NO4">NO4 – Nord-Norge</option><option value="NO5">NO5 – Vest-Norge</option></select></div>
+    <div><label for="favtale">Strømavtale</label><select id="favtale"><option value="spot">Spotpris med strømstøtte</option><option value="norgespris">Norgespris</option><option value="spot-uten">Spotpris uten strømstøtte (f.eks. hytte)</option></select></div>
+    <div><label for="fovn">Ovn</label><select id="fovn"><option value="0.75">Ny, rentbrennende ovn</option><option value="0.5">Gammel ovn (før 1998)</option></select></div>
+    <div><label for="fved">Pris per 40 L sekk (kr)</label><input id="fved" inputmode="decimal" value="89"></div>
+    <div><label for="fnett">Nettleie dag, øre/kWh</label><input id="fnett" inputmode="decimal" value="46,4"></div>
+    <div><label for="fnatt">Nettleie natt/helg, øre/kWh</label><input id="fnatt" inputmode="decimal" value="31,4"></div>
+  </div>
+  <p class="muted small"><span id="fstatus"></span> · Strømpriser levert av <a href="https://www.hvakosterstrommen.no" rel="noopener" target="_blank">Hva koster strømmen.no</a></p>
+</div><p class="credit">Tjeneste fra <a href="https://follobjorkeved.no/fyre-i-dag/" target="_blank" rel="noopener">Follo Bjørkeved</a></p></div><script>window.FYRE={"zone": "NO1", "supportThreshold": 0.77, "supportShare": 0.9, "norgesprisKr": 0.5, "markupKr": 0.0, "nettDayOre": 46.4, "nettNightOre": 31.4, "kwhPerKg": 4.32, "efficiency": 0.75, "cop": 3, "noMvaZones": ["NO4"], "sackPrice": 89, "sackKg": 14};</script><script src="/assets/fyre.js" defer></script></body></html>

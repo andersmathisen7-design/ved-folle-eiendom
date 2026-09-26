@@ -9,7 +9,7 @@
 - Hjemlevering: 499 kr per bestilling
 - Bestilling: skjema på https://follobjorkeved.no/#bestill eller telefon +47 48 99 39 00
 - E-post: post@min-eiendom.no
-- Oppdatert: 2026-09-25
+- Oppdatert: 2026-09-26
 
 ## Tillegg for bæring
 - Ingen bæring – settes ved innkjørsel: ingen tillegg
@@ -76,3 +76,10 @@ Vi avtaler betaling når vi ringer for å bekrefte bestillingen. Du betaler inge
 - [Vedfyring i Follo – tall for alle kommunene](https://follobjorkeved.no/artikler/vedfyring-i-follo-tall-per-kommune/): Follo har ca. 157 000 innbyggere og 67 000 husstander. Regner vi med Akershus-snittet fra SSB – 51 prosent av husstandene fyrer med ved, og de brenner 655 kg i året – fyrer rundt 34 000 husstander i Follo med ved, og de bruker ca. 1,6 millioner 40-liters sekker i året. Andelen eneboliger varierer fra 36 prosent i Nordre Follo til 68 prosent i Enebakk.
 - [Vedfyring og luftkvalitet i Follo](https://follobjorkeved.no/artikler/vedfyring-og-luftkvalitet-i-follo/): I Nordre Follo er vedfyring den største kilden til helseskadelige utslipp om vinteren – mer enn trafikken (Nordre Follo kommune). Lufta er dårligst på kalde, tørre og vindstille dager. Vi fant ikke noe fyringsforbud i Follo, men kommunen ber folk følge luftkvalitetsvarselet og fyre riktig: tørr ved, opptenning fra toppen og synlige flammer.
 - [Ved til hytta i Follo – Drøbak, Son, Hvitsten og Nesodden](https://follobjorkeved.no/artikler/ved-til-hytta-i-follo/): Follo har ca. 7 900 fritidsboliger (SSB 2026), og nesten 5 900 av dem ligger i Frogn, Vestby og Nesodden. Vi leverer tørr bjørkeved til hytter i hele Follo og kan bære sekkene inntil 50 meter fra bilen. Bestill før sesongen, og lagre veden tørt og luftig – hytter som står tomme, kan bli fuktige.
+
+## Verktøy og data
+- [Sekkprisindeksen 2026](https://follobjorkeved.no/vedpris/): vedpriser hos 42 norske selgere, med kilde og CSV
+- [Lønner det seg å fyre i dag?](https://follobjorkeved.no/fyre-i-dag/): dagens strømpris time for time mot varme fra ved, alle prisområder
+- [Gratis verktøy](https://follobjorkeved.no/verktoy/): vedkalkulator og strøm-mot-ved som kan bygges inn på andre nettsider
+- [Åpne data](https://follobjorkeved.no/data/): vedfyring per kommune i Follo som CSV (CC BY 4.0)
+- [Presse](https://follobjorkeved.no/presse/): tall, bilder med fri bruk og kontakt
