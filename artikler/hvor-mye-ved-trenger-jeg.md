@@ -29,6 +29,8 @@ Snittet skjuler store forskjeller. SSB har tidligere vist at en enebolig på gå
 
 [[kalkulator]]
 
+Har du en nettside? Du kan [legge inn kalkulatoren gratis](/verktoy/).
+
 ## Tommelfingerregler
 
 | Slik fyrer du | Sekker per sesong (okt–mar) |

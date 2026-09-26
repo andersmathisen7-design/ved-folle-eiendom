@@ -17,6 +17,9 @@
 7. **Kataloger.** Se forklaring under.
 8. **Anmeldelser:** be kundene om en Google-anmeldelse etter levering. Mål: 20 før jul.
 
+## Lenker (gratis)
+9a. **Følg [LENKEBYGGING.md](LENKEBYGGING.md).** Legg inn lenker fra folloes.no og mineiendomsservice.no, registrer dere i næringsregisteret til Follo Næringsforening, og send e-postutkastene i Gmail når de nye sidene er publisert.
+
 ## Kontoer
 9. **GoatCounter:** bytt passordet, og klikk bekreftelseslenken i e-posten.
 10. **FormSubmit (valgfritt):** bytt ut e-postadressen i `config.py` med den tilfeldige koden fra aktiverings-e-posten.

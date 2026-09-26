@@ -10,6 +10,10 @@ Markedsplan og analyse med tall og kilder finner du i **[ANALYSE.md](ANALYSE.md)
 |---|---|
 | `/` | «bjørkeved Follo», «kjøp ved», «ved levering», «bjørkeved pris» |
 | `/ved-as/`, `/ved-ski/`, `/ved-kolbotn/`, `/ved-vestby/`, `/ved-drobak/`, `/ved-nesodden/`, `/ved-enebakk/` | «ved Ås», «ved Ski», «ved Kolbotn» osv. Hver side har egen tittel, egne FAQ-er og et bestillingsskjema der området er valgt på forhånd |
+| `/vedpris/` | Sekkprisindeksen: vedpriser i hele Norge med kilde og CSV. Laget for å få lenker fra aviser (se LENKEBYGGING.md) |
+| `/fyre-i-dag/` | «Lønner det seg å fyre i dag?»: dagens strømpris time for time mot ved. Innstillingene ligger i `STROM` i `config.py` |
+| `/verktoy/`, `/widget/…` | Vedkalkulator og strøm mot ved som andre kan bygge inn på sine nettsider |
+| `/data/`, `/presse/` | Åpne data (CSV, CC BY 4.0) og en side for journalister |
 | `/takk/` | Takkeside etter bestilling. Brukes til å måle konverteringer i Google Ads og Meta |
 | `/llms.txt` | Faktaark skrevet for AI-søkemotorer |
 | `sitemap.xml`, `robots.txt` | Lages automatisk |

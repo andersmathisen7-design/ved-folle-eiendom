@@ -54,6 +54,8 @@ Veden er dyrest om høsten, når alle vil fylle vedboden. Norsk Skogbruk skrev a
 
 Usikker på hvor mange sekker du trenger? Bruk [vedkalkulatoren](/artikler/hvor-mye-ved-trenger-jeg/).
 
+Vil du sammenligne med resten av landet? Se [Sekkprisindeksen 2026](/vedpris/), der vi har samlet over 40 vedpriser fra kjeder og vedselgere i hele Norge.
+
 [[bestill]]
 
 ## Kilder

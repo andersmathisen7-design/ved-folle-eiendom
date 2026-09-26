@@ -226,6 +226,8 @@ def footer():
       <p class="footer-h">Vi leverer i</p>
       <p class="footer-areas">{areas}</p>
       <p><a href="{CO['facebook']}" rel="noopener">Facebook</a> · <a href="/artikler/">Råd om ved</a> · <a href="{CO['main_site']}" rel="noopener">Andre tjenester</a> · <a href="/personvern/">Personvern</a></p>
+      <p class="footer-h">Verktøy og tall</p>
+      <p>{'<a href="/vedpris/">' + C.VEDPRIS['name'] + ' ' + str(C.VEDPRIS['year']) + '</a> · ' if VEDPRISER else ''}<a href="/fyre-i-dag/">Lønner det seg å fyre i dag?</a> · <a href="/verktoy/">Gratis verktøy</a> · <a href="/data/">Åpne data</a> · <a href="/presse/">Presse</a></p>
     </div>
   </div>
 </footer>
@@ -735,6 +737,488 @@ def page_articles_index():
                 "/artikler/", ld_tags(ld, breadcrumb_ld("Råd om ved", "/artikler/"))) + body + footer()
 
 
+# ---------------------------------------------------------------- lenkemagneter (verktøy, data, presse)
+# Sider som andre nettsteder, journalister og bloggere har grunn til å lenke til.
+
+def js_cfg_fyre():
+    s = C.STROM
+    return {"zone": s["zone"], "supportThreshold": s["support_threshold"], "supportShare": s["support_share"],
+            "norgesprisKr": s["norgespris_kr"], "markupKr": s["markup_kr"],
+            "nettDayOre": s["nett_day_ore"], "nettNightOre": s["nett_night_ore"],
+            "kwhPerKg": s["kwh_per_kg"], "efficiency": s["efficiency"], "cop": s["cop"],
+            "noMvaZones": s["no_mva_zones"], "sackPrice": P["price"], "sackKg": P["kg"]}
+
+
+def fmt_kr2(x):
+    return f"{x:.2f}".replace(".", ",") + " kr"
+
+
+def ved_kwh_price(eff=None):
+    return P["price"] / (P["kg"] * C.STROM["kwh_per_kg"] * (eff or C.STROM["efficiency"]))
+
+
+def hbar_svg(rows, unit="", label_w=190, title=""):
+    """Liggende søylediagram i HTML (lesbart på mobil). rows: (etikett, verdi, uthev, verditekst)."""
+    if not rows:
+        return ""
+    mx = max(r[1] for r in rows) or 1
+    items = "".join(
+        f'<li class="{"hi" if hi else ""}" title="{esc(lab)}: {esc(txt)}"><span class="lab">{esc(lab)}</span>'
+        f'<span class="track"><span class="fill" style="width:{max(1, 100 * val / mx):.1f}%"></span>'
+        f'<span class="val">{esc(txt)}</span></span></li>'
+        for lab, val, hi, txt in rows)
+    return f'<ul class="hbar" role="list" aria-label="{esc(title)}" style="--lw:{label_w}px">{items}</ul>'
+
+
+def fyre_widget_markup(compact=False):
+    s = C.STROM
+    zones = "".join(f'<option value="NO{i}"{" selected" if f"NO{i}" == s["zone"] else ""}>NO{i} – {n}</option>'
+                    for i, n in ((1, "Øst-Norge"), (2, "Sør-Norge"), (3, "Midt-Norge"), (4, "Nord-Norge"), (5, "Vest-Norge")))
+    settings = f"""
+  <div class="fyre-set">
+    <div><label for="fz">Prisområde</label><select id="fz">{zones}</select></div>
+    <div><label for="favtale">Strømavtale</label><select id="favtale"><option value="spot">Spotpris med strømstøtte</option><option value="norgespris">Norgespris</option><option value="spot-uten">Spotpris uten strømstøtte (f.eks. hytte)</option></select></div>
+    <div><label for="fovn">Ovn</label><select id="fovn"><option value="{s['efficiency']}">Ny, rentbrennende ovn</option><option value="0.5">Gammel ovn (før 1998)</option></select></div>
+    <div><label for="fved">Pris per 40 L sekk (kr)</label><input id="fved" inputmode="decimal" value="{P['price']}"></div>
+    <div><label for="fnett">Nettleie dag, øre/kWh</label><input id="fnett" inputmode="decimal" value="{str(s['nett_day_ore']).replace('.', ',')}"></div>
+    <div><label for="fnatt">Nettleie natt/helg, øre/kWh</label><input id="fnatt" inputmode="decimal" value="{str(s['nett_night_ore']).replace('.', ',')}"></div>
+  </div>"""
+    return f"""<div id="fyre" class="fyre{' compact' if compact else ''}">
+  <p id="fsvar" class="fyre-svar" aria-live="polite">Henter dagens strømpris …</p>
+  <div class="fyre-tall">
+    <div><span>Strøm nå, per kWh</span><strong id="fel">–</strong></div>
+    <div><span>Varme fra ved, per kWh</span><strong id="fvedkwh">{fmt_kr2(ved_kwh_price())}</strong></div>
+    <div><span>Varmepumpe nå, per kWh</span><strong id="fvp">–</strong></div>
+    <div><span>Strøm, snitt i dag</span><strong id="fsnitt">–</strong></div>
+  </div>
+  <p id="finfo" class="muted small"></p>
+  <p id="fbe" class="muted small"></p>
+  {'' if compact else '<div id="fchart" class="fyre-chart"></div><p class="legend small"><span><span class="sw hot"></span>Strøm dyrere enn ved</span><span><span class="sw"></span>Strøm billigere enn ved</span><span><span class="sw line"></span>Ved</span></p>'}
+  {settings}
+  <p class="muted small"><span id="fstatus"></span> · Strømpriser levert av <a href="https://www.hvakosterstrommen.no" rel="noopener" target="_blank">Hva koster strømmen.no</a></p>
+</div>"""
+
+
+def kr_be(stotte):
+    """Spotpris inkl. mva der ved og strøm koster det samme på dagtid (NO1, Elvia)."""
+    s = C.STROM
+    rest = (ved_kwh_price() - s["nett_day_ore"] / 100) / 1.25 - s["markup_kr"]
+    spot = (rest - s["support_share"] * s["support_threshold"]) / (1 - s["support_share"]) if stotte else rest
+    return fmt_kr2(spot * 1.25)
+
+
+def page_fyre():
+    s = C.STROM
+    path = "/fyre-i-dag/"
+    title = f"Lønner det seg å fyre med ved i dag? Strøm mot ved, time for time | {C.BRAND}"
+    desc = "Se om ved eller strøm er billigst akkurat nå. Dagens strømpris time for time med nettleie, avgifter og strømstøtte, sammenlignet med varme fra ved."
+    items = [
+        ("Er ved billigere enn strøm i dag?",
+         f"Det kommer an på strømprisen time for time. Med en sekk til {P['price']} kr og en ny ovn koster varme fra ved ca. {fmt_kr2(ved_kwh_price())} per kWh. "
+         "Når strømprisen med nettleie og avgifter er høyere enn det, er ved billigst. Siden viser svaret for i dag."),
+        ("Hvordan regner dere ut hva varmen fra ved koster?",
+         f"En 40-liters sekk bjørk veier ca. {P['kg']} kg. Ved gir ca. {str(s['kwh_per_kg']).replace('.', ',')} kWh per kg (NIBIO), og en ny ovn utnytter ca. {round(s['efficiency'] * 100)} prosent. "
+         f"{P['price']} kr delt på {P['kg']} × {str(s['kwh_per_kg']).replace('.', ',')} × {str(s['efficiency']).replace('.', ',')} gir {fmt_kr2(ved_kwh_price())} per kWh. I en gammel ovn blir det ca. {fmt_kr2(ved_kwh_price(0.5))}."),
+        ("Hva med strømstøtten og Norgespris?",
+         f"Med spotpris trekker vi fra strømstøtten: staten dekker {round(s['support_share'] * 100)} prosent av prisen over {round(s['support_threshold'] * 100)} øre per kWh eks. mva. "
+         f"Har du Norgespris, betaler du fast {round(s['norgespris_kr'] * 100)} øre per kWh inkl. mva, pluss nettleie. Velg avtalen din i innstillingene."),
+        ("Kan jeg vise dette på min egen nettside?",
+         "Ja, gratis. Kopier koden på siden «Gratis verktøy», så får du en liten boks som viser dagens svar."),
+    ]
+    ld = ld_tags(faq_ld(items), breadcrumb_ld("Lønner det seg å fyre i dag?", path), {
+        "@context": "https://schema.org", "@type": "WebApplication", "name": "Lønner det seg å fyre med ved i dag?",
+        "url": f"{URL}{path}", "applicationCategory": "UtilitiesApplication", "operatingSystem": "Alle",
+        "offers": {"@type": "Offer", "price": "0", "priceCurrency": "NOK"}, "publisher": {"@id": f"{URL}/#business"}})
+    faq = "".join(f"<details><summary>{esc(q)}</summary><p>{esc(a)}</p></details>" for q, a in items)
+    body = f"""
+<section class="section">
+  <div class="wrap narrow prose">
+    <nav class="crumbs" aria-label="Brødsmuler"><a href="/">Bjørkeved i Follo</a> › Lønner det seg å fyre i dag?</nav>
+    <h1>Lønner det seg å fyre med ved i dag?</h1>
+    <p class="lead">Vi henter dagens strømpris og legger til nettleie, avgifter og strømstøtte. Så sammenligner vi med hva varmen fra en sekk ved koster. Svaret oppdateres hver time.</p>
+    {fyre_widget_markup()}
+    <details class="card-details"><summary>Se tallene time for time</summary>
+      <div class="table-wrap"><table><thead><tr><th>Tid</th><th>Spotpris inkl. mva</th><th>Strøm totalt</th><th>Billigst</th></tr></thead><tbody id="ftable"></tbody></table></div>
+    </details>
+    <h2>Så lønner det seg nesten aldri?</h2>
+    <p>For de fleste: nei, ikke med ved kjøpt i 40-liters sekk. Med strømstøtte betaler du bare 10 prosent av spotprisen over {round(s['support_threshold'] * 100)} øre. Da må spotprisen opp i ca. {kr_be(True)} per kWh inkl. mva før ved blir billigst på dagtid. <strong>Uten strømstøtte</strong>, for eksempel på hytta, snur det allerede ved ca. {kr_be(False)}. Med Norgespris koster strøm {fmt_kr2(s['norgespris_kr'] + s['nett_day_ore'] / 100)} per kWh på dagtid, og da er strøm alltid billigst.</p>
+    <p>Ved lønner seg likevel når du hugger selv eller kjøper storsekk, når strømmen går, når du vil avlaste strømmen på de kaldeste dagene, og for hyggen. Skriv inn din pris per 40 liter i innstillingene, så ser du hva det betyr.</p>
+    <h2>Slik regner vi</h2>
+    <ul>
+      <li><strong>Strøm:</strong> spotpris fra Nord Pool (via hvakosterstrommen.no) + mva, minus strømstøtte time for time ({round(s['support_share'] * 100)} % av prisen over {round(s['support_threshold'] * 100)} øre eks. mva, <a href="https://www.nve.no/reguleringsmyndigheten/kunde/stroem/dette-er-stroemstoetteordningen/" rel="noopener">NVE</a>), pluss nettleie. Standard er energileddet hos Elvia fra 1. juli 2026, med elavgift, Enova-avgift og mva: {str(s['nett_day_ore']).replace('.', ',')} øre på hverdager kl. 06–22 og {str(s['nett_night_ore']).replace('.', ',')} øre ellers (<a href="https://www.elvia.no/nettleie/alt-om-nettleiepriser/ny-pris-for-privatkunder-fra-1.-juli-2026" rel="noopener">Elvia</a>). Har du et annet nettselskap, skriver du inn dine priser. Påslaget i strømavtalen er ikke tatt med. Nord-Norge (NO4) er regnet uten mva.</li>
+      <li><strong>Norgespris:</strong> fast {round(s['norgespris_kr'] * 100)} øre per kWh inkl. mva ut 2026, pluss nettleie. Hytter får ikke strømstøtte, så velg «uten strømstøtte» der.</li>
+      <li><strong>Ved:</strong> sekkpris / ({P['kg']} kg × {str(s['kwh_per_kg']).replace('.', ',')} kWh/kg × virkningsgrad). Energiinnholdet er fra <a href="https://www.nibio.no/tema/skog/bruk-av-tre/bioenergi/fyringsved" rel="noopener">NIBIO</a> (tørr ved, 20 % fuktighet). Virkningsgraden er {round(s['efficiency'] * 100)} % i en ny ovn og 50 % i en gammel. Levering er ikke tatt med. Fordelt på 20 sekker legger levering til ca. {fmt_kr2((C.DELIVERY_FEE or 0) / 20 / (P['kg'] * s['kwh_per_kg'] * s['efficiency']))} per kWh.</li>
+      <li><strong>Varmepumpe:</strong> strømprisen delt på {s['cop']}, som Norsk Varmepumpeforening regner som realistisk årsvarmefaktor for luft-til-luft.</li>
+      <li>Kapasitetsleddet i nettleien (fast beløp per måned) er ikke med, fordi det ikke endres av at du fyrer litt mer eller mindre.</li>
+    </ul>
+    <p>Vil du ha hele regnestykket for året? Les <a href="/artikler/ved-eller-strom/">Er ved billigere enn strøm i 2026?</a></p>
+    <aside class="callout"><p><strong>Vil du vise dette på din nettside?</strong> Den er gratis å bygge inn. <a href="/verktoy/">Hent koden her</a>.</p></aside>
+    <h2 id="sporsmal">Spørsmål og svar</h2>
+    {faq}
+    {cta_block()}
+  </div>
+</section>""" + order_form()
+    script = f'<script>window.FYRE={json.dumps(js_cfg_fyre())};</script><script src="/assets/fyre.js" defer></script>'
+    return head(title, desc, path, ld) + body + footer().replace("</body>", script + "\n</body>")
+
+
+WIDGET_CSS = """body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:15px;line-height:1.45;color:#1d231f;background:#fff}
+.w{border:1px solid #e2dccd;border-radius:12px;padding:14px 16px;max-width:560px}
+h2{font-size:1.05rem;margin:0 0 8px;color:#1f3a2b}
+label{display:block;font-weight:600;font-size:.85rem;margin:6px 0 3px}
+select,input{width:100%;box-sizing:border-box;font:inherit;padding:.45em .6em;border:1.5px solid #cfc8b6;border-radius:8px;background:#fff}
+.row2,.fyre-set{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.out{font-size:1.05rem;margin:10px 0 6px}.muted{color:#5b6259}.small{font-size:.8rem}
+a{color:#2e5a41}.fyre-svar{font-weight:800;font-size:1.05rem;margin:0 0 8px}.fyre-svar.ja{color:#8a4a0e}.fyre-svar.nei{color:#1f3a2b}
+.fyre-tall{display:grid;grid-template-columns:1fr 1fr;gap:6px}.fyre-tall div{background:#f6f3ea;border-radius:8px;padding:6px 8px}
+.fyre-tall span{display:block;font-size:.75rem;color:#5b6259}.fyre-tall strong{font-size:1.05rem}
+.fyre-set{margin-top:8px}.fyre-set div:nth-child(n+3){display:none}#fbe{display:none}
+#finfo{margin:6px 0 0}
+.credit{margin:8px 0 0;font-size:.8rem}
+@media(prefers-color-scheme:dark){body{background:#16211b;color:#e8ede9}.w{border-color:#34443a}select,input{background:#1f2c24;color:#e8ede9;border-color:#44564a}
+.fyre-tall div{background:#1f2c24}.fyre-tall span,.muted{color:#aab6ad}a{color:#9fd4b0}h2{color:#cfe6d6}.fyre-svar.nei{color:#9fd4b0}.fyre-svar.ja{color:#f0b070}}"""
+
+
+def widget_page(title, inner, script):
+    return f"""<!doctype html>
+<html lang="nb"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex"><title>{esc(title)}</title>
+<style>{WIDGET_CSS}</style></head>
+<body><div class="w">{inner}</div>{script}</body></html>
+"""
+
+
+def widget_kalkulator():
+    fee = C.DELIVERY_FEE or 0
+    inner = f"""<h2>Hvor mye ved trenger du?</h2>
+<div class="row2">
+  <div><label for="k-bruk">Hvor mye fyrer du?</label>
+  <select id="k-bruk">
+    <option value="0.6|1.5">Helgekos (1–2 kvelder i uka)</option>
+    <option value="0.6|3.5" selected>Noen kvelder i uka (3–4)</option>
+    <option value="0.6|6">Nesten hver kveld</option>
+    <option value="0.8|7">Hovedoppvarming</option>
+  </select></div>
+  <div><label for="k-mnd">Hvor mange måneder?</label>
+  <select id="k-mnd">
+    <option value="3">3 (des–feb)</option><option value="5">5 (nov–mar)</option>
+    <option value="6" selected>6 (okt–mar)</option><option value="7">7 (okt–apr)</option>
+  </select></div>
+</div>
+<p class="out">Du trenger ca. <strong id="k-sekker">–</strong> sekker à 40 liter (<span id="k-kg">–</span> kg ved).</p>
+<p class="muted small">Bor du i Follo? Levert fra oss: <strong id="k-pris">–</strong>.</p>
+<p class="credit">Vedkalkulator fra <a href="{URL}/artikler/hvor-mye-ved-trenger-jeg/" target="_blank" rel="noopener">{esc(C.BRAND)}</a></p>"""
+    script = f"""<script>(function(){{var b=document.getElementById("k-bruk"),m=document.getElementById("k-mnd");
+function c(){{var p=b.value.split("|"),n=Math.max(5,Math.round(+p[0]*+p[1]*(+m.value)*4.33));
+document.getElementById("k-sekker").textContent=n;document.getElementById("k-kg").textContent=(n*{P['kg']}).toLocaleString("nb-NO");
+document.getElementById("k-pris").textContent=(n*{P['price']}+{fee}).toLocaleString("nb-NO")+" kr";}}
+b.addEventListener("change",c);m.addEventListener("change",c);c();}})();</script>"""
+    return widget_page("Vedkalkulator", inner, script)
+
+
+def widget_fyre():
+    inner = "<h2>Lønner det seg å fyre med ved i dag?</h2>" + fyre_widget_markup(compact=True) + \
+        f'<p class="credit">Tjeneste fra <a href="{URL}/fyre-i-dag/" target="_blank" rel="noopener">{esc(C.BRAND)}</a></p>'
+    script = f'<script>window.FYRE={json.dumps(js_cfg_fyre())};</script><script src="/assets/fyre.js" defer></script>'
+    return widget_page("Lønner det seg å fyre i dag?", inner, script)
+
+
+def embed_code(path, title, height, credit_path, credit_text):
+    code = (f'<iframe src="{URL}{path}" title="{title}" width="100%" height="{height}" '
+            f'style="border:0;max-width:560px" loading="lazy"></iframe>\n'
+            f'<p style="font-size:13px">{credit_text} <a href="{URL}{credit_path}">{C.BRAND}</a></p>')
+    return f'<textarea class="embed" readonly rows="4" onclick="this.select()">{esc(code)}</textarea>'
+
+
+def page_verktoy():
+    path = "/verktoy/"
+    body = f"""
+<section class="section">
+  <div class="wrap narrow prose">
+    <nav class="crumbs" aria-label="Brødsmuler"><a href="/">Bjørkeved i Follo</a> › Gratis verktøy</nav>
+    <h1>Gratis vedverktøy til din nettside</h1>
+    <p class="lead">Har du en blogg, en hytteside, en velforening eller en nettbutikk for ovner? Legg inn verktøyene under gratis. Kopier koden og lim den inn der du vil ha dem. De tilpasser seg mobil og mørk modus.</p>
+
+    <h2>1. Vedkalkulator: hvor mange sekker trenger du?</h2>
+    <p>Regner ut hvor mange 40-liters sekker en husstand trenger, ut fra hvor ofte de fyrer. Tallene bygger på SSB.</p>
+    <iframe src="/widget/vedkalkulator/" title="Vedkalkulator" width="100%" height="300" style="border:0;max-width:560px" loading="lazy"></iframe>
+    <p><strong>Kode:</strong></p>
+    {embed_code("/widget/vedkalkulator/", "Vedkalkulator", 300, "/artikler/hvor-mye-ved-trenger-jeg/", "Vedkalkulator fra")}
+
+    <h2>2. Lønner det seg å fyre med ved i dag?</h2>
+    <p>Henter dagens strømpris for hele Norge (NO1–NO5) og viser om ved eller strøm er billigst akkurat nå. Oppdateres av seg selv.</p>
+    <iframe src="/widget/fyre-i-dag/" title="Lønner det seg å fyre i dag?" width="100%" height="460" style="border:0;max-width:560px" loading="lazy"></iframe>
+    <p><strong>Kode:</strong></p>
+    {embed_code("/widget/fyre-i-dag/", "Lønner det seg å fyre i dag?", 460, "/fyre-i-dag/", "Strøm mot ved fra")}
+
+    <h2>Vilkår</h2>
+    <ul>
+      <li>Gratis for alle, også kommersielle nettsider.</li>
+      <li>Behold lenken under verktøyet. Den er det eneste vi ber om.</li>
+      <li>Vil du ha verktøyet tilpasset (farger, en annen vedpris, ditt område)? Send en e-post til <a href="mailto:{CO['email']}">{CO['email']}</a>.</li>
+    </ul>
+    <p>Se også {'<a href="/vedpris/">' + C.VEDPRIS['name'] + '</a>, ' if VEDPRISER else ''}<a href="/data/">åpne data om vedfyring</a> og <a href="/presse/">presse og bilder</a>.</p>
+  </div>
+</section>"""
+    return head(f"Gratis vedkalkulator og strøm-mot-ved-verktøy til din nettside | {C.BRAND}",
+                "Legg inn en gratis vedkalkulator eller «Lønner det seg å fyre i dag?» på din nettside. Kopier koden. Tilpasser seg mobil.",
+                path, ld_tags(breadcrumb_ld("Gratis verktøy", path))) + body + footer()
+
+
+# ---- åpne data
+
+def kommune_rows():
+    rows = []
+    for k, s in C.KOMMUNE_STATS.items():
+        wood = s["husstander"] * C.WOOD_SHARE
+        rows.append({"kommune": k.replace(" kommune", ""), "innbyggere": s["innbyggere"], "husstander": s["husstander"],
+                     "husstander_enebolig": s["enebolig"], "andel_enebolig_pst": s["enebolig_pst"],
+                     "andel_smahus_pst": s["smahus_pst"], "fritidsbygg": s["hytter"],
+                     "vedfyrende_husstander_anslag": round(wood, -2),
+                     "vedsekker_per_ar_anslag": round(wood * C.KG_PER_HOUSEHOLD / P["kg"], -3)})
+    return rows
+
+
+def to_csv(rows, cols):
+    def cell(v):
+        v = str(v)
+        return f'"{v}"' if any(c in v for c in ',"\n') else v
+    return "\n".join([",".join(cols)] + [",".join(cell(r.get(c, "")) for c in cols) for r in rows]) + "\n"
+
+
+KOMMUNE_COLS = ["kommune", "innbyggere", "husstander", "husstander_enebolig", "andel_enebolig_pst", "andel_smahus_pst",
+                "fritidsbygg", "vedfyrende_husstander_anslag", "vedsekker_per_ar_anslag"]
+
+
+def page_data():
+    path = "/data/"
+    rows = kommune_rows()
+    chart = hbar_svg(sorted([(r["kommune"], r["vedsekker_per_ar_anslag"], False, f"ca. {nb(r['vedsekker_per_ar_anslag'])} sekker")
+                             for r in rows], key=lambda x: -x[1]), label_w=120, title="Vedsekker brent per år per kommune i Follo (anslag)")
+    chart2 = hbar_svg(sorted([(r["kommune"], r["andel_enebolig_pst"], False, f"{r['andel_enebolig_pst']} %")
+                              for r in rows], key=lambda x: -x[1]), label_w=120, title="Andel husstander i enebolig")
+    def cell(c, v):
+        if c == "andel_smahus_pst":
+            return str(v).replace(".", ",") + "&nbsp;%"
+        if c == "andel_enebolig_pst":
+            return f"{v}&nbsp;%"
+        return ("ca. " if c.endswith("anslag") else "") + nb(v) if isinstance(v, (int, float)) else esc(str(v))
+    trs = "".join("<tr>" + "".join(f"<td>{cell(c, r[c])}</td>" for c in KOMMUNE_COLS) + "</tr>" for r in rows)
+    heads = ["Kommune", "Innbyggere", "Husstander", "I enebolig", "Andel enebolig", "Andel småhus", "Hytter",
+             "Vedfyrende husstander*", "Vedsekker i året*"]
+    ths = "".join(f"<th>{h}</th>" for h in heads)
+    vp = ""
+    if VEDPRISER:
+        vp = f'<li><a href="/data/{C.VEDPRIS["csv"]}" download>{C.VEDPRIS["csv"]}</a> – {C.VEDPRIS["name"]} {C.VEDPRIS["year"]}: {len(VEDPRISER)} priser fra selgere i hele Norge, med kilde-URL. Se <a href="/vedpris/">{C.VEDPRIS["name"]}</a>.</li>'
+    ld = {"@context": "https://schema.org", "@type": "Dataset", "name": "Vedfyring i Follo per kommune",
+          "description": "Innbyggere, husstander, eneboliger, hytter og anslått vedforbruk for kommunene i Follo. Bygger på SSB.",
+          "url": f"{URL}{path}", "license": "https://creativecommons.org/licenses/by/4.0/deed.no",
+          "creator": {"@id": f"{URL}/#business"}, "isAccessibleForFree": True, "inLanguage": "nb-NO",
+          "spatialCoverage": "Follo, Akershus, Norge", "dateModified": TODAY,
+          "distribution": [{"@type": "DataDownload", "encodingFormat": "text/csv",
+                            "contentUrl": f"{URL}/data/vedfyring-follo-kommuner.csv"}]}
+    body = f"""
+<section class="section">
+  <div class="wrap narrow prose">
+    <nav class="crumbs" aria-label="Brødsmuler"><a href="/">Bjørkeved i Follo</a> › Åpne data</nav>
+    <h1>Åpne data om ved og vedfyring</h1>
+    <p class="lead">Her kan du laste ned tallene vi har samlet om vedfyring og vedpriser. Bruk dem fritt i artikler, skoleoppgaver, rapporter og på nettsider, så lenge du oppgir kilden.</p>
+    <h2>Last ned</h2>
+    <ul>
+      <li><a href="/data/vedfyring-follo-kommuner.csv" download>vedfyring-follo-kommuner.csv</a> – innbyggere, husstander, eneboliger, hytter og anslått vedforbruk for de seks kommunene i Follo.</li>
+      {vp}
+    </ul>
+    <aside class="callout"><p><strong>Lisens: CC BY 4.0.</strong> Du kan bruke, endre og dele dataene, også kommersielt. Oppgi kilden slik: <em>Kilde: {esc(C.BRAND)} (follobjorkeved.no), basert på SSB</em>, gjerne med lenke til <a href="{URL}/data/">{URL.replace('https://', '')}/data/</a>.</p></aside>
+    <h2>Hvor mye ved brennes i hver kommune?</h2>
+    <p>Anslått antall 40-liters sekker per år. Nordre Follo har flest innbyggere og bruker mest ved totalt.</p>
+    <figure class="chart">{chart}<figcaption class="muted small">Anslag: husstander × 51 % som fyrer med ved × 655 kg per år (SSB 09703, Akershus 2025), delt på {P['kg']} kg per sekk.</figcaption></figure>
+    <h2>Andel som bor i enebolig</h2>
+    <p>I eneboliger har tre av fire vedovn, i blokkleiligheter rundt én av åtte (SSB 10568). Kommuner med mange eneboliger fyrer derfor trolig mer enn snittet.</p>
+    <figure class="chart">{chart2}<figcaption class="muted small">Kilde: SSB tabell 14917 (2025).</figcaption></figure>
+    <h2>Tabell</h2>
+    <div class="table-wrap"><table><thead><tr>{ths}</tr></thead><tbody>{trs}</tbody></table></div>
+    <p class="muted small">* Anslag. Kolonnenavnene i CSV-filen er uten æøå. Kilder: SSB tabell 07459 (innbyggere 1.1.2026), 14917 (husstander 2025), 05467 (fritidsbygg 2026) og 09703 (vedforbruk 2025). Mer forklaring i artikkelen <a href="/artikler/vedfyring-i-follo-tall-per-kommune/">Vedfyring i Follo – tall for alle kommunene</a>.</p>
+  </div>
+</section>"""
+    return head(f"Åpne data: vedfyring og vedpriser (CSV, CC BY) | {C.BRAND}",
+                "Last ned tall om vedfyring per kommune i Follo og vedpriser i Norge som CSV. Fri bruk med kildehenvisning (CC BY 4.0).",
+                path, ld_tags(ld, breadcrumb_ld("Åpne data", path))) + body + footer()
+
+
+# ---- presse
+
+def page_presse():
+    path = "/presse/"
+    imgs = [("bjorkeved-levering-follo-1536.jpg", "Levering av bjørkeved i sekker fra varebil", "1536 × 1024"),
+            ("og-bjorkeved-follo.jpg", "Bjørkeved i sekk, liggende format", "1200 × 630")]
+    figs = "".join(
+        f'<figure class="press-img"><img src="/img/{f}" alt="{esc(alt)}" loading="lazy" width="768" height="512">'
+        f'<figcaption>{esc(alt)} ({dim}) · <a href="/img/{f}" download>Last ned</a></figcaption></figure>' for f, alt, dim in imgs)
+    tel = CO["phone"].replace(" ", "")
+    idx = f'<li><a href="/vedpris/">{C.VEDPRIS["name"]} {C.VEDPRIS["year"]}</a>: hva en sekk ved koster rundt i Norge, med kilde for hver pris.</li>' if VEDPRISER else ""
+    body = f"""
+<section class="section">
+  <div class="wrap narrow prose">
+    <nav class="crumbs" aria-label="Brødsmuler"><a href="/">Bjørkeved i Follo</a> › Presse</nav>
+    <h1>Presse: tall, bilder og kilder om ved</h1>
+    <p class="lead">Skriver du om vedpriser, strømpris, vedfyring eller luftkvalitet? Her finner du tall du kan bruke, bilder med fri bruk og noen som kan svare på spørsmål om ved.</p>
+    <h2>Tall og verktøy du kan bruke</h2>
+    <ul>
+      {idx}
+      <li><a href="/fyre-i-dag/">Lønner det seg å fyre i dag?</a>: dagens strømpris mot ved, for alle prisområder, oppdatert hver time.</li>
+      <li><a href="/data/">Åpne data</a>: vedfyring per kommune i Follo (CSV).</li>
+      <li><a href="/artikler/ved-eller-strom/">Er ved billigere enn strøm i 2026?</a>: hele regnestykket med kilder.</li>
+      <li><a href="/artikler/vedfyring-og-luftkvalitet-i-follo/">Vedfyring og luftkvalitet i Follo</a>.</li>
+    </ul>
+    <h2>Fakta om oss</h2>
+    <ul>
+      <li>{esc(C.BRAND)} selger tørr bjørkeved i 40-liters sekker og leverer i hele Follo.</li>
+      <li>Drives av {esc(CO['legal_name'])} (org.nr. {CO['org_nr']}) i {esc(CO['city'])}, som også driver med vaktmester-, vinter- og hagetjenester.</li>
+      <li>Pris: {P['price']} kr per sekk {esc(P['vat_text'])}, hjemlevering {kr(C.DELIVERY_FEE or 0)}.</li>
+    </ul>
+    <h2>Bilder med fri bruk</h2>
+    <p>Bildene kan brukes gratis i redaksjonelt innhold og på nettsider. Krediter slik: <em>Foto: {esc(C.BRAND)}</em>, gjerne med lenke til follobjorkeved.no.</p>
+    <div class="press-grid">{figs}</div>
+    <h2>Kontakt</h2>
+    <p>Vi svarer gjerne på spørsmål om vedpriser, hvor mye ved folk kjøper, tørr ved og riktig fyring. Ring <a href="tel:{tel}">{CO['phone_display']}</a> eller send e-post til <a href="mailto:{CO['email']}">{CO['email']}</a>.</p>
+  </div>
+</section>"""
+    return head(f"Presse: vedpriser, tall og bilder med fri bruk | {C.BRAND}",
+                "Tall om vedpriser og vedfyring, bilder av bjørkeved med fri bruk og kontakt for journalister.",
+                path, ld_tags(breadcrumb_ld("Presse", path))) + body + footer()
+
+
+# ---- vedprisindeksen
+
+def load_vedpriser():
+    import csv
+    f = SRC / "data" / C.VEDPRIS["csv"]
+    if not f.exists():
+        return []
+    rows = []
+    with f.open(encoding="utf-8") as fh:
+        for r in csv.DictReader(fh):
+            try:
+                r["liter"] = float(r["liter"])
+                r["pris_kr"] = float(r["pris_kr"])
+            except (ValueError, KeyError):
+                continue
+            r["per40"] = r["pris_kr"] / r["liter"] * 40
+            rows.append(r)
+    return rows
+
+
+VEDPRISER = load_vedpriser()
+
+
+def median(xs):
+    xs = sorted(xs)
+    n = len(xs)
+    if not n:
+        return 0
+    return xs[n // 2] if n % 2 else (xs[n // 2 - 1] + xs[n // 2]) / 2
+
+
+def kr0(x):
+    return f"{round(x):,}".replace(",", " ") + " kr"
+
+
+KAT_NAVN = {"kjede": "Byggevare- og butikkjeder (henter selv)", "lokal": "Lokale vedselgere (før levering)",
+            "storsekk": "Storsekk (1000–1500 L)"}
+
+
+def vedpris_stats():
+    out = {}
+    for k in KAT_NAVN:
+        rs = [r for r in VEDPRISER if r["kategori"] == k]
+        if rs:
+            out[k] = {"n": len(rs), "median40": median([r["per40"] for r in rs]),
+                      "min": min(rs, key=lambda r: r["per40"]), "max": max(rs, key=lambda r: r["per40"])}
+    return out
+
+
+def page_vedpris():
+    V = C.VEDPRIS
+    path = "/vedpris/"
+    st = vedpris_stats()
+    small = [r for r in VEDPRISER if r["kategori"] != "storsekk"]
+    alle = median([r["per40"] for r in small]) if small else 0
+    tiles = "".join(
+        f'<div class="stat"><span>{esc(KAT_NAVN[k])}</span><strong>{kr0(v["median40"])}</strong>'
+        f'<small>median per 40 liter · {v["n"]} priser</small></div>' for k, v in st.items())
+    bars = hbar_svg(sorted([(f'{r["selger"]} ({r["sted"]})' if r["sted"] else r["selger"], r["per40"],
+                             r["selger"].startswith(C.BRAND), f'{kr0(r["per40"])}')
+                            for r in small], key=lambda x: x[1]),
+                    label_w=260, title="Pris per 40 liter ved hos norske selgere")
+    def row(r):
+        lev = r.get("levering_kr") or ""
+        lev = kr0(float(lev)) if lev.replace(".", "").isdigit() else esc(lev or "–")
+        return (f'<tr><td><a href="{esc(r["kilde_url"])}" rel="noopener nofollow">{esc(r["selger"])}</a></td>'
+                f'<td>{esc(r["sted"])}</td><td>{esc(r["produkt"])}</td><td>{nb(r["liter"])} L</td>'
+                f'<td>{kr0(r["pris_kr"])}</td><td><strong>{kr0(r["per40"])}</strong></td><td>{lev}</td>'
+                f'<td class="small">{esc(r.get("notat", ""))}</td></tr>')
+    trs = "".join(
+        f'<tr class="grp"><th colspan="8">{esc(navn)}</th></tr>'
+        + "".join(row(r) for r in sorted((r for r in VEDPRISER if r["kategori"] == k), key=lambda r: r["per40"]))
+        for k, navn in KAT_NAVN.items())
+    funn = "".join(f"<li>{inline_md(x)}</li>" for x in V.get("funn", []))
+    kilde = f'Kilde: {V["name"]} {V["year"]}, {C.BRAND} (follobjorkeved.no/vedpris/)'
+    cite = esc(f'<a href="{URL}{path}">{V["name"]} {V["year"]}</a> fra {C.BRAND}')
+    items = [(f"Hva koster en sekk ved i {V['year']}?",
+              f"Medianprisen for en 40-liters sekk ved var {kr0(alle)} i vår gjennomgang av {len(small)} priser høsten {V['year']}. "
+              + " ".join(f"{KAT_NAVN[k]}: {kr0(v['median40'])}." for k, v in st.items())),
+             ("Hvordan er prisene samlet inn?",
+              f"Vi har lest av prisene på selgernes egne nettsider {nb_date(V['collected'])}. Alle priser er inkl. mva. For å kunne sammenligne regner vi om til pris per 40 liter. Hver pris har lenke til kilden.")]
+    ld = ld_tags(faq_ld(items), breadcrumb_ld(f"{V['name']} {V['year']}", path), {
+        "@context": "https://schema.org", "@type": "Dataset", "name": f"{V['name']} {V['year']}",
+        "description": f"Priser på ved hos {len(VEDPRISER)} norske selgere, samlet inn {V['collected']}.",
+        "url": f"{URL}{path}", "license": "https://creativecommons.org/licenses/by/4.0/deed.no",
+        "creator": {"@id": f"{URL}/#business"}, "isAccessibleForFree": True, "temporalCoverage": V["collected"],
+        "spatialCoverage": "Norge", "distribution": [{"@type": "DataDownload", "encodingFormat": "text/csv",
+                                                       "contentUrl": f"{URL}/data/{V['csv']}"}]})
+    faq = "".join(f"<details><summary>{esc(q)}</summary><p>{esc(a)}</p></details>" for q, a in items)
+    body = f"""
+<section class="section">
+  <div class="wrap narrow prose wide-table">
+    <nav class="crumbs" aria-label="Brødsmuler"><a href="/">Bjørkeved i Follo</a> › {V['name']} {V['year']}</nav>
+    <h1>{V['name']} {V['year']}: dette koster ved i Norge</h1>
+    <p class="meta muted small">Av {esc(CO['legal_name'])} · Prisene er samlet inn {nb_date(V['collected'])}</p>
+    <aside class="callout kort"><p class="cta-title">Kort svar</p><p>En 40-liters sekk ved kostet {kr0(alle)} i median høsten {V['year']}, målt over {len(small)} priser hos kjeder og lokale selgere i hele Norge. Levering kommer ofte i tillegg.</p></aside>
+    <div class="stats">{tiles}</div>
+    {'<h2>Det viktigste</h2><ul>' + funn + '</ul>' if funn else ''}
+    <h2>Pris per 40 liter hos hver selger</h2>
+    <p>Alle priser er regnet om til 40 liter, slik at store og små sekker kan sammenlignes. Levering er ikke med.</p>
+    <figure class="chart">{bars}<figcaption class="muted small">Pris inkl. mva, omregnet til 40 liter. Kilde: selgernes nettsider {nb_date(V['collected'])}.</figcaption></figure>
+    <h2>Alle prisene</h2>
+    <div class="table-wrap"><table><thead><tr><th>Selger</th><th>Sted</th><th>Produkt</th><th>Størrelse</th><th>Pris</th><th>Per 40 L</th><th>Levering</th><th>Merknad</th></tr></thead><tbody>{trs}</tbody></table></div>
+    <p><a class="btn btn-ghost" href="/data/{V['csv']}" download>Last ned alle prisene (CSV)</a></p>
+    <h2>Slik har vi gjort det</h2>
+    <ul>
+      <li>Prisene er lest av på selgernes egne nettsider {nb_date(V['collected'])}. Klikk på selgeren i tabellen for å se kilden.</li>
+      <li>Alle priser er inkl. mva. Tilbud og mengderabatter er merket.</li>
+      <li>Vi har regnet om til pris per 40 liter. Tresort og fuktighet varierer, så sammenlign også kvaliteten.</li>
+      <li>Vi selger selv ved, og prisen vår er med i tabellen. Ser du en feil, eller vil du ha med din pris? Send en e-post til <a href="mailto:{CO['email']}">{CO['email']}</a>.</li>
+    </ul>
+    <p>Andre prisoversikter bygger på annonser og storsekker, ikke butikkpriser per sekk: {" · ".join(f'<a href="{u}" rel="noopener">{esc(t)}</a>' for t, u in V.get("andre", []))}.</p>
+    <h2>Bruk tallene fritt</h2>
+    <p>Tallene kan brukes fritt (CC BY 4.0). Oppgi kilden, for eksempel slik: <em>{esc(kilde)}</em>. På nett kan du lime inn denne lenken:</p>
+    <textarea class="embed" readonly rows="2" onclick="this.select()">{cite}</textarea>
+    <p>Journalist? Se <a href="/presse/">pressesiden</a>, eller ring {CO['phone_display']}.</p>
+    <h2 id="sporsmal">Spørsmål og svar</h2>
+    {faq}
+    <p>Les også: <a href="/fyre-i-dag/">Lønner det seg å fyre med ved i dag?</a> · <a href="/artikler/bjorkeved-pris-follo/">Hva koster bjørkeved levert i Follo?</a></p>
+    {cta_block()}
+  </div>
+</section>""" + order_form()
+    return head(f"{V['name']} {V['year']}: hva koster en sekk ved? | {C.BRAND}",
+                f"Vi sammenlignet {len(VEDPRISER)} vedpriser i Norge høsten {V['year']}. Median {kr0(alle)} per 40 liter. Se alle prisene med kilde, og last ned tallene.",
+                path, ld) + body + footer()
+
+
+def inline_md(t):
+    return AB.inline(t)
+
+
 # ---------------------------------------------------------------- machine-readable files
 
 def llms_txt():
@@ -743,6 +1227,12 @@ def llms_txt():
     carry = "\n".join(f"- {label}: {'ingen tillegg' if fee == 0 else f'+{fee} kr per bestilling'}" for _, label, fee in C.CARRY_OPTIONS)
     faq = "\n\n".join(f"### {q}\n{a}" for q, a in faq_items())
     arts = "\n".join(f"- [{a['title']}]({URL}/artikler/{a['slug']}/): {a.get('kort') or a['description']}" for a in ARTICLES)
+    tools = "\n".join(
+        ([f"- [{C.VEDPRIS['name']} {C.VEDPRIS['year']}]({URL}/vedpris/): vedpriser hos {len(VEDPRISER)} norske selgere, med kilde og CSV"] if VEDPRISER else [])
+        + [f"- [Lønner det seg å fyre i dag?]({URL}/fyre-i-dag/): dagens strømpris time for time mot varme fra ved, alle prisområder",
+           f"- [Gratis verktøy]({URL}/verktoy/): vedkalkulator og strøm-mot-ved som kan bygges inn på andre nettsider",
+           f"- [Åpne data]({URL}/data/): vedfyring per kommune i Follo som CSV (CC BY 4.0)",
+           f"- [Presse]({URL}/presse/): tall, bilder med fri bruk og kontakt"])
     return f"""# {C.BRAND}
 
 > {C.BRAND} selger og leverer tørr bjørkeved i 40-liters sekker til privatpersoner og hytteeiere i Follo (Akershus): Ås, Nordre Follo (Ski, Langhus, Kolbotn, Oppegård), Vestby, Frogn (Drøbak), Nesodden og Enebakk. Pris {P['price']} kr per sekk {P['vat_text']}. Veden kan bæres inn. Drives av {CO['legal_name']}, org.nr. {CO['org_nr']}, {CO['street']}, {CO['postal_code']} {CO['city']}.
@@ -767,6 +1257,9 @@ def llms_txt():
 
 ## Artikler
 {arts}
+
+## Verktøy og data
+{tools}
 """
 
 
@@ -818,17 +1311,29 @@ def main():
     write("personvern/index.html", page_personvern())
     write("404.html", page_404())
 
+    write("fyre-i-dag/index.html", page_fyre())
+    write("verktoy/index.html", page_verktoy())
+    write("widget/vedkalkulator/index.html", widget_kalkulator())
+    write("widget/fyre-i-dag/index.html", widget_fyre())
+    write("data/index.html", page_data())
+    write("data/vedfyring-follo-kommuner.csv", to_csv(kommune_rows(), KOMMUNE_COLS))
+    write("presse/index.html", page_presse())
+    extra = ["/fyre-i-dag/", "/verktoy/", "/data/", "/presse/"]
+    if VEDPRISER:
+        write("vedpris/index.html", page_vedpris())
+        extra.insert(0, "/vedpris/")
+
     write("artikler/index.html", page_articles_index())
     for a in ARTICLES:
         write(f"artikler/{a['slug']}/index.html", page_article(a))
     indexable = (["/"] + [f"/{a['slug']}/" for a in C.AREAS] + ["/artikler/"]
-                 + [f"/artikler/{a['slug']}/" for a in ARTICLES] + ["/personvern/"])
+                 + [f"/artikler/{a['slug']}/" for a in ARTICLES] + extra + ["/personvern/"])
     write("sitemap.xml", sitemap(indexable))
     write("robots.txt", robots())
     write("llms.txt", llms_txt())
     write("site.webmanifest", manifest())
     write(".nojekyll", "")
-    print(f"Bygget {len(indexable) + 2} sider til {OUT}/ for {URL}")
+    print(f"Bygget {len(indexable) + 4} sider til {OUT}/ for {URL}")
 
 
 if __name__ == "__main__":
