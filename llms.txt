@@ -13,17 +13,17 @@
 
 ## Tillegg for bæring
 - Ingen bæring – settes ved innkjørsel: ingen tillegg
-- Utendørs 0–15 meter: +12 kr per bestilling
-- Utendørs 15–50 meter: +16 kr per bestilling
-- Inn i garasje: +15 kr per bestilling
-- Til kjeller, 0–15 meter: +16 kr per bestilling
-- Til kjeller, 15–50 meter: +20 kr per bestilling
-- Til 1. etasje: +16 kr per bestilling
-- Til 2. etasje: +20 kr per bestilling
-- Til 3. etasje: +24 kr per bestilling
-- Til 4. etasje: +28 kr per bestilling
-- Til 5. etasje: +34 kr per bestilling
-- Til 6. etasje: +36 kr per bestilling
+- Utendørs 0–15 meter: +12 kr per sekk
+- Utendørs 15–50 meter: +16 kr per sekk
+- Inn i garasje: +15 kr per sekk
+- Til kjeller, 0–15 meter: +16 kr per sekk
+- Til kjeller, 15–50 meter: +20 kr per sekk
+- Til 1. etasje: +16 kr per sekk
+- Til 2. etasje: +20 kr per sekk
+- Til 3. etasje: +24 kr per sekk
+- Til 4. etasje: +28 kr per sekk
+- Til 5. etasje: +34 kr per sekk
+- Til 6. etasje: +36 kr per sekk
 
 ## Leveringsområder
 - [Ved i Ås](https://follobjorkeved.no/ved-as/): Ås sentrum, Nordby, Vinterbro, Kroer, Brekke, Togrenda, Solberg (postnr. 1430–1435 og 1407)
@@ -36,7 +36,7 @@
 
 ## Spørsmål og svar
 ### Hva koster bjørkeved hos dere?
-En 40-liters sekk med tørr bjørkeved koster 89 kr inkl. mva. Vil du ha veden båret inn, koster det 12–36 kr ekstra per bestilling. Prisen avhenger av hvor langt og hvor høyt den skal bæres. Hjemlevering koster 499 kr per bestilling. Du ser totalprisen i skjemaet før du sender bestillingen.
+En 40-liters sekk med tørr bjørkeved koster 89 kr inkl. mva. Vil du ha veden båret inn, koster det 12–36 kr ekstra per sekk. Prisen avhenger av hvor langt og hvor høyt den skal bæres. Hjemlevering koster 499 kr per bestilling. Du ser totalprisen i skjemaet før du sender bestillingen.
 
 ### Hvor leverer dere ved?
 Vi leverer i hele Follo: Ås, Ski, Langhus, Kolbotn, Oppegård, Vestby, Son, Drøbak, Nesodden og Enebakk.
@@ -72,7 +72,7 @@ Vi avtaler betaling når vi ringer for å bekrefte bestillingen. Du betaler inge
 - [Bjørk, gran eller blandingsved – hva bør du velge?](https://follobjorkeved.no/artikler/bjork-gran-eller-blandingsved/): Per kilo gir bjørk, gran og furu nesten like mye varme. Men bjørk er tyngre, så en sekk bjørkeved gir mer varme enn en like stor sekk med gran. En 40-liters sekk tørr bjørk gir ca. 55 kWh nyttig varme, mot ca. 35 kWh for gran (Norsk Ved). Bjørk brenner også jevnt, med lite gnister og fin flamme.
 - [Er ved billigere enn strøm i 2026?](https://follobjorkeved.no/artikler/ved-eller-strom/): Nei, ikke med ved i sekk og dagens strømpriser. Nyttig varme fra en 40-liters sekk bjørk til 89 kr koster ca. 1,6–2,0 kr per kWh i en moderne ovn. En gjennomsnittlig husholdning betalte ca. 1,20 kr per kWh for strøm etter strømstøtte første halvår 2026 (SSB), og en luft-til-luft-varmepumpe gir varme for ca. 0,40 kr per kWh. Ved lønner seg likevel som reserve ved strømbrudd, for å avlaste strømmen i kuldeperioder – og for hyggen.
 - [Feiing og brannsikkerhet med vedovn i Follo](https://follobjorkeved.no/artikler/feiing-og-brannsikkerhet-follo/): I Ås, Nordre Follo, Nesodden, Frogn og Enebakk er det Follo Brannvesen IKS som feier og fører tilsyn med ildsteder. Feiing skjer etter behov, typisk hvert 2.–8. år, og du får varsel på SMS eller brev ca. en uke før. Selv må du ha minst én røykvarsler per etasje, godkjent slukkeutstyr, og oppbevare aske i en bøtte av metall.
-- [Ved til leilighet og rekkehus – båret helt inn](https://follobjorkeved.no/artikler/ved-levert-til-leilighet/): Du kan få ved levert og båret helt inn, også i leilighet. Hos oss koster bæring 12–36 kr per bestilling, fra utendørs 0–15 meter til 6. etasje. En av våre 40-liters sekker veier ca. 14 kg, så 20 sekker er nesten 300 kg du slipper å bære selv.
+- [Ved til leilighet og rekkehus – båret helt inn](https://follobjorkeved.no/artikler/ved-levert-til-leilighet/): Du kan få ved levert og båret helt inn, også i leilighet. Hos oss koster bæring 12–36 kr per sekk, fra utendørs 0–15 meter til 6. etasje. En av våre 40-liters sekker veier ca. 14 kg, så 20 sekker er nesten 300 kg du slipper å bære selv.
 - [Vedfyring i Follo – tall for alle kommunene](https://follobjorkeved.no/artikler/vedfyring-i-follo-tall-per-kommune/): Follo har ca. 157 000 innbyggere og 67 000 husstander. Regner vi med Akershus-snittet fra SSB – 51 prosent av husstandene fyrer med ved, og de brenner 655 kg i året – fyrer rundt 34 000 husstander i Follo med ved, og de bruker ca. 1,6 millioner 40-liters sekker i året. Andelen eneboliger varierer fra 36 prosent i Nordre Follo til 68 prosent i Enebakk.
 - [Vedfyring og luftkvalitet i Follo](https://follobjorkeved.no/artikler/vedfyring-og-luftkvalitet-i-follo/): I Nordre Follo er vedfyring den største kilden til helseskadelige utslipp om vinteren – mer enn trafikken (Nordre Follo kommune). Lufta er dårligst på kalde, tørre og vindstille dager. Vi fant ikke noe fyringsforbud i Follo, men kommunen ber folk følge luftkvalitetsvarselet og fyre riktig: tørr ved, opptenning fra toppen og synlige flammer.
 - [Ved til hytta i Follo – Drøbak, Son, Hvitsten og Nesodden](https://follobjorkeved.no/artikler/ved-til-hytta-i-follo/): Follo har ca. 7 900 fritidsboliger (SSB 2026), og nesten 5 900 av dem ligger i Frogn, Vestby og Nesodden. Vi leverer tørr bjørkeved til hytter i hele Follo og kan bære sekkene inntil 50 meter fra bilen. Bestill før sesongen, og lagre veden tørt og luftig – hytter som står tomme, kan bli fuktige.
