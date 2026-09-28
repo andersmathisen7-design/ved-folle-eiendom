@@ -12,7 +12,8 @@
     try { if (window.fbq) fbq("trackCustom", name, params || {}); } catch (e) {}
     try {
       if (window.goatcounter && goatcounter.count)
-        goatcounter.count({ path: name, title: EVENT_NAMES[name] || name, event: true });
+        goatcounter.count({ path: name, title: (EVENT_NAMES[name] || name) +
+          (params && params.reason ? ": " + String(params.reason).slice(0, 120) : ""), event: true });
     } catch (e) {}
   };
 
@@ -172,12 +173,19 @@
         } catch (e) {}
         location.href = (S.base || "") + "/takk/";
       })
-      .catch(function () {
+      .catch(function (err) {
         btn.disabled = false; btn.textContent = "Send bestilling";
+        // Bestillingen skal ikke gå tapt: la kunden sende den som vanlig e-post med alt ferdig utfylt.
+        var lines = [];
+        Object.keys(data).forEach(function (k) {
+          if (k.charAt(0) !== "_" && data[k]) lines.push(k + ": " + data[k]);
+        });
+        var mailto = "mailto:" + S.orderEmail + "?subject=" + encodeURIComponent(data._subject) +
+          "&body=" + encodeURIComponent(lines.join("\n"));
         msg.className = "form-msg err";
-        msg.innerHTML = "Beklager, noe gikk galt da vi skulle sende bestillingen. Ring oss på <a href=\"tel:" +
-          S.phone.replace(/\s/g, "") + "\">" + S.phone + "</a>, så ordner vi det.";
-        track("order_error");
+        msg.innerHTML = "Beklager, bestillingen kom ikke fram. <a href=\"" + mailto + "\">Send den på e-post i stedet</a> " +
+          "(alt er fylt ut for deg), eller ring oss på <a href=\"tel:" + S.phone.replace(/\s/g, "") + "\">" + S.phone + "</a>.";
+        track("order_error", { reason: (err && err.message) || "ukjent" });
       });
   });
 })();
