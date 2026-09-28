@@ -384,13 +384,6 @@ def order_form(area_name=""):
           <div><label for="f-sted">Område</label>
           <select id="f-sted" name="Område">{area_opts}<option>Annet</option></select></div>
         </div>
-        <label for="f-tid">Når ønsker du levering?</label>
-        <select id="f-tid" name="Ønsket levering">
-          <option>Så snart som mulig</option>
-          <option>Innen 2 uker</option>
-          <option>Innen 1 måned</option>
-          <option>Fleksibelt – avtal med meg</option>
-        </select>
       </fieldset>
 
       <fieldset>
