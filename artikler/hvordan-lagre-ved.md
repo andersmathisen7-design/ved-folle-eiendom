@@ -17,7 +17,7 @@ Du har betalt for tørr ved, og den skal være tørr når du fyrer. Ved trekker 
 - **Stablet stabilt.** Stable sekkene i rader, med den tyngste nederst. En 40-liters sekk bjørkeved veier ca. 14 kg.
 - **Den du bruker først, ytterst.** Ta sekkene i den rekkefølgen de ble levert.
 
-Har du ikke plass selv? Vi kan bære veden dit du vil ha den – inn i garasjen, ned i kjelleren eller opp til 6. etasje – for et lite tillegg per bestilling.
+Har du ikke plass selv? Vi kan bære veden dit du vil ha den – inn i garasjen, ned i kjelleren eller opp til 6. etasje – for et lite tillegg per sekk.
 
 ## Slik lagrer du løs ved
 

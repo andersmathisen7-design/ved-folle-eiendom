@@ -308,7 +308,7 @@ def price_section():
         <a class="btn" href="#bestill">Regn ut pris og bestill</a>
       </div>
       <div class="card">
-        <h3>Bæring (tillegg per bestilling)</h3>
+        <h3>Bæring (tillegg per sekk)</h3>
         <table class="carry">
           <tbody>{rows}</tbody>
         </table>
@@ -334,7 +334,7 @@ def steps_section():
 
 def order_form(area_name=""):
     opts = "\n".join(
-        f'<option value="{k}" data-fee="{fee}">{esc(label)}{"" if fee == 0 else f" (+{fee} kr)"}</option>'
+        f'<option value="{k}" data-fee="{fee}">{esc(label)}{"" if fee == 0 else f" (+{fee} kr per sekk)"}</option>'
         for k, label, fee in C.CARRY_OPTIONS)
     area_opts = "\n".join(
         f'<option{" selected" if a["name"] == area_name else ""}>{esc(a["name"])}</option>' for a in C.AREAS)
@@ -540,7 +540,7 @@ def page_area(a):
         (f"Leverer dere ved i {name}?",
          f"Ja. Vi leverer tørr bjørkeved i hele {name} ({a['kommune']}), blant annet til {', '.join(a['places'])}. Postnummer {a['postnr']}."),
         (f"Hva koster ved levert i {name}?",
-         f"En 40-liters sekk koster {P['price']} kr {P['vat_text']}. Skal vi bære veden inn, koster det 12–36 kr ekstra per bestilling. "
+         f"En 40-liters sekk koster {P['price']} kr {P['vat_text']}. Skal vi bære veden inn, koster det 12–36 kr ekstra per sekk. "
          f"10 sekker koster {kr(10 * P['price'])} uten bæring"
          + (f", pluss hjemlevering {kr(C.DELIVERY_FEE)} per bestilling." if C.DELIVERY_FEE else ".")),
         (f"Hvor raskt kan jeg få ved i {name}?",
@@ -1219,7 +1219,7 @@ def inline_md(t):
 def llms_txt():
     areas = "\n".join(f"- [Ved i {a['name']}]({URL}/{a['slug']}/): {', '.join(a['places'])} (postnr. {a['postnr']})"
                       for a in C.AREAS)
-    carry = "\n".join(f"- {label}: {'ingen tillegg' if fee == 0 else f'+{fee} kr per bestilling'}" for _, label, fee in C.CARRY_OPTIONS)
+    carry = "\n".join(f"- {label}: {'ingen tillegg' if fee == 0 else f'+{fee} kr per sekk'}" for _, label, fee in C.CARRY_OPTIONS)
     faq = "\n\n".join(f"### {q}\n{a}" for q, a in faq_items())
     arts = "\n".join(f"- [{a['title']}]({URL}/artikler/{a['slug']}/): {a.get('kort') or a['description']}" for a in ARTICLES)
     tools = "\n".join(
