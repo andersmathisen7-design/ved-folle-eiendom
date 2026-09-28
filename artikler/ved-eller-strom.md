@@ -3,16 +3,16 @@ title: Er ved billigere enn strøm i 2026?
 description: Vi regnet på det. Nyttig varme fra ved i sekk koster ca. 2 kr/kWh, strøm ca. 1,20 kr etter strømstøtte. Men ved har andre fordeler.
 date: 2026-09-25
 order: 8
-kort: Nei, ikke med ved i sekk og dagens strømpriser. Nyttig varme fra en 40-liters sekk bjørk til 89 kr koster ca. 1,6–2,0 kr per kWh i en moderne ovn. En gjennomsnittlig husholdning betalte ca. 1,20 kr per kWh for strøm etter strømstøtte første halvår 2026 (SSB), og en luft-til-luft-varmepumpe gir varme for ca. 0,40 kr per kWh. Ved lønner seg likevel som reserve ved strømbrudd, for å avlaste strømmen i kuldeperioder – og for hyggen.
+kort: Nei, ikke med ved i sekk og dagens strømpriser. Nyttig varme fra en 40-liters sekk bjørk på ca. 14 kg til 89 kr koster ca. 2 kr per kWh i en moderne ovn. En gjennomsnittlig husholdning betalte ca. 1,20 kr per kWh for strøm etter strømstøtte første halvår 2026 (SSB), og en luft-til-luft-varmepumpe gir varme for ca. 0,40 kr per kWh. Ved lønner seg likevel som reserve ved strømbrudd, for å avlaste strømmen i kuldeperioder – og for hyggen.
 faq: Hvor mye varme gir en sekk ved? || En 40-liters sekk bjørk gir ca. 45–55 kWh nyttig varme i en moderne ovn, avhengig av vekt (14–17 kg) og hvor tørr den er. I en gammel ovn blir det ca. en tredjedel mindre.
-faq: Hva koster varme fra ved per kWh? || Med 89 kr per sekk og en moderne ovn: ca. 1,6–2,0 kr per kWh nyttig varme. I en gammel ovn: ca. 2,5–3 kr. Kjøper du storsekk eller hugger selv, blir det billigere.
+faq: Hva koster varme fra ved per kWh? || Med 89 kr for en sekk på ca. 14 kg og en moderne ovn: ca. 2 kr per kWh nyttig varme. I en gammel ovn: ca. 3 kr. Kjøper du storsekk eller hugger selv, blir det billigere.
 faq: Lønner det seg å ha vedovn? || Som eneste varmekilde er det ofte dyrere enn strøm og varmepumpe i 2026. Men vedovnen gir varme når strømmen går, kan ta toppene når strømmen er dyrest, og gir en helt annen hygge.
 ---
 Mange tror ved alltid er billigere enn strøm. Vi selger ved, men vi vil gi deg de ekte tallene.
 
 ## Regnestykket
 
-**Hvor mye varme gir en sekk?** SSB regner med at ved gir ca. 4,3 kWh per kilo. En 40-liters sekk bjørk veier ca. 14–17 kg. En moderne ovn utnytter ca. 75 prosent av energien, og en gammel ovn ca. 50 prosent.
+**Hvor mye varme gir en sekk?** SSB regner med at ved gir ca. 4,3 kWh per kilo. En 40-liters sekk bjørk veier ca. 14–17 kg. Våre sekker veier ca. 14 kg. En moderne ovn utnytter ca. 75 prosent av energien, og en gammel ovn ca. 50 prosent.
 
 | Ovn og sekk | Nyttig varme | Pris per kWh (89 kr sekk) |
 |---|---|---|
@@ -29,8 +29,8 @@ Hjemlevering (499 kr per bestilling) kommer i tillegg. Fordelt på 50 sekker er 
 | Strøm, snitt 1. kvartal 2026 (etter strømstøtte) | ca. 1,22 kr |
 | Strøm, snitt 2. kvartal 2026 (etter strømstøtte) | ca. 1,18 kr |
 | Luft-til-luft-varmepumpe (årsvarmefaktor 3) | ca. 0,40 kr |
-| Ved i sekk, ny ovn | ca. 1,6–2,0 kr |
-| Ved i sekk, gammel ovn | ca. 2,5–3 kr |
+| Ved i sekk (14 kg), ny ovn | ca. 1,97 kr |
+| Ved i sekk (14 kg), gammel ovn | ca. 2,95 kr |
 
 Kilder: SSB (strømpriser for husholdninger, landsgjennomsnitt inkl. nettleie og avgifter), Norsk Varmepumpeforening (årsvarmefaktor 3). Varmepumpen er regnet med ca. 1,20 kr per kWh strøm.
 
