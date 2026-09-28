@@ -244,6 +244,8 @@ def site_js_config():
         "price": P["price"],
         "deliveryFee": C.DELIVERY_FEE,
         "endpoint": f"https://formsubmit.co/ajax/{C.ORDER_EMAIL}",
+        # Reserve-adresse hvis skjemaet feiler (ORDER_EMAIL kan være FormSubmit-koden i stedet for en adresse).
+        "orderEmail": C.ORDER_EMAIL if "@" in C.ORDER_EMAIL else CO["email"],
         "brand": C.BRAND,
         "phone": CO["phone_display"],
         "adsConversion": C.GADS_CONVERSION,
