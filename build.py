@@ -693,7 +693,9 @@ def page_article(a):
     if a["faq"]:
         faq = "<h2 id=\"sporsmal\">Spørsmål og svar</h2>" + "".join(
             f"<details><summary>{esc(q)}</summary><p>{esc(ans)}</p></details>" for q, ans in a["faq"])
-    others = [x for x in ARTICLES if x["slug"] != a["slug"]][:4]
+    # «Les også»: de neste fire artiklene i lista (rundt), så alle artikler får lenker, ikke bare de fire første.
+    i = next(n for n, x in enumerate(ARTICLES) if x["slug"] == a["slug"])
+    others = [ARTICLES[(i + k) % len(ARTICLES)] for k in range(1, min(5, len(ARTICLES)))]
     rel = "".join(f'<li><a href="/artikler/{x["slug"]}/"><strong>{esc(x["title"])}</strong><span>{esc(x["description"][:90])}…</span></a></li>' for x in others)
     body = f"""
 <article class="section">

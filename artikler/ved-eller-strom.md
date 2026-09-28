@@ -40,7 +40,7 @@ Norgespris (fast 50 øre per kWh inkl. mva pluss nettleie og avgifter) har gjort
 
 ## Så hvorfor fyre med ved?
 
-- **Varme når strømmen går.** Vedovnen virker uten strøm. Det er god beredskap på kalde vinterdager.
+- **Varme når strømmen går.** Vedovnen virker uten strøm. Det er god beredskap på kalde vinterdager. Se [vedovn ved strømbrudd](/artikler/vedovn-ved-strombrudd/).
 - **Kuldeperioder.** Når det er kaldt og strømnettet er presset, avlaster vedovnen. I januar 2026, den kaldeste måneden siden 2010, økte vedsalget kraftig (Dinside).
 - **Varme der du sitter.** En vedovn gir mye varme i stua, raskt.
 - **Hygge.** Det er vanskelig å sette pris på en kveld foran peisen.

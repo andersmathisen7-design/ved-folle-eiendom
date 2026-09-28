@@ -42,7 +42,7 @@ I Akershus ble 77 prosent av veden i 2025 brent i rentbrennende ovner (SSB). I N
 
 ## Følg med på lufta
 
-Lufta i Follo er dårligst på kalde, tørre og vindstille dager. Nordre Follo kommune anbefaler å følge luftkvalitetsvarselet på [luftkvalitet.miljodirektoratet.no](https://luftkvalitet.miljodirektoratet.no/varsling/Viken/Nordre%20Follo/Ski%20%C3%98st) eller Yr. Vi fant ikke noe fyringsforbud i Follo-kommunene, men på dager med dårlig luft er det ekstra viktig å fyre riktig.
+Lufta i Follo er dårligst på kalde, tørre og vindstille dager. Nordre Follo kommune anbefaler å følge luftkvalitetsvarselet på [luftkvalitet.miljodirektoratet.no](https://luftkvalitet.miljodirektoratet.no/varsling?f=Akershus&k=Nordre+Follo&lat=59.7195&lon=10.8358) eller Yr. Vi fant ikke noe fyringsforbud i Follo-kommunene, men på dager med dårlig luft er det ekstra viktig å fyre riktig.
 
 [[bestill]]
 
