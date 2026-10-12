@@ -28,7 +28,7 @@ Luftkvaliteten i Nordre Follo modelleres – den blir ikke målt direkte (Nordre
 
 På **kalde, tørre og vindstille dager**. Da legger røyken seg lavt i stedet for å blåse bort. Det er også de dagene flest fyrer. Sjekk varselet før du tenner opp:
 
-- [Luftkvalitetsvarsel for Ski-området](https://luftkvalitet.miljodirektoratet.no/varsling/Viken/Nordre%20Follo/Ski%20%C3%98st)
+- [Luftkvalitetsvarsel for Nordre Follo](https://luftkvalitet.miljodirektoratet.no/varsling?f=Akershus&k=Nordre+Follo&lat=59.7195&lon=10.8358)
 - [luftkvalitet.miljodirektoratet.no](https://luftkvalitet.miljodirektoratet.no/) for andre steder i Follo
 - Yr viser også luftkvalitet
 
