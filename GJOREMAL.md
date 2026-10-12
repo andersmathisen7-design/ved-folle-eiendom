@@ -74,6 +74,6 @@
 | [Proff](https://www.proff.no) | Oppføringen kommer automatisk fra Brønnøysund. Legg til nettsiden hvis det går. | Gratis |
 | [Vednett](https://www.vednett.no) | Registrer dere som vedselger i Follo, med pris og leveringsområde. | Se nettsiden |
 | [Vedbod](https://www.vedbod.no) | Legg inn annonse for Follo-kommunene. | Se nettsiden |
-| [FINN Torget](https://www.finn.no) | Legg inn en annonse for bjørkeved med levering, med lenke til nettsiden. | Fra 59 kr (bedrift) |
+| [FINN Torget](https://www.finn.no) | Bedrifter må ha en bedriftsavtale. Enkeltannonser og privatannonser er ikke lov for bedrifter. Vurder det bare hvis dere har mye ved på lager. | Fra 899 kr/mnd eks. mva (5 annonser) |
 
 **Tips:** Bruk samme bilde og tekst overalt, og oppdater prisen alle stedene hvis den endres.

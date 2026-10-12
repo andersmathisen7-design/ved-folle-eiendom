@@ -13,7 +13,9 @@
     try {
       if (window.goatcounter && goatcounter.count)
         goatcounter.count({ path: name, title: (EVENT_NAMES[name] || name) +
-          (params && params.reason ? ": " + String(params.reason).slice(0, 120) : ""), event: true });
+          (params && params.reason ? ": " + String(params.reason).slice(0, 120) : ""), event: true,
+          // Siden hendelsen skjedde på, vises som «kilde» i GoatCounter, så vi ser hvilke sider som gir bestillinger.
+          referrer: location.origin + location.pathname });
     } catch (e) {}
   };
 
