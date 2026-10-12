@@ -50,7 +50,7 @@ Veden er dyrest om høsten, når alle vil fylle vedboden. Norsk Skogbruk skrev a
 |---|---|
 | Bjørkeved, 40 L sekk (ca. 14 kg) | 89 kr |
 | Hjemlevering i hele Follo | 499 kr per bestilling |
-| Bæring (utendørs, garasje, kjeller eller opp til 6. etasje) | 12–36 kr per bestilling |
+| Bæring (utendørs, garasje, kjeller eller opp til 6. etasje) | 12–36 kr per sekk |
 
 Usikker på hvor mange sekker du trenger? Bruk [vedkalkulatoren](/artikler/hvor-mye-ved-trenger-jeg/).
 

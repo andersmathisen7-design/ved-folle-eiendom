@@ -12,7 +12,8 @@
     try { if (window.fbq) fbq("trackCustom", name, params || {}); } catch (e) {}
     try {
       if (window.goatcounter && goatcounter.count)
-        goatcounter.count({ path: name, title: EVENT_NAMES[name] || name, event: true });
+        goatcounter.count({ path: name, title: (EVENT_NAMES[name] || name) +
+          (params && params.reason ? ": " + String(params.reason).slice(0, 120) : ""), event: true });
     } catch (e) {}
   };
 
@@ -83,10 +84,10 @@
   function calc() {
     var n = Math.max(0, parseInt(qty.value, 10) || 0);
     var fee = parseInt(carry.options[carry.selectedIndex].dataset.fee, 10) || 0;
-    var wood = n * S.price, carryTotal = fee; // bæring er per bestilling, som på gammel side
+    var wood = n * S.price, carryTotal = n * fee; // bæring er per sekk
     var total = wood + carryTotal + (S.deliveryFee || 0);
     document.getElementById("s-ved").textContent = n + " × " + S.price + " kr = " + fmt(wood);
-    document.getElementById("s-baering").textContent = fee ? fmt(carryTotal) : "–";
+    document.getElementById("s-baering").textContent = fee ? n + " × " + fee + " kr = " + fmt(carryTotal) : "–";
     document.getElementById("s-total").textContent = fmt(total);
     document.getElementById("f-total").value = fmt(total) + (S.deliveryFee == null ? " + levering (avtales)" : "");
     chips.forEach(function (c) { c.classList.toggle("on", parseInt(c.dataset.qty, 10) === n); });
@@ -172,12 +173,19 @@
         } catch (e) {}
         location.href = (S.base || "") + "/takk/";
       })
-      .catch(function () {
+      .catch(function (err) {
         btn.disabled = false; btn.textContent = "Send bestilling";
+        // Bestillingen skal ikke gå tapt: la kunden sende den som vanlig e-post med alt ferdig utfylt.
+        var lines = [];
+        Object.keys(data).forEach(function (k) {
+          if (k.charAt(0) !== "_" && data[k]) lines.push(k + ": " + data[k]);
+        });
+        var mailto = "mailto:" + S.orderEmail + "?subject=" + encodeURIComponent(data._subject) +
+          "&body=" + encodeURIComponent(lines.join("\n"));
         msg.className = "form-msg err";
-        msg.innerHTML = "Beklager, noe gikk galt da vi skulle sende bestillingen. Ring oss på <a href=\"tel:" +
-          S.phone.replace(/\s/g, "") + "\">" + S.phone + "</a>, så ordner vi det.";
-        track("order_error");
+        msg.innerHTML = "Beklager, bestillingen kom ikke fram. <a href=\"" + mailto + "\">Send den på e-post i stedet</a> " +
+          "(alt er fylt ut for deg), eller ring oss på <a href=\"tel:" + S.phone.replace(/\s/g, "") + "\">" + S.phone + "</a>.";
+        track("order_error", { reason: (err && err.message) || "ukjent" });
       });
   });
 })();

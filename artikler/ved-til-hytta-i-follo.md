@@ -4,7 +4,7 @@ description: Follo har nesten 7 900 hytter, de fleste langs Oslofjorden i Frogn,
 date: 2026-09-25
 order: 13
 kort: Follo har ca. 7 900 fritidsboliger (SSB 2026), og nesten 5 900 av dem ligger i Frogn, Vestby og Nesodden. Vi leverer tørr bjørkeved til hytter i hele Follo og kan bære sekkene inntil 50 meter fra bilen. Bestill før sesongen, og lagre veden tørt og luftig – hytter som står tomme, kan bli fuktige.
-faq: Leverer dere ved til hytta? || Ja, i hele Follo. Vi trenger vei fram til hytta, eller et sted i nærheten der vi kan sette sekkene. Vi kan bære inntil 50 meter utendørs mot et lite tillegg per bestilling.
+faq: Leverer dere ved til hytta? || Ja, i hele Follo. Vi trenger vei fram til hytta, eller et sted i nærheten der vi kan sette sekkene. Vi kan bære inntil 50 meter utendørs mot et lite tillegg per sekk.
 faq: Hvordan lagrer jeg ved på en hytte som står tom? || Under tak, luftig og over bakken – for eksempel i en bod eller under et takutspring. Ikke pakk veden inn i plast, for da stenges fukten inne.
 faq: Må jeg være til stede når veden leveres? || Det avtaler vi når vi ringer for å bekrefte bestillingen. Beskriv gjerne i meldingsfeltet hvor sekkene skal stå.
 ---
@@ -28,7 +28,7 @@ Kilde: SSB tabell 05467, Fritidsbygninger 2026. Områdene er eksempler.
 
 1. **Bestill i god tid**, gjerne før høstferien eller juleferien. Etterspørselen er størst i september–oktober og i kuldeperioder. Se [når det er lurt å kjøpe ved](/artikler/nar-er-det-lurt-a-kjope-ved/).
 2. **Beskriv adkomsten** i meldingsfeltet: bom, grusvei, parkering og hvor sekkene skal stå.
-3. **Velg bæring** hvis hytta ligger et stykke fra veien. Utendørs 0–15 meter koster 12 kr, og 15–50 meter koster 16 kr – per bestilling, ikke per sekk.
+3. **Velg bæring** hvis hytta ligger et stykke fra veien. Utendørs 0–15 meter koster 12 kr per sekk, og 15–50 meter koster 16 kr per sekk.
 4. **Samle bestillingen.** Hjemlevering koster 499 kr per bestilling, så det lønner seg å bestille for hele sesongen på én gang.
 
 ## Hvor mye trenger hytta?
