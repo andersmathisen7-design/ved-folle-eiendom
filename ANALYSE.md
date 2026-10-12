@@ -150,7 +150,7 @@ Disse koster 0 kr og betyr mest for lokale søk:
 3. **Den gamle siden, folloes.no.** Begge sidene skal leve hver for seg. Legg inn en lenke fra folloes.no/salg-av-bjorkeved/ til den nye siden. En lenke fra et etablert firma-nettsted hjelper den nye siden i Google.
 4. **Oppføringer i kataloger.** Registrer det samme navnet, telefonnummeret og adressen hos Gule Sider, 1881, Proff, [Vednett](https://vednett.no) (118 selgere) og [Vedbod](https://vedbod.no). KI-søk henter ofte svar fra slike lister.
 5. **Facebook-grupper.** Lokale kjøp-og-salg-grupper som «Ås», «Nesodden», «Ski» og «Vestby». Legg ut ett innlegg per gruppe per måned i sesongen, med bilde, pris og lenke.
-6. **FINN Torget.** En annonse for bedrifter koster fra 59 kr ([FINN](https://www.finn.no/bedriftskunde/torget/priser-pa-finn-torget)). Mange søker etter ved der.
+6. **FINN Torget.** Bedrifter kan ikke lenger kjøpe enkeltannonser, og de kan ikke annonsere som privatperson. Det må være en bedriftsavtale ([FINN hjelpesenter](https://hjelpesenter.finn.no/hc/no/articles/22621077197330-Endringer-i-Bedrift-uten-avtale)). Minste pakke er «Entry» med 5 prioriterte annonser for 899 kr per måned eks. mva, med 1 måneds oppsigelse ([FINN](https://www.finn.no/bedriftskunde/torget/priser-pa-finn-torget), sjekket 12.10.2026). Mange søker etter ved der, men dette er et abonnement og ingen billig test.
 
 ---
 
@@ -164,7 +164,7 @@ Disse koster 0 kr og betyr mest for lokale søk:
 | Kanal | Kjente tall (kilde) | Kostnad per bestilling (utregnet) |
 |---|---|---|
 | Google-bedriftsprofil + SEO | 0 kr | **0 kr** |
-| FINN Torget | fra 59 kr per annonse ([FINN](https://www.finn.no/bedriftskunde/torget/priser-pa-finn-torget)) | trolig under 50 kr (må testes) |
+| FINN Torget | bedriftsavtale fra 899 kr/mnd eks. mva for 5 annonser ([FINN](https://www.finn.no/bedriftskunde/torget/priser-pa-finn-torget)) | må gi 2–3 bestillinger i måneden for å lønne seg **(antakelse: ca. 400 kr dekningsbidrag per bestilling)** |
 | Google Ads (søk) | klikk koster 5–15 kr ([digitalsor.no](https://digitalsor.no/hva-koster-google-ads/)) | **50–300 kr**, midt i spennet ca. 133 kr |
 | Facebook/Instagram | klikk koster 3–12 kr, 40–80 % dyrere i 4. kvartal ([digitalmediepartner.no](https://digitalmediepartner.no/meta-ads-priser/)) | **50–400 kr**, midt i spennet ca. 167 kr |
 | Flygeblad i postkassen (Bring) | 1,45 kr per stk. + 900 kr i oppstart. 31 % av husstandene har reservert seg mot reklame ([bring.no](https://www.bring.no/tjenester/post/like-formater/uadressert-post-og-reklame)) | 5 000 stk. = 8 150 kr og når ca. 3 450 husstander. Svarer 0,5–1 % **(antakelse)**, blir det **230–480 kr** |
@@ -217,7 +217,7 @@ Betalt reklame lønner seg likevel av to grunner:
 |---|---|---:|
 | 39 (nå) | Kjøp domenet og slå på GitHub Pages (se README). Test skjemaet og aktiver FormSubmit. | 30 kr |
 | 39 | Google-bedriftsprofil, lenke fra folloes.no til ny side, Facebook-side med lenke | 0 kr |
-| 40 | FINN-annonser (Ås, Ski, Vestby). Innlegg i 6 lokale Facebook-grupper. | ca. 180 kr |
+| 40 | Innlegg i 6 lokale Facebook-grupper. (FINN krever nå bedriftsavtale fra 899 kr/mnd, se punkt 6.) | 0 kr |
 | 40–41 | Test Google Ads for Nordre Follo og Ås: 100 kr per dag i 14 dager | 1 400 kr |
 | 40–41 | Test Facebook for alle 6 kommuner: 100 kr per dag i 14 dager | 1 400 kr |
 | 42 | **Evaluer:** Regn ut kostnad per bestilling for hver kanal ut fra «Hvor fant du oss?» og kampanjekoden. Kutt kanaler over 150 kr. | 0 kr |

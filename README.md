@@ -63,6 +63,7 @@ Hver push til `main` bygger siden og legger den på `gh-pages`-branchen, som Git
 Dashbord: **https://follobjorkeved.goatcounter.com**. Du logger inn med amkleven@gmail.com.
 Det viser besøk per side, hvor folk kommer fra (Google, Facebook osv.) og disse hendelsene:
 «Bestilling sendt», «Begynte på bestilling», «Trykket på telefonnummer» og «Feil ved sending av bestilling».
+For hendelsene viser «kilde» (referrer) siden hendelsen skjedde på, for eksempel `follobjorkeved.no/ved-as`. Da ser du hvilke sider som gir bestillinger. Hvor besøkende kom fra, ser du på sidene selv.
 GoatCounter bruker ingen cookies, så siden trenger ikke samtykkebanner.
 
 ## Folloes.no og denne siden
