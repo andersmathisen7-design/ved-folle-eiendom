@@ -361,12 +361,12 @@ def order_form(area_name=""):
         <label for="f-antall">Antall sekker (40 liter)</label>
         <div class="qty">
           <button type="button" class="qty-btn" data-step="-1" aria-label="Færre sekker">−</button>
-          <input id="f-antall" name="Antall sekker" type="number" inputmode="numeric" min="1" max="500" value="20" required>
+          <input id="f-antall" name="Antall sekker" type="number" inputmode="numeric" min="1" max="500" value="50" required>
           <button type="button" class="qty-btn" data-step="1" aria-label="Flere sekker">+</button>
         </div>
         <div class="chips" role="group" aria-label="Hurtigvalg antall">
-          <button type="button" data-qty="5">5</button><button type="button" data-qty="10">10</button>
-          <button type="button" data-qty="20">20</button><button type="button" data-qty="40">40</button>
+          <button type="button" data-qty="30">30</button><button type="button" data-qty="50">50</button>
+          <button type="button" data-qty="75">75</button><button type="button" data-qty="100">100</button>
         </div>
         <label for="f-baering">Bæring</label>
         <select id="f-baering" name="Bæring" required>
