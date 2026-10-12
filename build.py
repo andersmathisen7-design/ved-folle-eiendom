@@ -361,12 +361,12 @@ def order_form(area_name=""):
         <label for="f-antall">Antall sekker (40 liter)</label>
         <div class="qty">
           <button type="button" class="qty-btn" data-step="-1" aria-label="Færre sekker">−</button>
-          <input id="f-antall" name="Antall sekker" type="number" inputmode="numeric" min="1" max="500" value="10" required>
+          <input id="f-antall" name="Antall sekker" type="number" inputmode="numeric" min="1" max="500" value="50" required>
           <button type="button" class="qty-btn" data-step="1" aria-label="Flere sekker">+</button>
         </div>
         <div class="chips" role="group" aria-label="Hurtigvalg antall">
-          <button type="button" data-qty="5">5</button><button type="button" data-qty="10">10</button>
-          <button type="button" data-qty="20">20</button><button type="button" data-qty="40">40</button>
+          <button type="button" data-qty="30">30</button><button type="button" data-qty="50">50</button>
+          <button type="button" data-qty="75">75</button><button type="button" data-qty="100">100</button>
         </div>
         <label for="f-baering">Bæring</label>
         <select id="f-baering" name="Bæring" required>
@@ -378,12 +378,8 @@ def order_form(area_name=""):
         <legend>Leveringsadresse</legend>
         <label for="f-adresse">Gateadresse</label>
         <input id="f-adresse" name="Adresse" autocomplete="street-address" required>
-        <div class="row2">
-          <div><label for="f-postnr">Postnummer</label>
-          <input id="f-postnr" name="Postnummer" inputmode="numeric" pattern="[0-9]{{4}}" maxlength="4" autocomplete="postal-code" required></div>
-          <div><label for="f-sted">Område</label>
-          <select id="f-sted" name="Område">{area_opts}<option>Annet</option></select></div>
-        </div>
+        <label for="f-sted">Område</label>
+        <select id="f-sted" name="Område">{area_opts}<option>Annet</option></select>
       </fieldset>
 
       <fieldset>
@@ -393,22 +389,9 @@ def order_form(area_name=""):
         <div class="row2">
           <div><label for="f-tlf">Telefon</label>
           <input id="f-tlf" name="Telefon" type="tel" inputmode="tel" autocomplete="tel" required></div>
-          <div><label for="f-epost">E-post</label>
-          <input id="f-epost" name="email" type="email" autocomplete="email" required></div>
+          <div><label for="f-epost">E-post (valgfritt)</label>
+          <input id="f-epost" name="E-post" type="email" autocomplete="email"></div>
         </div>
-        <label for="f-kilde">Hvor fant du oss?</label>
-        <select id="f-kilde" name="Hvor fant du oss">
-          <option value="">Velg …</option>
-          <option>Google-søk</option>
-          <option>Google Maps</option>
-          <option>Facebook / Instagram</option>
-          <option>FINN.no</option>
-          <option>Flygeblad i postkassen</option>
-          <option>Anbefalt av noen</option>
-          <option>Har kjøpt før</option>
-          <option>ChatGPT / KI-søk</option>
-          <option>Annet</option>
-        </select>
         <label for="f-melding">Melding (valgfritt)</label>
         <textarea id="f-melding" name="Melding" rows="3" placeholder="F.eks. port-kode, hvor sekkene skal stå, eller et ønsket tidspunkt"></textarea>
       </fieldset>
@@ -591,7 +574,7 @@ def page_personvern():
     <h1>Personvern</h1>
     <p>{esc(CO['legal_name'])} (org.nr. {CO['org_nr']}), {esc(CO['street'])}, {CO['postal_code']} {esc(CO['city'])}, er ansvarlig for personopplysningene som samles inn på denne nettsiden.</p>
     <h2>Hva vi samler inn</h2>
-    <p>Når du bestiller, får vi navnet ditt, telefonnummeret, e-postadressen, leveringsadressen og det du skriver i meldingsfeltet. Vi bruker opplysningene bare til å behandle og levere bestillingen, og til å sende faktura. Rettslig grunnlag er avtale (GDPR art. 6 nr. 1 b).</p>
+    <p>Når du bestiller, får vi navnet ditt, telefonnummeret, e-postadressen hvis du oppgir den, leveringsadressen og det du skriver i meldingsfeltet. Vi bruker opplysningene bare til å behandle og levere bestillingen, og til å sende faktura. Rettslig grunnlag er avtale (GDPR art. 6 nr. 1 b).</p>
     <h2>Hvem som behandler opplysningene</h2>
     <p>Bestillingsskjemaet sendes videre til oss på e-post gjennom tjenesten FormSubmit (formsubmit.co). Vi selger ikke opplysningene dine og deler dem ikke med andre.</p>
     <h2>Hvor lenge vi lagrer dem</h2>
