@@ -5,14 +5,15 @@
     click_tel: "Trykket på telefonnummer", begin_checkout: "Begynte på bestilling",
     generate_lead: "Bestilling sendt", order_error: "Feil ved sending av bestilling",
     purchase_lead_view: "Så takkesiden", article_cta: "Klikket bestill i artikkel",
-    calculator_to_order: "Brukte vedkalkulatoren"
+    calculator_to_order: "Brukte vedkalkulatoren", price_check: "Sjekket pris i skjemaet",
+    form_invalid: "Trykket Send, men et felt manglet"
   };
   var track = function (name, params) {
     try { if (window.gtag) gtag("event", name, params || {}); } catch (e) {}
     try { if (window.fbq) fbq("trackCustom", name, params || {}); } catch (e) {}
     try {
       if (window.goatcounter && goatcounter.count)
-        goatcounter.count({ path: name, title: (EVENT_NAMES[name] || name) +
+        goatcounter.count({ path: name, title: (EVENT_NAMES[name] || (EVENT_NAMES[name.split(":")[0]] ? EVENT_NAMES[name.split(":")[0]] + ": " + name.split(":")[1] : name)) +
           (params && params.reason ? ": " + String(params.reason).slice(0, 120) : ""), event: true,
           // Siden hendelsen skjedde på, vises som «kilde» i GoatCounter, så vi ser hvilke sider som gir bestillinger.
           referrer: location.origin + location.pathname });
@@ -99,18 +100,22 @@
   form.querySelectorAll(".qty-btn").forEach(function (b) {
     b.addEventListener("click", function () {
       qty.value = Math.max(1, (parseInt(qty.value, 10) || 0) + parseInt(b.dataset.step, 10));
-      calc();
+      calc(); priceCheck();
     });
   });
   chips.forEach(function (c) {
-    c.addEventListener("click", function () { qty.value = c.dataset.qty; calc(); });
+    c.addEventListener("click", function () { qty.value = c.dataset.qty; calc(); priceCheck(); });
   });
+  // Målingen deles i to steg: «sjekket pris» (antall/bæring) og «begynte på bestilling» (adresse/kontaktinfo).
+  var priced = false;
+  function priceCheck() { if (!priced) { priced = true; track("price_check"); } }
   form.addEventListener("input", function (e) {
     if (e.target.classList) e.target.classList.remove("invalid");
     calc();
-    if (!started) { started = true; track("begin_checkout"); }
+    if (e.target === qty || e.target === carry) priceCheck();
+    else if (!started && e.target.id !== "f-sted") { started = true; track("begin_checkout"); }
   });
-  form.addEventListener("change", calc);
+  form.addEventListener("change", function (e) { calc(); if (e.target === qty || e.target === carry) priceCheck(); });
   form.querySelector('[name="Side"]').value = location.pathname;
   // Husk kampanjen (utm_*) kunden kom fra, så vi ser hvilken reklame som gir bestillinger.
   try {
@@ -130,7 +135,11 @@
       el.classList.toggle("invalid", bad);
       if (bad) { ok = false; first = first || el; }
     });
-    if (first) first.focus();
+    if (first) {
+      first.focus();
+      // Hvilket felt stoppet kunden? Vises som egen hendelse i GoatCounter, f.eks. «form_invalid:Telefon».
+      form.querySelectorAll(".invalid").forEach(function (el) { track("form_invalid:" + el.name); });
+    }
     return ok;
   }
 
@@ -148,10 +157,18 @@
     new FormData(form).forEach(function (v, k) { data[k] = v; });
     data["Bæring"] = carry.options[carry.selectedIndex].text;
     data._subject = "Ny vedbestilling: " + data["Antall sekker"] + " sekker – " + data["Navn"] + ", " + data["Område"];
-    data._replyto = data.email;
-    data._autoresponse = "Takk for bestillingen hos " + S.brand + "! Vi har mottatt bestilling på " +
-      data["Antall sekker"] + " sekker bjørkeved (beregnet " + fmt(total) + "). Vi ringer deg for å avtale levering. " +
-      "Spørsmål? Ring " + S.phone + ".";
+    // E-post er valgfritt. Bare en gyldig adresse får automatisk bekreftelse fra FormSubmit.
+    var epost = (data["E-post"] || "").trim();
+    delete data["E-post"];
+    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(epost)) {
+      data.email = epost;
+      data._replyto = epost;
+      data._autoresponse = "Takk for bestillingen hos " + S.brand + "! Vi har mottatt bestilling på " +
+        data["Antall sekker"] + " sekker bjørkeved (beregnet " + fmt(total) + "). Vi ringer deg for å avtale levering. " +
+        "Spørsmål? Ring " + S.phone + ".";
+    } else if (epost) {
+      data["E-post (ugyldig)"] = epost;
+    }
     delete data._next;
 
     var btn = form.querySelector('button[type="submit"]');
@@ -170,7 +187,7 @@
         try {
           sessionStorage.setItem("lastOrder", JSON.stringify({
             qty: data["Antall sekker"], carry: data["Bæring"], total: fmt(total),
-            address: data["Adresse"] + ", " + data["Postnummer"]
+            address: data["Adresse"] + ", " + data["Område"]
           }));
         } catch (e) {}
         location.href = (S.base || "") + "/takk/";
