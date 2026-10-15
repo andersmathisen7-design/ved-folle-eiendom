@@ -6,7 +6,8 @@
     generate_lead: "Bestilling sendt", order_error: "Feil ved sending av bestilling",
     purchase_lead_view: "Så takkesiden", article_cta: "Klikket bestill i artikkel",
     calculator_to_order: "Brukte vedkalkulatoren", price_check: "Sjekket pris i skjemaet",
-    form_invalid: "Trykket Send, men et felt manglet"
+    form_invalid: "Trykket Send, men et felt manglet",
+    antall_valgt: "Endret antall sekker til", bestilt_antall: "Bestilte antall sekker"
   };
   var track = function (name, params) {
     try { if (window.gtag) gtag("event", name, params || {}); } catch (e) {}
@@ -108,7 +109,22 @@
   });
   // Målingen deles i to steg: «sjekket pris» (antall/bæring) og «begynte på bestilling» (adresse/kontaktinfo).
   var priced = false;
-  function priceCheck() { if (!priced) { priced = true; track("price_check"); } }
+  function priceCheck() { if (!priced) { priced = true; track("price_check"); } qtyChoice(); }
+  // Skrur folk antallet opp eller ned fra standard (50)? Måles som «antall_valgt:20-49» osv., én gang per gruppe,
+  // og først når antallet har ligget stille i 2 sekunder (så + og − ikke gir en hendelse per klikk).
+  var qtyDefault = parseInt(qty.defaultValue, 10) || 0, qtySeen = {}, qtyTimer = null;
+  function qtyBucket(n) {
+    return n < qtyDefault ? (n < 10 ? "under-10" : n < 20 ? "10-19" : n < 30 ? "20-29" : "30-" + (qtyDefault - 1)) :
+      n === qtyDefault ? String(qtyDefault) : n < 100 ? (qtyDefault + 1) + "-99" : "100+";
+  }
+  function qtyChoice() {
+    clearTimeout(qtyTimer);
+    qtyTimer = setTimeout(function () {
+      var n = parseInt(qty.value, 10) || 0, b = qtyBucket(n);
+      if (b === String(qtyDefault) && !Object.keys(qtySeen).length) return; // uendret, f.eks. bare bæring endret
+      if (n > 0 && !qtySeen[b]) { qtySeen[b] = true; track("antall_valgt:" + b); }
+    }, 2000);
+  }
   form.addEventListener("input", function (e) {
     if (e.target.classList) e.target.classList.remove("invalid");
     calc();
@@ -182,6 +198,7 @@
       .then(function (res) {
         if (!res.ok || String(res.j.success) !== "true") throw new Error(res.j.message || "Feil");
         track("generate_lead", { value: total, currency: "NOK", sacks: +data["Antall sekker"] });
+        track("bestilt_antall:" + qtyBucket(+data["Antall sekker"]));
         try { if (window.fbq) fbq("track", "Lead", { value: total, currency: "NOK" }); } catch (e) {}
         try { if (window.gtag && S.adsConversion) gtag("event", "conversion", { send_to: S.adsConversion, value: total, currency: "NOK" }); } catch (e) {}
         try {
