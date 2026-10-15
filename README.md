@@ -62,7 +62,7 @@ Hver push til `main` bygger siden og legger den på `gh-pages`-branchen, som Git
 
 Dashbord: **https://follobjorkeved.goatcounter.com**. Du logger inn med amkleven@gmail.com.
 Det viser besøk per side, hvor folk kommer fra (Google, Facebook osv.) og disse hendelsene:
-«Sjekket pris i skjemaet» (endret antall eller bæring), «Begynte på bestilling» (begynte på adresse eller kontaktinfo), «Trykket Send, men et felt manglet: …» (ett per felt, f.eks. Telefon), «Bestilling sendt», «Trykket på telefonnummer» og «Feil ved sending av bestilling».
+«Sjekket pris i skjemaet» (endret antall eller bæring), «Begynte på bestilling» (begynte på adresse eller kontaktinfo), «Trykket Send, men et felt manglet: …» (ett per felt, f.eks. Telefon), «Endret antall sekker til: …» (gruppe, f.eks. 20-29 eller 100+, når kunden endrer fra standard 50), «Bestilling sendt», «Bestilte antall sekker: …», «Trykket på telefonnummer» og «Feil ved sending av bestilling».
 For hendelsene viser «kilde» (referrer) siden hendelsen skjedde på, for eksempel `follobjorkeved.no/ved-as`. Da ser du hvilke sider som gir bestillinger. Hvor besøkende kom fra, ser du på sidene selv.
 GoatCounter bruker ingen cookies, så siden trenger ikke samtykkebanner.
 
