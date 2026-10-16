@@ -159,7 +159,7 @@ FAQ = [
     ("Hvordan bestiller jeg?",
      "Fyll ut skjemaet på siden. Da får vi bestillingen med en gang, og vi tar kontakt for å avtale leveringsdag. Du kan også ringe oss på {phone}."),
     ("Har dere vedabonnement?",
-     "Ja. Velg «Fast levering» i bestillingsskjemaet, så kommer vi med samme antall sekker hver 2., 4. eller 6. uke gjennom vinteren. Hver levering koster det samme som en vanlig bestilling, og du betaler for én levering om gangen. Du er sikret ved selv om det blir tomt hos andre, og du kan endre eller stoppe når du vil ved å ringe {phone}."),
+     "Ja. Velg «Fast levering» i bestillingsskjemaet, så kommer vi med samme antall sekker hver 2., 4. eller 6. uke gjennom vinteren. Hver levering koster det samme som en vanlig bestilling, og du betaler for én levering om gangen. Du slipper å huske å bestille, og du kan endre eller stoppe når du vil ved å ringe {phone}."),
     ("Hvordan betaler jeg?",
      "Vi avtaler betaling når vi ringer for å bekrefte bestillingen. Du betaler ingenting når du sender skjemaet."),
 ]
