@@ -122,10 +122,37 @@ p { margin: 0 0 1em; }
 .qty { display: flex; gap: 8px; }
 .qty input { text-align: center; font-weight: 800; font-size: 1.25rem; }
 .qty-btn { flex: 0 0 52px; font-size: 1.5rem; font-weight: 700; border-radius: 10px; border: 1.5px solid #cfc8b6; background: var(--bg); cursor: pointer; color: var(--green); }
-.chips { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.chips { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 8px; }
 .chips button { border: 1.5px solid #cfc8b6; background: #fff; border-radius: 999px; padding: .3em .9em; cursor: pointer; font: inherit; font-size: .9rem; }
 .chips button.on { background: var(--green); color: #fff; border-color: var(--green); }
-.chips button::after { content: " sekker"; }
+.order-intro .order-usp { margin: 0 0 1.2em; }
+.order-intro .order-usp li::before { color: #ffd39e; }
+@media (max-width: 900px) { .order-intro .order-usp { display: none; } }
+.form .step-no { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--green); color: #fff; font-size: .85rem; margin-right: 6px; vertical-align: 1px; }
+.form fieldset + fieldset { border-top: 1px solid var(--line); padding-top: 18px; }
+.form legend { float: left; width: 100%; padding: 0; }
+.form legend + * { clear: both; }
+.form .label { display: block; font-weight: 600; font-size: .92rem; margin: 12px 0 4px; }
+.form label .muted, .form .label .muted { font-weight: 400; }
+.qty-note { margin: 10px 0 0; font-size: .92rem; line-height: 1.4; }
+.qty-note strong { color: var(--green); display: block; font-size: 1.02rem; }
+.choice { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.form .choice label { margin: 0; cursor: pointer; }
+.choice input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.choice span { display: flex; flex-direction: column; height: 100%; padding: .65em .8em; border: 1.5px solid #cfc8b6; border-radius: 10px; background: #fff; line-height: 1.3; }
+.choice small { color: var(--muted); font-weight: 400; font-size: .82rem; margin-top: 2px; }
+.choice input:checked + span { border-color: var(--green); box-shadow: inset 0 0 0 1px var(--green); background: #f3f7f3; }
+.choice input:focus-visible + span { outline: 3px solid rgba(217,130,43,.35); }
+.more { background: none; border: 0; margin: 12px 0 0; }
+.form .more summary { font-weight: 600; font-size: .92rem; color: var(--green-2); padding: 4px 0; }
+.form .more summary::after { content: none; }
+.form .more summary::before { content: "+ "; font-weight: 800; }
+.form .more[open] summary::before { content: "− "; }
+.more textarea { margin-top: 6px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.btn #s-btn-total:not(:empty)::before { content: " · "; }
+.reassure { list-style: none; padding: 0; margin: 10px 0 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 16px; font-size: .88rem; color: var(--green-2); font-weight: 600; }
+.reassure li::before { content: "✓ "; }
 .hp { position: absolute !important; left: -9999px !important; }
 .days { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
 .days button { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: .5em .4em; border: 1.5px solid #cfc8b6; border-radius: 10px; background: #fff; cursor: pointer; font: inherit; color: var(--ink); }

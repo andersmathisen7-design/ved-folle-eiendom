@@ -242,6 +242,7 @@ def footer():
 def site_js_config():
     return {
         "price": P["price"],
+        "kg": P["kg"],
         "deliveryFee": C.DELIVERY_FEE,
         "endpoint": f"https://formsubmit.co/ajax/{C.ORDER_EMAIL}",
         # Reserve-adresse hvis skjemaet feiler (ORDER_EMAIL kan være FormSubmit-koden i stedet for en adresse).
@@ -335,19 +336,27 @@ def steps_section():
 
 def order_form(area_name=""):
     opts = "\n".join(
-        f'<option value="{k}" data-fee="{fee}">{esc(label)}{"" if fee == 0 else f" (+{fee} kr per sekk)"}</option>'
+        f'<option value="{k}" data-fee="{fee}">{esc(label)}{"" if fee == 0 else f" (+{fee} kr/sekk)"}</option>'
         for k, label, fee in C.CARRY_OPTIONS)
+    min_carry = min(fee for _, _, fee in C.CARRY_OPTIONS if fee)
     area_opts = "\n".join(
         f'<option{" selected" if a["name"] == area_name else ""}>{esc(a["name"])}</option>' for a in C.AREAS)
     fee_line = ("Avtales ved bekreftelse" if C.DELIVERY_FEE is None
                 else ("Gratis" if C.DELIVERY_FEE == 0 else kr(C.DELIVERY_FEE)))
+    tel = CO['phone'].replace(' ', '')
     return f"""
 <section id="bestill" class="section order">
   <div class="wrap order-grid">
     <div class="order-intro">
       <h2>Bestill bjørkeved{(' i ' + esc(area_name)) if area_name else ''}</h2>
-      <p>Velg antall og leveringsdag. Vi kjører ut på mandager og tirsdager, og ringer deg for å bekrefte. Du betaler ingenting nå.</p>
-      <p class="muted">Vil du heller ringe? <a href="tel:{CO['phone'].replace(' ', '')}" data-track="tel">{CO['phone_display']}</a></p>
+      <p>Tre korte steg, og du ser prisen hele veien. Vi kjører ut på mandager og tirsdager, og ringer deg for å bekrefte.</p>
+      <ul class="usp order-usp">
+        <li><strong>Tørr bjørkeved</strong>, lagret under tak</li>
+        <li>{P['liters']}-liters sekk, ca. {P['kg']} kg, klar til bruk</li>
+        <li>Vi <strong>bærer veden inn</strong> hvis du vil</li>
+        <li>Lokale fra Ås – du snakker med de som kjører</li>
+      </ul>
+      <p class="muted">Vil du heller ringe? <a href="tel:{tel}" data-track="tel">{CO['phone_display']}</a></p>
     </div>
     <form class="card form" id="order-form" action="https://formsubmit.co/{C.ORDER_EMAIL}" method="POST" novalidate>
       <input type="hidden" name="_subject" value="Ny vedbestilling – {esc(C.BRAND)}">
@@ -358,51 +367,61 @@ def order_form(area_name=""):
       <input type="hidden" name="Kampanje" value="">
 
       <fieldset>
-        <legend>Ved</legend>
-        <label for="f-antall">Antall sekker (40 liter)</label>
+        <legend><span class="step-no">1</span> Hvor mye ved?</legend>
+        <label for="f-antall">Antall sekker ({P['liters']} liter)</label>
         <div class="qty">
           <button type="button" class="qty-btn" data-step="-1" aria-label="Færre sekker">−</button>
           <input id="f-antall" name="Antall sekker" type="number" inputmode="numeric" min="1" max="500" value="50" required>
           <button type="button" class="qty-btn" data-step="1" aria-label="Flere sekker">+</button>
         </div>
-        <div class="chips" role="group" aria-label="Hurtigvalg antall">
+        <div class="chips" role="group" aria-label="Hurtigvalg antall sekker">
           <button type="button" data-qty="30">30</button><button type="button" data-qty="50">50</button>
           <button type="button" data-qty="75">75</button><button type="button" data-qty="100">100</button>
         </div>
-        <label for="f-baering">Bæring</label>
-        <select id="f-baering" name="Bæring" required>
-          {opts}
-        </select>
+        <p class="qty-note"><strong id="s-qty">–</strong> <span class="muted">En sekk rekker 1–2 kvelder med peisen.</span></p>
+
+        <span class="label" id="l-baering">Hvor skal sekkene stå?</span>
+        <div class="choice" role="radiogroup" aria-labelledby="l-baering">
+          <label><input type="radio" name="_baering" value="ingen" checked><span><strong>Ved innkjørselen</strong><small>Ingen tillegg</small></span></label>
+          <label><input type="radio" name="_baering" value="inn"><span><strong>Bær inn for meg</strong><small>Fra {min_carry} kr per sekk</small></span></label>
+        </div>
+        <div id="baering-wrap" hidden>
+          <label for="f-baering">Hvor skal vi bære dem?</label>
+          <select id="f-baering" name="Bæring" required>
+            {opts}
+          </select>
+        </div>
       </fieldset>
 
       <fieldset>
-        <legend>Leveringsadresse</legend>
-        <label for="f-adresse">Gateadresse</label>
-        <input id="f-adresse" name="Adresse" autocomplete="street-address" required>
+        <legend><span class="step-no">2</span> Hvor og når?</legend>
         <label for="f-sted">Område</label>
         <select id="f-sted" name="Område">{area_opts}<option>Annet</option></select>
-      </fieldset>
-
-      <fieldset id="f-dag">
-        <legend>Leveringsdag</legend>
-        <p class="muted small">Vi kjører ut på mandager og tirsdager.</p>
-        <div class="days" id="f-dager" role="radiogroup" aria-label="Velg leveringsdag"></div>
-        <input type="hidden" name="Leveringsdag" id="f-leveringsdag" required>
-        <p class="muted small" id="f-dag-msg"></p>
+        <label for="f-adresse">Gateadresse</label>
+        <input id="f-adresse" name="Adresse" autocomplete="street-address" required>
+        <div id="f-dag">
+          <span class="label">Leveringsdag <span class="muted">· vi kjører mandag og tirsdag</span></span>
+          <div class="days" id="f-dager" role="radiogroup" aria-label="Velg leveringsdag"></div>
+          <input type="hidden" name="Leveringsdag" id="f-leveringsdag" required>
+          <p class="muted small" id="f-dag-msg"></p>
+        </div>
       </fieldset>
 
       <fieldset>
-        <legend>Kontaktinfo</legend>
+        <legend><span class="step-no">3</span> Hvem leverer vi til?</legend>
         <label for="f-navn">Navn</label>
         <input id="f-navn" name="Navn" autocomplete="name" required>
         <div class="row2">
-          <div><label for="f-tlf">Telefon</label>
+          <div><label for="f-tlf">Telefon <span class="muted">· vi ringer og bekrefter</span></label>
           <input id="f-tlf" name="Telefon" type="tel" inputmode="tel" autocomplete="tel" required></div>
-          <div><label for="f-epost">E-post (valgfritt)</label>
+          <div><label for="f-epost">E-post <span class="muted">(valgfritt)</span></label>
           <input id="f-epost" name="E-post" type="email" autocomplete="email"></div>
         </div>
-        <label for="f-melding">Melding (valgfritt)</label>
-        <textarea id="f-melding" name="Melding" rows="3"></textarea>
+        <details class="more">
+          <summary>Legg til en melding <span class="muted">(valgfritt)</span></summary>
+          <label for="f-melding" class="sr-only">Melding</label>
+          <textarea id="f-melding" name="Melding" rows="3"></textarea>
+        </details>
       </fieldset>
 
       <div class="summary" aria-live="polite">
@@ -413,7 +432,11 @@ def order_form(area_name=""):
       </div>
       <input type="hidden" name="Beregnet totalpris" id="f-total">
 
-      <button class="btn btn-lg btn-block" type="submit">Send bestilling</button>
+      <button class="btn btn-lg btn-block" type="submit"><span class="btn-label">Send bestilling</span><span id="s-btn-total"></span></button>
+      <ul class="reassure">
+        <li>Du betaler ingenting nå</li>
+        <li>Vi ringer og bekrefter før vi kjører</li>
+      </ul>
       <p class="form-msg" id="form-msg" role="alert"></p>
       <p class="muted small">Når du sender skjemaet, får vi navnet, adressen og kontaktinfoen din. Vi bruker det bare til å levere veden. Les mer i <a href="/personvern/">personvernerklæringen</a>.</p>
     </form>

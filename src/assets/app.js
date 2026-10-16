@@ -96,10 +96,31 @@
     document.getElementById("s-ved").textContent = n + " × " + S.price + " kr = " + fmt(wood);
     document.getElementById("s-baering").textContent = fee ? n + " × " + fee + " kr = " + fmt(carryTotal) : "–";
     document.getElementById("s-total").textContent = fmt(total);
+    document.getElementById("s-qty").textContent = n + " sekker = " + fmt(wood) + (S.kg ? " (ca. " + (n * S.kg).toLocaleString("nb-NO") + " kg)" : "");
+    document.getElementById("s-btn-total").textContent = fmt(total);
     document.getElementById("f-total").value = fmt(total) + (S.deliveryFee == null ? " + levering (avtales)" : "");
     chips.forEach(function (c) { c.classList.toggle("on", parseInt(c.dataset.qty, 10) === n); });
     return total;
   }
+
+  // Bæring: «Ved innkjørselen» eller «Bær inn for meg». Lista med etasjer osv. vises bare når kunden vil ha bæring.
+  var carryWrap = form.querySelector("#baering-wrap");
+  form.querySelectorAll('[name="_baering"]').forEach(function (r) {
+    r.addEventListener("change", function () {
+      var inn = r.value === "inn" && r.checked;
+      carryWrap.hidden = !inn;
+      var fee0 = !(parseInt(carry.options[carry.selectedIndex].dataset.fee, 10) > 0);
+      if (inn && fee0) carry.selectedIndex = 1;
+      if (!inn) carry.selectedIndex = 0;
+      carry.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+  });
+  // Velger kunden «ingen bæring» i lista, går vi tilbake til «Ved innkjørselen».
+  carry.addEventListener("change", function () {
+    if (!(parseInt(carry.options[carry.selectedIndex].dataset.fee, 10) > 0) && !carryWrap.hidden) {
+      carryWrap.hidden = true; form.querySelector('[name="_baering"][value="ingen"]').checked = true;
+    }
+  });
 
   form.querySelectorAll(".qty-btn").forEach(function (b) {
     b.addEventListener("click", function () {
@@ -288,6 +309,7 @@
     var data = {};
     new FormData(form).forEach(function (v, k) { data[k] = v; });
     data["Bæring"] = carry.options[carry.selectedIndex].text;
+    delete data._baering;
     var dayBtn = dayBox && dayBox.querySelector('[data-date="' + dayInput.value + '"]');
     var dayText = dayBtn ? dayBtn.dataset.label : dayInput.value;
     data["Leveringsdag"] = dayText;
@@ -309,15 +331,16 @@
     delete data._next;
 
     var btn = form.querySelector('button[type="submit"]');
-    btn.disabled = true; btn.textContent = "Sender …";
+    var setBtn = function (busy) { btn.disabled = busy; btn.querySelector(".btn-label").textContent = busy ? "Sender …" : "Send bestilling"; };
+    setBtn(true);
 
     reserve(data).then(function (go) {
-      if (!go) { btn.disabled = false; btn.textContent = "Send bestilling"; return; }
-      send(data, total, btn);
+      if (!go) { setBtn(false); return; }
+      send(data, total, setBtn);
     });
   });
 
-  function send(data, total, btn) {
+  function send(data, total, setBtn) {
     fetch(S.endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
@@ -338,7 +361,7 @@
         location.href = (S.base || "") + "/takk/";
       })
       .catch(function (err) {
-        btn.disabled = false; btn.textContent = "Send bestilling";
+        setBtn(false);
         // Bestillingen skal ikke gå tapt: la kunden sende den som vanlig e-post med alt ferdig utfylt.
         var lines = [];
         Object.keys(data).forEach(function (k) {
