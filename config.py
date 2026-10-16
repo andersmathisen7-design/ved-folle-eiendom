@@ -83,7 +83,7 @@ DELIVERY_DAYS = {
     "closed": ["2026-12-28", "2026-12-29"],
     # Kalenderen som teller bestillinger per dag (Google Apps Script, se kalender/README.md).
     # Tom = alle mandager og tirsdager vises som ledige, og dere må legge fulle dager i "closed" selv.
-    "calendar_url": "",
+    "calendar_url": "https://script.google.com/macros/s/AKfycbywB7MTobGWc7yZpYMUrDLxELynBpAUuXCpgC6NCbZJJnPJa4iRA8Xc5tNjWBRhB_eL/exec",
 }
 
 # Google Search Console-bekreftelse (meta-tag på forsiden).
