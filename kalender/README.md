@@ -23,25 +23,34 @@ Alle tallene endrer du i `DELIVERY_DAYS` i `config.py`: dager, timer per dag, kj
 
 Er `calendar_url` tom, vises alle mandager og tirsdager som ledige. Da må dere selv legge fulle dager inn i `closed` i `config.py` og publisere på nytt.
 
-## Sett opp kalenderen (ca. 10 min, gratis)
+## Sett opp kalenderen (ca. 5 min, gratis)
 
 Kalenderen er et Google-regneark med et lite skript. Nettsiden spør regnearket hvor mye tid som alt er bestilt hver dag, og legger inn en ny rad for hver bestilling. Det er også herfra eiersiden henter bestillingene.
 
-1. Lag et nytt Google-regneark, for eksempel «Vedlevering – kalender».
-2. Velg **Utvidelser → Apps Script**. Slett det som står der, og lim inn alt fra `kalender/kalender.gs`.
-3. Bytt ut `bytt-meg` øverst i skriptet (`ADMIN_NOKKEL`) med et langt, hemmelig passord på minst 12 tegn. Det er passordet til eiersiden. Ikke legg det inn i GitHub. Trykk lagre.
-4. Trykk **Implementer → Ny implementering**. Velg type **Nettapp**.
-   - Kjør som: **Meg**
-   - Hvem har tilgang: **Alle**
-5. Trykk **Implementer**, og godkjenn tilgangen med Google-kontoen din.
-6. Kopier nettapp-adressen (slutter på `/exec`), og lim den inn som `calendar_url` i `DELIVERY_DAYS` i `config.py`. Publiser.
+Regnearket **«Follo Bjørkeved – leveringskalender»** er allerede laget i Google Drive (amkleven@gmail.com). Det er privat, så bare du har tilgang. Ikke del det med andre enn de som skal se kundedataene.
 
-Etter første bestilling dukker arket **Bestillinger** opp, med én rad per levering:
-ID, Leveringsdag, Minutter, Status, Navn, Telefon, Adresse, Område, Sekker, Bæring, Totalpris, E-post, Melding og Registrert.
+1. Åpne regnearket, og velg **Utvidelser → Apps Script**.
+2. Slett det som står der, og lim inn alt fra `kalender/kalender.gs`. Trykk **lagre** (diskettikonet).
+3. Trykk **Implementer → Ny implementering**. Klikk tannhjulet og velg **Nettapp**.
+   - Kjør som: **Meg**
+   - Hvem har tilgang: **Alle**. Dette må til for at kundene kan bestille. Uten innlogging får man bare vite hvor mange minutter som er bestilt per dag, aldri kundedata.
+4. Trykk **Implementer**, og godkjenn tilgangen med Google-kontoen din. Google viser en advarsel om at appen «ikke er bekreftet». Det er vanlig for egne skript: velg **Avansert → Gå til … (usikkert)**. Det er ditt eget skript.
+5. Kopier nettapp-adressen (slutter på `/exec`). Lim den inn som `calendar_url` i `DELIVERY_DAYS` i `config.py`, eller send den til Claude.
+6. Gå tilbake til regnearket og last siden på nytt. Du får en ny meny, **Vedlevering**. Velg **Vedlevering → Lag nytt passord til eiersiden**, godkjenn én gang til, og velg menyvalget igjen. Passordet vises **én gang**. Lagre det i en passordbehandler eller skriv det ned.
+
+## Sikkerhet
+
+- **Passordet** lages tilfeldig av skriptet (20 tegn). Det lagres bare som en saltet SHA-256-sjekksum i skriptets egne innstillinger, ikke i koden, i GitHub eller i nettleseren.
+- **Innlogging:** eiersiden får en tilfeldig billett som utløper etter 12 timer. Med «Husk meg» utløper den etter 30 dager. Passordet selv lagres ikke på telefonen. «Logg ut» gjør billetten ugyldig.
+- **Mistet telefonen?** Velg **Vedlevering → Logg ut alle enheter**, eller lag et nytt passord. Da virker ingen gamle innlogginger.
+- **Gjetting:** etter 10 feil passord på 15 minutter stenges innloggingen i 15 minutter.
+- **Kundedata** sendes bare til den som er logget inn, og bare med POST, aldri i nettadressen. Eiersiden er skjult for Google og har en streng sikkerhetsregel (Content Security Policy), slik at bare sidens egen kode kan kjøre der.
+- **Arket kan ikke lures:** tekst kundene skriver, lagres alltid som ren tekst. Noe som `=IMPORTXML(…)` blir aldri en formel.
+- **Falske bestillinger:** kalenderen godtar bare mandager og tirsdager fra i morgen og 6 uker fram, og maks 30 nettbestillinger i timen. Avbestill eventuelle falske bestillinger på eiersiden.
 
 ## Eiersiden: follobjorkeved.no/admin/
 
-Her ser dere alle bestillingene, sortert etter leveringsdag. Logg inn med `ADMIN_NOKKEL`. Nøkkelen huskes på telefonen eller PC-en til dere trykker «Logg ut».
+Her ser dere alle bestillingene, sortert etter leveringsdag. Logg inn med passordet fra menyen **Vedlevering** i regnearket. Kryss av for «Husk meg» på din egen telefon.
 
 - **Per dag:** antall leveringer, **antall sekker som skal på bilen**, og hvor mye av de 5 timene som er brukt.
 - **Per bestilling:** navn, antall sekker, bæring, pris, beregnet tid og melding. Trykk på adressen for å åpne den i Google Maps, og på telefonnummeret for å ringe.
@@ -50,7 +59,7 @@ Her ser dere alle bestillingene, sortert etter leveringsdag. Logg inn med `ADMIN
 - **Skriv ut:** gir en kjøreliste med én dag per side, uten knapper og avbestilte leveringer.
 - **Tidligere:** viser leveringer som er gjennomført.
 
-Siden er skjult for Google. Uten riktig nøkkel får man ikke se noe, og kundedataene ligger bare i regnearket deres.
+Siden er skjult for Google. Uten riktig passord får man ikke se noe, og kundedataene ligger bare i regnearket deres.
 
 ### Daglig bruk
 

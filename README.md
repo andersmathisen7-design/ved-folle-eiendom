@@ -14,7 +14,7 @@ Markedsplan og analyse med tall og kilder finner du i **[ANALYSE.md](ANALYSE.md)
 | `/fyre-i-dag/` | «Lønner det seg å fyre i dag?»: dagens strømpris time for time mot ved. Innstillingene ligger i `STROM` i `config.py` |
 | `/verktoy/`, `/widget/…` | Vedkalkulator og strøm mot ved som andre kan bygge inn på sine nettsider |
 | `/data/`, `/presse/` | Åpne data (CSV, CC BY 4.0) og en side for journalister |
-| `/admin/` | Ikke i søk. Eiersiden med bestillinger per leveringsdag (krever nøkkel) |
+| `/admin/` | Ikke i søk. Eiersiden med bestillinger per leveringsdag (krever passord) |
 | `/takk/` | Takkeside etter bestilling. Brukes til å måle konverteringer i Google Ads og Meta |
 | `/llms.txt` | Faktaark skrevet for AI-søkemotorer |
 | `sitemap.xml`, `robots.txt` | Lages automatisk |

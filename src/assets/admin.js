@@ -1,9 +1,25 @@
 // Eiersiden (/admin/): bestillinger per leveringsdag, hentet fra leveringskalenderen (kalender/kalender.gs).
 (function () {
-  var A = window.ADMIN || {}, D = A.days || {}, CAP = D.minutes_per_day || 300;
   var $ = function (id) { return document.getElementById(id); };
-  var KEY = "folloAdminKey", key = "";
-  try { key = localStorage.getItem(KEY) || ""; } catch (e) {}
+  var A = {};
+  try { A = JSON.parse($("admin-cfg").textContent); } catch (e) {}
+  var D = A.days || {}, CAP = D.minutes_per_day || 300;
+  // Innloggingsbillett fra kalenderen (ikke passordet). «Husk meg» = localStorage, ellers bare til fanen lukkes.
+  var KEY = "folloAdminToken", token = "";
+  var store = {
+    get: function () {
+      try { return sessionStorage.getItem(KEY) || localStorage.getItem(KEY) || ""; } catch (e) { return token; }
+    },
+    set: function (t, remember) {
+      token = t;
+      try { (remember ? localStorage : sessionStorage).setItem(KEY, t); } catch (e) {}
+    },
+    clear: function () {
+      token = "";
+      try { localStorage.removeItem(KEY); sessionStorage.removeItem(KEY); } catch (e) {}
+    }
+  };
+  token = store.get();
   var orders = [], today = "", view = "kommende";
 
   if (!A.calendarUrl) { $("a-nocal").hidden = false; return; }
@@ -26,14 +42,19 @@
     $("a-key").focus();
   }
 
+  var ERR = {
+    passord: "Feil passord.", sperret: "For mange feil forsøk. Vent 15 minutter og prøv igjen.",
+    "ikke-satt-opp": "Passordet er ikke laget ennå. Åpne regnearket og velg Vedlevering → Lag nytt passord til eiersiden.",
+    token: "Du er logget ut. Logg inn igjen."
+  };
+
   function load() {
     $("a-updated").textContent = "Henter …";
-    return fetch(A.calendarUrl + "?key=" + encodeURIComponent(key))
-      .then(function (r) { return r.json(); })
+    return post({ action: "list" })
       .then(function (j) {
         if (!j.ok) {
-          try { localStorage.removeItem(KEY); } catch (e) {}
-          return showLogin(j.error === "nokkel" ? "Feil nøkkel." : "Noe gikk galt: " + (j.error || "ukjent"));
+          store.clear();
+          return showLogin(ERR[j.error] || "Noe gikk galt: " + (j.error || "ukjent"));
         }
         orders = j.orders || []; today = j.today || "";
         $("a-login").hidden = true; $("a-app").hidden = false; $("a-actions").hidden = false;
@@ -44,7 +65,7 @@
   }
 
   function post(body) {
-    body.key = key;
+    if (body.action !== "login") body.token = token;
     return fetch(A.calendarUrl, {
       method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(body)
     }).then(function (r) { return r.json(); });
@@ -81,9 +102,11 @@
         '<header><h2>' + esc(dayLabel(d)) + '</h2>' +
         '<p>' + live.length + ' levering' + (live.length === 1 ? "" : "er") + ' · <strong>' + nb(sacks) + ' sekker</strong> · ' +
         min + ' av ' + CAP + ' min' + (min > CAP ? ' <span class="over">(over tiden)</span>' : ' · ' + (CAP - min) + ' min ledig') + '</p>' +
-        '<div class="meter' + (min > CAP ? " over" : "") + '"><span style="width:' + pct + '%"></span></div></header>' +
+        '<div class="meter' + (min > CAP ? " over" : "") + '"><span data-pct="' + pct + '"></span></div></header>' +
         os.map(card).join("") + '</section>';
     }).join("");
+    // Bredden settes her og ikke som style-attributt, fordi sikkerhetsregelen (CSP) stopper inline-stil.
+    $("a-list").querySelectorAll(".meter span").forEach(function (m) { m.style.width = m.dataset.pct + "%"; });
   }
 
   function card(o) {
@@ -113,7 +136,7 @@
     if (st === "Avbestilt" && !confirm("Avbestille denne leveringen? Tiden blir ledig for andre kunder.")) return;
     b.disabled = true; b.textContent = "Lagrer …";
     post({ action: "status", id: b.dataset.id, status: st }).then(function (j) {
-      if (!j.ok) alert("Kunne ikke lagre: " + (j.error || "ukjent feil"));
+      if (!j.ok) alert(ERR[j.error] || "Kunne ikke lagre: " + (j.error || "ukjent feil"));
       return load();
     }).catch(function () { alert("Fikk ikke kontakt med kalenderen."); load(); });
   });
@@ -128,14 +151,20 @@
 
   $("a-login").addEventListener("submit", function (e) {
     e.preventDefault();
-    key = $("a-key").value.trim();
-    if (!key) return;
-    try { localStorage.setItem(KEY, key); } catch (err) {}
-    load();
+    var pw = $("a-key").value.trim(), remember = $("a-remember").checked, btn = $("a-login").querySelector("button");
+    if (!pw) return;
+    btn.disabled = true; $("a-login-msg").textContent = "";
+    post({ action: "login", password: pw, remember: remember }).then(function (j) {
+      btn.disabled = false;
+      if (!j.ok) return showLogin(ERR[j.error] || "Noe gikk galt.");
+      $("a-key").value = "";
+      store.set(j.token, remember);
+      load();
+    }).catch(function () { btn.disabled = false; showLogin("Fikk ikke kontakt med kalenderen."); });
   });
   $("a-logout").addEventListener("click", function () {
-    key = ""; try { localStorage.removeItem(KEY); } catch (e) {}
-    $("a-key").value = ""; showLogin();
+    post({ action: "logout" }).catch(function () {});
+    store.clear(); showLogin();
   });
   $("a-refresh").addEventListener("click", load);
   $("a-print").addEventListener("click", function () { window.print(); });
@@ -166,7 +195,7 @@
       sacks: +$("ad-sekker").value || 0, carry: $("ad-baering").value || "Ingen bæring", total: $("ad-pris").value.trim(),
       message: ($("ad-melding").value.trim() + " (telefonbestilling)").trim()
     }).then(function (j) {
-      if (!j.ok) { msg.className = "form-msg err"; msg.textContent = "Kunne ikke lagre: " + (j.error || "ukjent feil"); return; }
+      if (!j.ok) { msg.className = "form-msg err"; msg.textContent = ERR[j.error] || "Kunne ikke lagre: " + (j.error || "ukjent feil"); return; }
       msg.className = "form-msg ok"; msg.textContent = "Lagret.";
       ["ad-navn", "ad-tlf", "ad-adresse", "ad-pris", "ad-melding"].forEach(function (id) { $(id).value = ""; });
       minTouched = false; calcMin();
@@ -174,5 +203,5 @@
     }).catch(function () { msg.className = "form-msg err"; msg.textContent = "Fikk ikke kontakt med kalenderen."; });
   });
 
-  if (key) load(); else showLogin();
+  if (token) load(); else showLogin();
 })();

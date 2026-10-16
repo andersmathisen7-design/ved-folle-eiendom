@@ -270,6 +270,8 @@
         email: data.email || "", message: data["Melding"] || "" })
     }).then(function (r) { return r.json(); }).then(function (j) {
       if (j.ok) { reserved = dayInput.value; return true; }
+      // Andre feil enn «full» eller «for sent»: bestillingen sendes likevel, med en merknad.
+      if (!j.full && j.error !== "dato") { data["Leveringsdag"] += " (ikke registrert i kalenderen)"; return true; }
       if (j.booked) booked = j.booked;
       dayMsg.dataset.keep = "1";
       renderDays();

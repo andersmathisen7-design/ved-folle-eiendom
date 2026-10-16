@@ -598,7 +598,7 @@ def page_takk():
 
 
 def page_admin():
-    """Eiersiden: oversikt over bestillinger per leveringsdag. Dataene hentes fra kalenderen med en nøkkel."""
+    """Eiersiden: oversikt over bestillinger per leveringsdag. Dataene hentes fra kalenderen etter innlogging med passord."""
     cfg = {"calendarUrl": C.DELIVERY_DAYS.get("calendar_url", ""), "days": C.DELIVERY_DAYS,
            "areas": [a["name"] for a in C.AREAS] + ["Annet"], "base": BASE}
     return f"""<!doctype html>
@@ -607,6 +607,8 @@ def page_admin():
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src https://script.google.com https://script.googleusercontent.com; form-action 'none'; base-uri 'none'">
 <title>Bestillinger | {esc(C.BRAND)}</title>
 <link rel="icon" href="/favicon.ico">
 <link rel="stylesheet" href="/assets/style.css">
@@ -625,9 +627,11 @@ def page_admin():
 <main class="wrap admin-main">
   <form class="card admin-login" id="a-login" hidden>
     <h1>Logg inn</h1>
-    <p class="muted">Skriv inn nøkkelen (ADMIN_NOKKEL) fra kalenderskriptet. Den huskes på denne enheten.</p>
-    <label for="a-key">Nøkkel</label>
+    <p class="muted">Passordet lager du i regnearket: menyen <strong>Vedlevering → Lag nytt passord til eiersiden</strong>.</p>
+    <input type="text" name="username" value="eier" autocomplete="username" hidden>
+    <label for="a-key">Passord</label>
     <input id="a-key" type="password" autocomplete="current-password" required>
+    <label class="check"><input type="checkbox" id="a-remember"> Husk meg på denne enheten i 30 dager</label>
     <button class="btn btn-block" type="submit">Logg inn</button>
     <p class="form-msg err" id="a-login-msg"></p>
   </form>
@@ -673,7 +677,7 @@ def page_admin():
     <p>Til da kommer alle bestillinger som før på e-post.</p>
   </div>
 </main>
-<script>window.ADMIN={json.dumps(cfg, ensure_ascii=False)};</script>
+<script type="application/json" id="admin-cfg">{json.dumps(cfg, ensure_ascii=False).replace("</", "<\\/")}</script>
 <script src="/assets/admin.js" defer></script>
 </body>
 </html>

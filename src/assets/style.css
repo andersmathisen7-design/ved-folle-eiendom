@@ -290,6 +290,8 @@ textarea.embed { width: 100%; font-family: ui-monospace, Menlo, Consolas, monosp
 .admin-login { max-width: 420px; margin: 40px auto; }
 .admin-login h1, #a-nocal h1 { font-size: 1.4rem; margin-top: 0; }
 .admin-login .btn { margin-top: 12px; }
+.form label.check, .admin-login .check { display: flex; align-items: center; gap: 8px; font-weight: 400; margin-top: 12px; }
+.admin-login .check input { width: auto; }
 .admin-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
 .admin-bar p { margin: 0; }
 .admin-tabs { display: flex; gap: 4px; background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 4px; }
