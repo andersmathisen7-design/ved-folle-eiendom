@@ -50,7 +50,7 @@ Tallene er anslag. Hvor mye du bruker, avhenger av ovnen, hvor godt huset er iso
 
 ## Kjøp nok før kulda kommer
 
-Mange selgere blir utsolgt når det blir kaldt. Høsten 2026 var for eksempel Empo i Ski utsolgt for bjørkeved allerede i september. Har du plass, er det tryggest å kjøpe hele vinterens forbruk på én gang. Se også [når det er lurt å kjøpe ved](/artikler/nar-er-det-lurt-a-kjope-ved/) og [hvordan du lagrer ved](/artikler/hvordan-lagre-ved/).
+Mange selgere blir utsolgt når det blir kaldt. Høsten 2026 var for eksempel Empo i Ski utsolgt for bjørkeved allerede i september. Har du plass, er det tryggest å kjøpe hele vinterens forbruk på én gang. Har du lite lagringsplass, kan du få veden i porsjoner med [vedabonnement](/vedabonnement/). Se også [når det er lurt å kjøpe ved](/artikler/nar-er-det-lurt-a-kjope-ved/) og [hvordan du lagrer ved](/artikler/hvordan-lagre-ved/).
 
 [[bestill]]
 

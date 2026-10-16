@@ -7,7 +7,8 @@
     purchase_lead_view: "Så takkesiden", article_cta: "Klikket bestill i artikkel",
     calculator_to_order: "Brukte vedkalkulatoren", price_check: "Sjekket pris i skjemaet",
     form_invalid: "Trykket Send, men et felt manglet",
-    antall_valgt: "Endret antall sekker til", bestilt_antall: "Bestilte antall sekker"
+    antall_valgt: "Endret antall sekker til", bestilt_antall: "Bestilte antall sekker",
+    hyppighet_valgt: "Valgte hvor ofte", bestilt_hyppighet: "Bestilte med hyppighet"
   };
   var track = function (name, params) {
     try { if (window.gtag) gtag("event", name, params || {}); } catch (e) {}
@@ -42,7 +43,8 @@
     try {
       var last = JSON.parse(sessionStorage.getItem("lastOrder") || "null");
       if (last) {
-        ["Din bestilling", last.qty + " sekker bjørkeved", last.carry, last.address, "Beregnet: " + last.total]
+        ["Din bestilling", last.qty + " sekker bjørkeved" + (last.freq ? ", " + last.freq.toLowerCase() : ""), last.carry, last.address,
+         "Beregnet: " + last.total + (last.freq ? " per levering" : "")]
           .forEach(function (t, i) {
             var p = document.createElement(i === 0 || i === 4 ? "strong" : "div");
             p.textContent = t; p.style.display = "block"; ts.appendChild(p);
@@ -81,6 +83,8 @@
 
   var qty = form.querySelector("#f-antall");
   var carry = form.querySelector("#f-baering");
+  var freq = form.querySelector("#f-hyppighet");
+  function freqKey() { return freq ? freq.options[freq.selectedIndex].dataset.key : "en-gang"; }
   var msg = form.querySelector("#form-msg");
   var chips = form.querySelectorAll(".chips button");
   var started = false;
@@ -93,6 +97,9 @@
     document.getElementById("s-ved").textContent = n + " × " + S.price + " kr = " + fmt(wood);
     document.getElementById("s-baering").textContent = fee ? n + " × " + fee + " kr = " + fmt(carryTotal) : "–";
     document.getElementById("s-total").textContent = fmt(total);
+    var repeat = freqKey() !== "en-gang";
+    document.getElementById("s-total-label").textContent = repeat ? "Per levering" : "Totalt";
+    document.getElementById("f-hyppighet-info").hidden = !repeat;
     document.getElementById("f-total").value = fmt(total) + (S.deliveryFee == null ? " + levering (avtales)" : "");
     chips.forEach(function (c) { c.classList.toggle("on", parseInt(c.dataset.qty, 10) === n); });
     return total;
@@ -129,9 +136,14 @@
     if (e.target.classList) e.target.classList.remove("invalid");
     calc();
     if (e.target === qty || e.target === carry) priceCheck();
+    else if (e.target === freq) {}
     else if (!started && e.target.id !== "f-sted") { started = true; track("begin_checkout"); }
   });
-  form.addEventListener("change", function (e) { calc(); if (e.target === qty || e.target === carry) priceCheck(); });
+  form.addEventListener("change", function (e) {
+    calc();
+    if (e.target === qty || e.target === carry) priceCheck();
+    if (e.target === freq) track("hyppighet_valgt:" + freqKey());
+  });
   form.querySelector('[name="Side"]').value = location.pathname;
   // Husk kampanjen (utm_*) kunden kom fra, så vi ser hvilken reklame som gir bestillinger.
   try {
@@ -172,7 +184,10 @@
     var data = {};
     new FormData(form).forEach(function (v, k) { data[k] = v; });
     data["Bæring"] = carry.options[carry.selectedIndex].text;
-    data._subject = "Ny vedbestilling: " + data["Antall sekker"] + " sekker – " + data["Navn"] + ", " + data["Område"];
+    var repeat = freqKey() !== "en-gang";
+    if (repeat) data["Beregnet totalpris"] += " per levering";
+    data._subject = (repeat ? "Nytt vedabonnement: " : "Ny vedbestilling: ") + data["Antall sekker"] + " sekker" +
+      (repeat ? " " + data["Hyppighet"].replace("Fast levering ", "") : "") + " – " + data["Navn"] + ", " + data["Område"];
     // E-post er valgfritt. Bare en gyldig adresse får automatisk bekreftelse fra FormSubmit.
     var epost = (data["E-post"] || "").trim();
     delete data["E-post"];
@@ -180,7 +195,7 @@
       data.email = epost;
       data._replyto = epost;
       data._autoresponse = "Takk for bestillingen hos " + S.brand + "! Vi har mottatt bestilling på " +
-        data["Antall sekker"] + " sekker bjørkeved (beregnet " + fmt(total) + "). Vi ringer deg for å avtale levering. " +
+        data["Antall sekker"] + " sekker bjørkeved (beregnet " + fmt(total) + (repeat ? " per levering, " + data["Hyppighet"].toLowerCase() : "") + "). Vi ringer deg for å avtale levering. " +
         "Spørsmål? Ring " + S.phone + ".";
     } else if (epost) {
       data["E-post (ugyldig)"] = epost;
@@ -199,11 +214,12 @@
         if (!res.ok || String(res.j.success) !== "true") throw new Error(res.j.message || "Feil");
         track("generate_lead", { value: total, currency: "NOK", sacks: +data["Antall sekker"] });
         track("bestilt_antall:" + qtyBucket(+data["Antall sekker"]));
+        track("bestilt_hyppighet:" + freqKey());
         try { if (window.fbq) fbq("track", "Lead", { value: total, currency: "NOK" }); } catch (e) {}
         try { if (window.gtag && S.adsConversion) gtag("event", "conversion", { send_to: S.adsConversion, value: total, currency: "NOK" }); } catch (e) {}
         try {
           sessionStorage.setItem("lastOrder", JSON.stringify({
-            qty: data["Antall sekker"], carry: data["Bæring"], total: fmt(total),
+            qty: data["Antall sekker"], carry: data["Bæring"], total: fmt(total), freq: repeat ? data["Hyppighet"] : "",
             address: data["Adresse"] + ", " + data["Område"]
           }));
         } catch (e) {}
