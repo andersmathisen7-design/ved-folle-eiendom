@@ -79,7 +79,7 @@ NMBU publiserer oppgaveforslag fra bedrifter på [nmbu.no/forslag-til-masteroppg
 
 ## 4. Ferdige e-poster
 
-13 utkast ligger i Gmail-kontoen andersmathisen7@gmail.com under **Utkast**: de fem lokalavisene, Dinside, E24, Nettavisen, NRK, Norsk Ved, Follo Brannvesen, NMBU og Tuntréet. Bytt ut [NAVN] før du sender. Les gjennom, endre det du vil, og send dem **etter** at sidene er publisert. Malene står også her, så du kan sende dem fra en annen adresse, for eksempel post@min-eiendom.no.
+**Sendt 16.10.2026** fra andersmathisen7@gmail.com, signert Anders Mathisen: de fem lokalavisene, Dinside, E24, Nettavisen, NRK, Norsk Ved, Follo Brannvesen, NMBU og Tuntréet. Følg opp dem som ikke svarer etter to uker, og send riksmediene en ny e-post neste gang det meldes kulde eller strømprisen stiger. Malene står også her, så du kan sende dem fra en annen adresse, for eksempel post@min-eiendom.no.
 
 ### Lokalavis
 > **Emne:** Vedpriser 2026: tørr ved er utsolgt flere steder, dette koster den nå
