@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src https://script.google.com https://script.googleusercontent.com; form-action 'none'; base-uri 'none'">
+<title>Bestillinger | Follo Bjørkeved</title>
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body class="admin">
+<header class="admin-top">
+  <div class="wrap admin-top-in">
+    <strong>🪵 Follo Bjørkeved · Bestillinger</strong>
+    <div class="admin-actions" id="a-actions" hidden>
+      <button type="button" class="btn btn-sm btn-ghost" id="a-refresh">Oppdater</button>
+      <button type="button" class="btn btn-sm btn-ghost" id="a-print">Skriv ut</button>
+      <button type="button" class="btn btn-sm btn-ghost" id="a-logout">Logg ut</button>
+    </div>
+  </div>
+</header>
+<main class="wrap admin-main">
+  <form class="card admin-login" id="a-login" hidden>
+    <h1>Logg inn</h1>
+    <p class="muted">Passordet lager du i regnearket: menyen <strong>Vedlevering → Lag nytt passord til eiersiden</strong>.</p>
+    <input type="text" name="username" value="eier" autocomplete="username" hidden>
+    <label for="a-key">Passord</label>
+    <input id="a-key" type="password" autocomplete="current-password" required>
+    <label class="check"><input type="checkbox" id="a-remember"> Husk meg på denne enheten i 30 dager</label>
+    <button class="btn btn-block" type="submit">Logg inn</button>
+    <p class="form-msg err" id="a-login-msg"></p>
+  </form>
+  <div id="a-app" hidden>
+    <div class="admin-bar">
+      <div class="admin-tabs" role="tablist">
+        <button type="button" role="tab" data-view="kommende" class="on">Kommende</button>
+        <button type="button" role="tab" data-view="tidligere">Tidligere</button>
+      </div>
+      <p class="muted small" id="a-updated"></p>
+    </div>
+    <div id="a-stats" class="admin-stats"></div>
+    <details class="card admin-add">
+      <summary>+ Legg inn telefonbestilling</summary>
+      <form id="a-add" class="form" novalidate>
+        <div class="row2">
+          <div><label for="ad-dato">Leveringsdag</label><input id="ad-dato" type="date" required></div>
+          <div><label for="ad-omrade">Område</label><select id="ad-omrade"></select></div>
+        </div>
+        <div class="row2">
+          <div><label for="ad-navn">Navn <span class="muted">(valgfritt)</span></label><input id="ad-navn"></div>
+          <div><label for="ad-tlf">Telefon</label><input id="ad-tlf" type="tel"></div>
+        </div>
+        <label for="ad-adresse">Adresse</label><input id="ad-adresse">
+        <div class="row2">
+          <div><label for="ad-sekker">Sekker</label><input id="ad-sekker" type="number" min="1" value="50"></div>
+          <div><label for="ad-baering">Bæring</label><select id="ad-baering"><option value="">Ingen bæring</option><option value="Bæres inn">Bæres inn</option></select></div>
+        </div>
+        <div class="row2">
+          <div><label for="ad-min">Minutter <span class="muted">(regnes ut)</span></label><input id="ad-min" type="number" min="0"></div>
+          <div><label for="ad-pris">Pris</label><input id="ad-pris"></div>
+        </div>
+        <label for="ad-melding">Melding</label><textarea id="ad-melding" rows="2"></textarea>
+        <button class="btn" type="submit">Lagre bestilling</button>
+        <p class="form-msg" id="a-add-msg"></p>
+      </form>
+    </details>
+    <div id="a-list" aria-live="polite"></div>
+  </div>
+  <div class="card" id="a-nocal" hidden>
+    <h1>Kalenderen er ikke satt opp</h1>
+    <p>Eiersiden henter bestillingene fra leveringskalenderen (et Google-regneark). Sett den opp som beskrevet i <code>kalender/README.md</code>, og legg adressen inn som <code>calendar_url</code> i <code>config.py</code>.</p>
+    <p>Til da kommer alle bestillinger som før på e-post.</p>
+  </div>
+</main>
+<script type="application/json" id="admin-cfg">{"calendarUrl": "https://script.google.com/macros/s/AKfycbywB7MTobGWc7yZpYMUrDLxELynBpAUuXCpgC6NCbZJJnPJa4iRA8Xc5tNjWBRhB_eL/exec", "days": {"weekdays": [1, 2], "minutes_per_day": 300, "weeks_ahead": 4, "order_by_hour": 18, "unload_minutes": 10, "carry_minutes_per_sack": 0.5, "drive_minutes": {"Ås": 20, "Ski og Langhus": 35, "Kolbotn og Oppegård": 50, "Vestby og Son": 45, "Drøbak": 45, "Nesodden": 70, "Enebakk": 60, "Annet": 60}, "closed": ["2026-12-28", "2026-12-29"], "calendar_url": "https://script.google.com/macros/s/AKfycbywB7MTobGWc7yZpYMUrDLxELynBpAUuXCpgC6NCbZJJnPJa4iRA8Xc5tNjWBRhB_eL/exec"}, "areas": ["Ås", "Ski og Langhus", "Kolbotn og Oppegård", "Vestby og Son", "Drøbak", "Nesodden", "Enebakk", "Annet"], "base": ""}</script>
+<script src="/assets/admin.js" defer></script>
+</body>
+</html>

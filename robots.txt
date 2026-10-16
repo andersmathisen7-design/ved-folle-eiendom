@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /takk/
+Disallow: /admin/
 
 Sitemap: https://follobjorkeved.no/sitemap.xml

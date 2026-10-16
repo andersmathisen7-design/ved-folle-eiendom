@@ -116,7 +116,13 @@
   <div class="wrap order-grid">
     <div class="order-intro">
       <h2>Bestill bjørkeved</h2>
-      <p>Send bestillingen her. Vi ringer deg, som regel innen én arbeidsdag, for å avtale levering. Du betaler ingenting nå.</p>
+      <p>Tre korte steg, og du ser prisen hele veien. Vi kjører ut på mandager og tirsdager, og ringer deg for å bekrefte.</p>
+      <ul class="usp order-usp">
+        <li><strong>Tørr bjørkeved</strong>, lagret under tak</li>
+        <li>40-liters sekk, ca. 14 kg, klar til bruk</li>
+        <li>Vi <strong>bærer veden inn</strong> hvis du vil</li>
+        <li>Lokale fra Ås – du snakker med de som kjører</li>
+      </ul>
       <p class="muted">Vil du heller ringe? <a href="tel:+4748993900" data-track="tel">48 99 39 00</a></p>
     </div>
     <form class="card form" id="order-form" action="https://formsubmit.co/amkleven@gmail.com" method="POST" novalidate>
@@ -128,31 +134,41 @@
       <input type="hidden" name="Kampanje" value="">
 
       <fieldset>
-        <legend>Ved</legend>
+        <legend><span class="step-no">1</span> Hvor mye ved?</legend>
         <label for="f-antall">Antall sekker (40 liter)</label>
         <div class="qty">
           <button type="button" class="qty-btn" data-step="-1" aria-label="Færre sekker">−</button>
           <input id="f-antall" name="Antall sekker" type="number" inputmode="numeric" min="1" max="500" value="50" required>
           <button type="button" class="qty-btn" data-step="1" aria-label="Flere sekker">+</button>
         </div>
-        <div class="chips" role="group" aria-label="Hurtigvalg antall">
+        <div class="chips" role="group" aria-label="Hurtigvalg antall sekker">
           <button type="button" data-qty="30">30</button><button type="button" data-qty="50">50</button><button type="button" data-qty="75">75</button><button type="button" data-qty="100">100</button>
         </div>
-        <label for="f-baering">Bæring</label>
-        <select id="f-baering" name="Bæring" required>
-          <option value="ingen" data-fee="0">Ingen bæring – settes ved innkjørsel</option>
-<option value="ute-15" data-fee="12">Utendørs 0–15 meter (+12 kr per sekk)</option>
-<option value="ute-50" data-fee="16">Utendørs 15–50 meter (+16 kr per sekk)</option>
-<option value="garasje" data-fee="15">Inn i garasje (+15 kr per sekk)</option>
-<option value="kjeller-15" data-fee="16">Til kjeller, 0–15 meter (+16 kr per sekk)</option>
-<option value="kjeller-50" data-fee="20">Til kjeller, 15–50 meter (+20 kr per sekk)</option>
-<option value="etg-1" data-fee="16">Til 1. etasje (+16 kr per sekk)</option>
-<option value="etg-2" data-fee="20">Til 2. etasje (+20 kr per sekk)</option>
-<option value="etg-3" data-fee="24">Til 3. etasje (+24 kr per sekk)</option>
-<option value="etg-4" data-fee="28">Til 4. etasje (+28 kr per sekk)</option>
-<option value="etg-5" data-fee="34">Til 5. etasje (+34 kr per sekk)</option>
-<option value="etg-6" data-fee="36">Til 6. etasje (+36 kr per sekk)</option>
-        </select>
+        <p class="qty-note"><strong id="s-qty">–</strong> <span class="muted">En sekk rekker 1–2 kvelder med peisen.</span></p>
+
+        <span class="label" id="l-baering">Hvor skal sekkene stå?</span>
+        <div class="choice" role="radiogroup" aria-labelledby="l-baering">
+          <label><input type="radio" name="_baering" value="ingen" checked><span><strong>Ved innkjørselen</strong><small>Ingen tillegg</small></span></label>
+          <label><input type="radio" name="_baering" value="inn"><span><strong>Bær inn for meg</strong><small>Fra 12 kr per sekk</small></span></label>
+        </div>
+        <div id="baering-wrap" hidden>
+          <label for="f-baering">Hvor skal vi bære dem?</label>
+          <select id="f-baering" name="Bæring" required>
+            <option value="ingen" data-fee="0">Ingen bæring – settes ved innkjørsel</option>
+<option value="ute-15" data-fee="12">Utendørs 0–15 meter (+12 kr/sekk)</option>
+<option value="ute-50" data-fee="16">Utendørs 15–50 meter (+16 kr/sekk)</option>
+<option value="garasje" data-fee="15">Inn i garasje (+15 kr/sekk)</option>
+<option value="kjeller-15" data-fee="16">Til kjeller, 0–15 meter (+16 kr/sekk)</option>
+<option value="kjeller-50" data-fee="20">Til kjeller, 15–50 meter (+20 kr/sekk)</option>
+<option value="etg-1" data-fee="16">Til 1. etasje (+16 kr/sekk)</option>
+<option value="etg-2" data-fee="20">Til 2. etasje (+20 kr/sekk)</option>
+<option value="etg-3" data-fee="24">Til 3. etasje (+24 kr/sekk)</option>
+<option value="etg-4" data-fee="28">Til 4. etasje (+28 kr/sekk)</option>
+<option value="etg-5" data-fee="34">Til 5. etasje (+34 kr/sekk)</option>
+<option value="etg-6" data-fee="36">Til 6. etasje (+36 kr/sekk)</option>
+          </select>
+        </div>
+
         <label for="f-hyppighet">Hvor ofte?</label>
         <select id="f-hyppighet" name="Hyppighet">
           <option value="Én gang" data-key="en-gang" selected>Én gang</option>
@@ -164,9 +180,7 @@
       </fieldset>
 
       <fieldset>
-        <legend>Leveringsadresse</legend>
-        <label for="f-adresse">Gateadresse</label>
-        <input id="f-adresse" name="Adresse" autocomplete="street-address" required>
+        <legend><span class="step-no">2</span> Hvor og når?</legend>
         <label for="f-sted">Område</label>
         <select id="f-sted" name="Område"><option>Ås</option>
 <option>Ski og Langhus</option>
@@ -175,20 +189,29 @@
 <option>Drøbak</option>
 <option>Nesodden</option>
 <option>Enebakk</option><option>Annet</option></select>
+        <label for="f-adresse">Gateadresse</label>
+        <input id="f-adresse" name="Adresse" autocomplete="street-address" required>
+        <div id="f-dag">
+          <span class="label"><span id="l-dag">Leveringsdag</span> <span class="muted">· mandag og tirsdag, bestill senest kl. 18 dagen før</span></span>
+          <div class="days" id="f-dager" role="radiogroup" aria-label="Velg leveringsdag"></div>
+          <input type="hidden" name="Leveringsdag" id="f-leveringsdag" required>
+          <p class="muted small" id="f-dag-msg"></p>
+        </div>
       </fieldset>
 
       <fieldset>
-        <legend>Kontaktinfo</legend>
-        <label for="f-navn">Navn</label>
-        <input id="f-navn" name="Navn" autocomplete="name" required>
+        <legend><span class="step-no">3</span> Hvordan når vi deg?</legend>
         <div class="row2">
-          <div><label for="f-tlf">Telefon</label>
+          <div><label for="f-tlf">Telefon <span class="muted">· vi ringer og bekrefter</span></label>
           <input id="f-tlf" name="Telefon" type="tel" inputmode="tel" autocomplete="tel" required></div>
-          <div><label for="f-epost">E-post (valgfritt)</label>
+          <div><label for="f-epost">E-post <span class="muted">(valgfritt)</span></label>
           <input id="f-epost" name="E-post" type="email" autocomplete="email"></div>
         </div>
-        <label for="f-melding">Melding (valgfritt)</label>
-        <textarea id="f-melding" name="Melding" rows="3"></textarea>
+        <details class="more">
+          <summary>Legg til en melding <span class="muted">(valgfritt)</span></summary>
+          <label for="f-melding" class="sr-only">Melding</label>
+          <textarea id="f-melding" name="Melding" rows="3"></textarea>
+        </details>
       </fieldset>
 
       <div class="summary" aria-live="polite">
@@ -199,9 +222,13 @@
       </div>
       <input type="hidden" name="Beregnet totalpris" id="f-total">
 
-      <button class="btn btn-lg btn-block" type="submit">Send bestilling</button>
+      <button class="btn btn-lg btn-block" type="submit"><span class="btn-label">Send bestilling</span><span id="s-btn-total"></span></button>
+      <ul class="reassure">
+        <li>Du betaler ingenting nå</li>
+        <li>Vi ringer og bekrefter før vi kjører</li>
+      </ul>
       <p class="form-msg" id="form-msg" role="alert"></p>
-      <p class="muted small">Når du sender skjemaet, får vi navnet, adressen og kontaktinfoen din. Vi bruker det bare til å levere veden. Les mer i <a href="/personvern/">personvernerklæringen</a>.</p>
+      <p class="muted small">Når du sender skjemaet, får vi adressen og kontaktinfoen din. Vi bruker det bare til å levere veden. Les mer i <a href="/personvern/">personvernerklæringen</a>.</p>
     </form>
   </div>
 </section>
@@ -240,7 +267,7 @@
   </div>
 </footer>
 <a class="sticky-cta btn" href="#bestill">Bestill ved – 89 kr/sekk</a>
-<script>window.SITE={"price": 89, "deliveryFee": 499, "endpoint": "https://formsubmit.co/ajax/amkleven@gmail.com", "orderEmail": "amkleven@gmail.com", "brand": "Follo Bjørkeved", "phone": "48 99 39 00", "adsConversion": "", "base": ""};</script>
+<script>window.SITE={"price": 89, "kg": 14, "deliveryFee": 499, "endpoint": "https://formsubmit.co/ajax/amkleven@gmail.com", "orderEmail": "amkleven@gmail.com", "brand": "Follo Bjørkeved", "phone": "48 99 39 00", "adsConversion": "", "base": "", "days": {"weekdays": [1, 2], "minutes_per_day": 300, "weeks_ahead": 4, "order_by_hour": 18, "unload_minutes": 10, "carry_minutes_per_sack": 0.5, "drive_minutes": {"Ås": 20, "Ski og Langhus": 35, "Kolbotn og Oppegård": 50, "Vestby og Son": 45, "Drøbak": 45, "Nesodden": 70, "Enebakk": 60, "Annet": 60}, "closed": ["2026-12-28", "2026-12-29"], "calendar_url": "https://script.google.com/macros/s/AKfycbywB7MTobGWc7yZpYMUrDLxELynBpAUuXCpgC6NCbZJJnPJa4iRA8Xc5tNjWBRhB_eL/exec"}};</script>
 <script src="/assets/app.js" defer></script>
 </body>
 </html>
