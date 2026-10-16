@@ -81,17 +81,15 @@
 
     // Nøkkeltall for kommende leveringer.
     var active = orders.filter(function (o) { return o.date >= today && o.status !== "Avbestilt"; });
-    var fresh = active.filter(function (o) { return o.status === "Ny"; }).length;
     $("a-stats").innerHTML = upcoming ?
       '<div><strong>' + active.length + '</strong><span>leveringer</span></div>' +
-      '<div><strong>' + nb(active.reduce(function (s, o) { return s + o.sacks; }, 0)) + '</strong><span>sekker</span></div>' +
-      '<div class="' + (fresh ? "warn" : "") + '"><strong>' + fresh + '</strong><span>ikke bekreftet</span></div>' : "";
+      '<div><strong>' + nb(active.reduce(function (s, o) { return s + o.sacks; }, 0)) + '</strong><span>sekker</span></div>' : "";
 
     if (!days.length) {
       $("a-list").innerHTML = '<p class="card muted">' + (upcoming ? "Ingen kommende bestillinger." : "Ingen tidligere bestillinger.") + "</p>";
       return;
     }
-    var order = { "Ny": 0, "Bekreftet": 1, "Levert": 2, "Avbestilt": 3 };
+    var order = { "Levert": 1, "Avbestilt": 2 };
     $("a-list").innerHTML = days.map(function (d) {
       var os = byDay[d].sort(function (a, b) { return (order[a.status] || 0) - (order[b.status] || 0) || a.area.localeCompare(b.area); });
       var live = os.filter(function (o) { return o.status !== "Avbestilt"; });
@@ -111,13 +109,15 @@
 
   function card(o) {
     var addr = [o.address, o.area].filter(Boolean).join(", ");
+    var done = o.status === "Levert" || o.status === "Avbestilt";
+    var undo = '<button type="button" class="btn btn-sm btn-ghost" data-id="' + esc(o.id) + '" data-status="Ny">Angre</button>';
     var maps = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(addr);
     var btn = function (s, label) {
       return '<button type="button" class="btn btn-sm' + (o.status === s ? "" : " btn-ghost") + '" data-id="' + esc(o.id) +
         '" data-status="' + s + '"' + (o.status === s ? " disabled" : "") + '>' + label + '</button>';
     };
     return '<article class="card admin-order st-' + esc(o.status.toLowerCase()) + '">' +
-      '<div class="ao-head"><strong>' + esc(o.name || o.address || o.phone || "(uten navn)") + '</strong><span class="pill">' + esc(o.status) + '</span></div>' +
+      '<div class="ao-head"><strong>' + esc(o.name || o.address || o.phone || "(uten navn)") + '</strong>' + (done ? '<span class="pill">' + esc(o.status) + '</span>' : "") + '</div>' +
       '<p class="ao-main"><strong>' + nb(o.sacks) + ' sekker</strong>' + (o.carry ? ' · ' + esc(o.carry) : "") +
       (o.total ? ' · ' + esc(o.total) : "") + ' · ' + o.minutes + ' min</p>' +
       '<p>' + (addr ? '<a href="' + maps + '" target="_blank" rel="noopener">📍 ' + esc(addr) + '</a>' : "") +
@@ -125,7 +125,7 @@
       (o.email ? ' &nbsp; <a href="mailto:' + esc(o.email) + '">' + esc(o.email) + '</a>' : "") + '</p>' +
       (o.message ? '<p class="ao-msg">💬 ' + esc(o.message) + '</p>' : "") +
       '<p class="muted small">Bestilt ' + esc(o.registered) + '</p>' +
-      '<div class="ao-btns">' + btn("Bekreftet", "Bekreftet") + btn("Levert", "Levert") + btn("Avbestilt", "Avbestill") + '</div>' +
+      '<div class="ao-btns">' + (done ? undo : btn("Levert", "Levert") + btn("Avbestilt", "Avbestill")) + '</div>' +
       '</article>';
   }
 

@@ -54,7 +54,7 @@ Her ser dere alle bestillingene, sortert etter leveringsdag. Logg inn med passor
 
 - **Per dag:** antall leveringer, **antall sekker som skal på bilen**, og hvor mye av de 5 timene som er brukt.
 - **Per bestilling:** navn, antall sekker, bæring, pris, beregnet tid og melding. Trykk på adressen for å åpne den i Google Maps, og på telefonnummeret for å ringe.
-- **Status:** Ny (oransje strek, ikke ringt ennå) → **Bekreftet** → **Levert**. **Avbestill** gjør tiden ledig igjen for andre kunder.
+- **Levert** når veden er kjørt ut. **Avbestill** gjør tiden ledig igjen for andre kunder. Trykket feil? Trykk **Angre**.
 - **Legg inn telefonbestilling:** minuttene regnes ut av seg selv, og bestillingen teller med i kapasiteten.
 - **Skriv ut:** gir en kjøreliste med én dag per side, uten knapper og avbestilte leveringer.
 - **Tidligere:** viser leveringer som er gjennomført.
