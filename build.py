@@ -225,7 +225,7 @@ def footer():
     <div>
       <p class="footer-h">Vi leverer i</p>
       <p class="footer-areas">{areas}</p>
-      <p><a href="{CO['facebook']}" rel="noopener">Facebook</a> · <a href="/artikler/">Råd om ved</a> · <a href="{CO['main_site']}" rel="noopener">Andre tjenester</a> · <a href="/personvern/">Personvern</a></p>
+      <p><a href="{CO['facebook']}" rel="noopener">Facebook</a> · <a href="/vedabonnement/">Vedabonnement</a> · <a href="/artikler/">Råd om ved</a> · <a href="{CO['main_site']}" rel="noopener">Andre tjenester</a> · <a href="/personvern/">Personvern</a></p>
       <p class="footer-h">Verktøy og tall</p>
       <p>{'<a href="/vedpris/">' + C.VEDPRIS['name'] + ' ' + str(C.VEDPRIS['year']) + '</a> · ' if VEDPRISER else ''}<a href="/fyre-i-dag/">Lønner det seg å fyre i dag?</a> · <a href="/verktoy/">Gratis verktøy</a> · <a href="/data/">Åpne data</a> · <a href="/presse/">Presse</a></p>
     </div>
@@ -305,6 +305,7 @@ def price_section():
           <li>Tørket og lagret under tak</li>
           <li>Produsert etter norsk standard</li>
           <li>Hjemlevering: {kr(C.DELIVERY_FEE) + ' per bestilling' if C.DELIVERY_FEE else 'avtales'}</li>
+          <li>Fast levering gjennom vinteren? Se <a href="/vedabonnement/">vedabonnement</a></li>
         </ul>
         <p class="example">Eksempel: 10 sekker = {kr(ex10)}{delivery_ex}</p>
         <a class="btn" href="#bestill">Regn ut pris og bestill</a>
@@ -334,13 +335,17 @@ def steps_section():
 </section>"""
 
 
-def order_form(area_name=""):
+def order_form(area_name="", freq="en-gang", qty=50, chips=(30, 50, 75, 100)):
     opts = "\n".join(
         f'<option value="{k}" data-fee="{fee}">{esc(label)}{"" if fee == 0 else f" (+{fee} kr/sekk)"}</option>'
         for k, label, fee in C.CARRY_OPTIONS)
     min_carry = min(fee for _, _, fee in C.CARRY_OPTIONS if fee)
     area_opts = "\n".join(
         f'<option{" selected" if a["name"] == area_name else ""}>{esc(a["name"])}</option>' for a in C.AREAS)
+    freq_opts = "\n          ".join(
+        f'<option value="{esc(label)}" data-key="{k}"{" selected" if k == freq else ""}>{esc(label)}</option>'
+        for k, label in C.FREQUENCY_OPTIONS)
+    chip_btns = "".join(f'<button type="button" data-qty="{n}">{n}</button>' for n in chips)
     fee_line = ("Avtales ved bekreftelse" if C.DELIVERY_FEE is None
                 else ("Gratis" if C.DELIVERY_FEE == 0 else kr(C.DELIVERY_FEE)))
     tel = CO['phone'].replace(' ', '')
@@ -371,12 +376,11 @@ def order_form(area_name=""):
         <label for="f-antall">Antall sekker ({P['liters']} liter)</label>
         <div class="qty">
           <button type="button" class="qty-btn" data-step="-1" aria-label="Færre sekker">−</button>
-          <input id="f-antall" name="Antall sekker" type="number" inputmode="numeric" min="1" max="500" value="50" required>
+          <input id="f-antall" name="Antall sekker" type="number" inputmode="numeric" min="1" max="500" value="{qty}" required>
           <button type="button" class="qty-btn" data-step="1" aria-label="Flere sekker">+</button>
         </div>
         <div class="chips" role="group" aria-label="Hurtigvalg antall sekker">
-          <button type="button" data-qty="30">30</button><button type="button" data-qty="50">50</button>
-          <button type="button" data-qty="75">75</button><button type="button" data-qty="100">100</button>
+          {chip_btns}
         </div>
         <p class="qty-note"><strong id="s-qty">–</strong> <span class="muted">En sekk rekker 1–2 kvelder med peisen.</span></p>
 
@@ -391,6 +395,12 @@ def order_form(area_name=""):
             {opts}
           </select>
         </div>
+
+        <label for="f-hyppighet">Hvor ofte?</label>
+        <select id="f-hyppighet" name="Hyppighet">
+          {freq_opts}
+        </select>
+        <p class="muted small" id="f-hyppighet-info" hidden>Vedabonnement: Vi kommer med samme antall sekker hver gang, og du betaler for én levering om gangen. Du kan endre eller stoppe når du vil.</p>
       </fieldset>
 
       <fieldset>
@@ -400,7 +410,7 @@ def order_form(area_name=""):
         <label for="f-adresse">Gateadresse</label>
         <input id="f-adresse" name="Adresse" autocomplete="street-address" required>
         <div id="f-dag">
-          <span class="label">Leveringsdag <span class="muted">· mandag og tirsdag, bestill senest kl. {C.DELIVERY_DAYS['order_by_hour']} dagen før</span></span>
+          <span class="label"><span id="l-dag">Leveringsdag</span> <span class="muted">· mandag og tirsdag, bestill senest kl. {C.DELIVERY_DAYS['order_by_hour']} dagen før</span></span>
           <div class="days" id="f-dager" role="radiogroup" aria-label="Velg leveringsdag"></div>
           <input type="hidden" name="Leveringsdag" id="f-leveringsdag" required>
           <p class="muted small" id="f-dag-msg"></p>
@@ -426,7 +436,7 @@ def order_form(area_name=""):
         <div><span>Ved</span><span id="s-ved">–</span></div>
         <div><span>Bæring</span><span id="s-baering">–</span></div>
         <div><span>Levering</span><span>{fee_line}</span></div>
-        <div class="total"><span>Totalt {esc(P['vat_text'])}</span><span id="s-total">–</span></div>
+        <div class="total"><span><span id="s-total-label">Totalt</span> {esc(P['vat_text'])}</span><span id="s-total">–</span></div>
       </div>
       <input type="hidden" name="Beregnet totalpris" id="f-total">
 
@@ -578,8 +588,101 @@ def page_area(a):
     local += local_stats(a)
     body = (hero(f"Bjørkeved levert i {esc(name)}",
                  f"Tørr bjørkeved i 40-liters sekker, kjørt hjem til deg i {esc(name)}. Vi kan bære veden helt inn. {P['price']} kr per sekk.")
-            + local + order_form(name) + price_section() + steps_section()
+            + local + order_form(name) + subscription_teaser(name) + price_section() + steps_section()
             + faq_section(items) + areas_section(a["slug"]))
+    return head(title, desc, path, ld) + body + footer()
+
+
+# ---------------------------------------------------------------- vedabonnement
+
+SEASON_WEEKS = 20  # fyringssesongen november–mars, ca. 20 uker mellom første og siste levering
+
+
+def deliveries(weeks):
+    return SEASON_WEEKS // weeks + 1
+
+
+def subscription_teaser(name):
+    return f"""
+<section class="section alt">
+  <div class="wrap narrow">
+    <h2>Vedabonnement i {esc(name)}</h2>
+    <p>Vil du slippe å huske å bestille? Med vedabonnement kommer vi med samme antall sekker hver 2., 4. eller 6. uke gjennom vinteren.
+    Hver levering koster det samme som en vanlig bestilling, og du kan endre eller stoppe når du vil.</p>
+    <p><a href="/vedabonnement/">Les mer om vedabonnement →</a></p>
+  </div>
+</section>"""
+
+
+def page_vedabonnement():
+    fee = C.DELIVERY_FEE or 0
+    price = P["price"]
+    examples = [(10, 6, "Peis i helgene"), (10, 4, "Fyrer flere kvelder i uka"), (20, 4, "Vedovnen som hovedvarme")]
+    rows = "\n".join(
+        f"<tr><td><strong>{n} sekker hver {w}. uke</strong><br><span class=\"muted small\">{esc(who)}</span></td><td>{kr(n * price + fee)}</td>"
+        f"<td>{kr(deliveries(w) * (n * price + fee))}<br><span class=\"muted small\">{deliveries(w)} leveranser, {n * deliveries(w)} sekker</span></td></tr>"
+        for n, w, who in examples)
+    # Ærlig regnestykke: samme mengde ved i færre leveranser sparer leveringsgebyr.
+    many, few = deliveries(4), deliveries(4) // 2
+    saved = (many - few) * fee
+    total_sacks = 10 * many
+    items = [
+        ("Hva er vedabonnement?",
+         "Du velger hvor mange sekker du vil ha og hvor ofte: hver 2., 4. eller 6. uke. Så kommer vi med samme antall hver gang gjennom fyringssesongen, uten at du må huske å bestille."),
+        ("Hva koster vedabonnement?",
+         f"Hver levering koster det samme som en vanlig bestilling: {price} kr per sekk {P['vat_text']}, bæring hvis du vil ha det, og {kr(fee)} for hjemlevering. Det er ingen ekstra avgift for abonnementet og ingen bindingstid."),
+        ("Hvordan betaler jeg?",
+         "Du betaler for én levering om gangen. Vi avtaler betalingsmåte når vi ringer for å bekrefte abonnementet."),
+        ("Kan jeg endre antall sekker, ta pause eller si opp?",
+         f"Ja. Ring {CO['phone_display']}, så endrer vi antall, flytter en levering eller stopper abonnementet. Det koster ingenting."),
+        ("Når starter og slutter abonnementet?",
+         "Du velger første leveringsdag i skjemaet (vi kjører mandag og tirsdag), og vi ringer deg for å bekrefte. Abonnementet går til du sier fra, og de fleste stopper når fyringssesongen er over."),
+        ("Kan jeg få en ekstra levering i en kuldeperiode?",
+         "Ja. Ring oss, så legger vi inn en ekstra levering. Den koster det samme som en vanlig bestilling."),
+        ("Er vedabonnement billigere enn å kjøpe alt på én gang?",
+         f"Nei. Hjemlevering koster {kr(fee)} hver gang, så har du tørr plass å lagre veden, er det billigst å få hele vinterens forbruk i én eller to leveranser. Abonnement passer når du har lite lagringsplass eller ikke vil huske å bestille."),
+    ]
+    path = "/vedabonnement/"
+    title = f"Vedabonnement i Follo – fast levering av bjørkeved | {C.BRAND}"
+    desc = (f"Fast levering av tørr bjørkeved hver 2., 4. eller 6. uke i Ås, Ski, Kolbotn, Vestby, Drøbak, Nesodden og Enebakk. "
+            f"{price} kr per sekk, ingen bindingstid.")
+    ld = ld_tags(business_ld(), product_ld(), faq_ld(items), breadcrumb_ld("Vedabonnement", path))
+    qs = "\n".join(f"<details><summary>{esc(q)}</summary><p>{esc(a)}</p></details>" for q, a in items)
+    body = (hero("Vedabonnement: tørr bjørkeved på fast dag hele vinteren",
+                 "Velg hvor mange sekker du vil ha og hvor ofte. Så kommer vi med veden gjennom vinteren, uten at du må huske å bestille. "
+                 "Du betaler for én levering om gangen og kan stoppe når du vil.")
+            + f"""
+<section class="section">
+  <div class="wrap narrow prose">
+    <nav class="crumbs" aria-label="Brødsmuler"><a href="/">Bjørkeved i Follo</a> › Vedabonnement</nav>
+    <h2>Slik fungerer vedabonnement</h2>
+    <ol class="steps">
+      <li><strong>Velg antall, hvor ofte og første dag.</strong> Velg «Fast levering» i skjemaet: hver 2., 4. eller 6. uke, og første leveringsdag.</li>
+      <li><strong>Vi ringer deg.</strong> Vi bekrefter abonnementet og første leveringsdag.</li>
+      <li><strong>Veden kommer av seg selv.</strong> Vi leverer samme antall sekker hver gang, og ringer hvis noe må flyttes. Vil du endre eller stoppe, ringer du oss.</li>
+    </ol>
+    <h2>Hva koster det?</h2>
+    <p>Hver levering koster det samme som en vanlig bestilling: {price} kr per sekk {esc(P['vat_text'])}, pluss {kr(fee)} for hjemlevering.
+    Bæring kommer i tillegg hvis du vil ha det. Det er ingen ekstra avgift og ingen bindingstid. Eksemplene gjelder november til mars, uten bæring:</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Abonnement</th><th>Per levering</th><th>Hele vinteren</th></tr></thead>
+      <tbody>{rows}</tbody>
+    </table></div>
+    <p><strong>Ærlig tips:</strong> Hjemlevering koster {kr(fee)} hver gang. Har du tørr plass å lagre veden, sparer du penger på færre og større leveranser.
+    {total_sacks} sekker fordelt på {few} leveranser i stedet for {many} sparer deg for {kr(saved)}. Abonnement passer best når du har lite plass, eller vil slippe å tenke på det.</p>
+    <p>Usikker på hvor mye du trenger? En vedfyrende husstand i Akershus bruker i snitt rundt 47 sekker i året (SSB).
+    Regn ut ditt eget behov med <a href="/artikler/hvor-mye-ved-trenger-jeg/">vedkalkulatoren</a>, og les om <a href="/artikler/hvordan-lagre-ved/">hvordan du lagrer ved</a>.</p>
+  </div>
+</section>"""
+            + order_form(freq="4-uker", qty=10, chips=(10, 15, 20, 30))
+            + f"""
+<section id="sporsmal" class="section">
+  <div class="wrap narrow">
+    <h2>Spørsmål om vedabonnement</h2>
+    {qs}
+  </div>
+</section>"""
+            + areas_section())
     return head(title, desc, path, ld) + body + footer()
 
 
@@ -1339,6 +1442,7 @@ def llms_txt():
 - Kvalitet: tørket og lagret under tak, produsert etter norsk standard
 - Pris: {P['price']} kr per sekk {P['vat_text']} (10 sekker = {kr(10 * P['price'])})
 - Hjemlevering: {kr(C.DELIVERY_FEE) + ' per bestilling' if C.DELIVERY_FEE else 'avtales'}
+- [Vedabonnement]({URL}/vedabonnement/): fast levering hver 2., 4. eller 6. uke, til samme pris per levering som en vanlig bestilling, uten bindingstid
 - Bestilling: skjema på {URL}/#bestill eller telefon {CO['phone']}
 - Leveringsdager: mandag og tirsdag. Kunden velger dag i skjemaet
 - E-post: {CO['email']}
@@ -1405,6 +1509,7 @@ def main():
     write("index.html", page_index())
     for a in C.AREAS:
         write(f"{a['slug']}/index.html", page_area(a))
+    write("vedabonnement/index.html", page_vedabonnement())
     write("takk/index.html", page_takk())
     write("personvern/index.html", page_personvern())
     write("admin/index.html", page_admin())
@@ -1425,7 +1530,7 @@ def main():
     write("artikler/index.html", page_articles_index())
     for a in ARTICLES:
         write(f"artikler/{a['slug']}/index.html", page_article(a))
-    indexable = (["/"] + [f"/{a['slug']}/" for a in C.AREAS] + ["/artikler/"]
+    indexable = (["/", "/vedabonnement/"] + [f"/{a['slug']}/" for a in C.AREAS] + ["/artikler/"]
                  + [f"/artikler/{a['slug']}/" for a in ARTICLES] + extra + ["/personvern/"])
     write("sitemap.xml", sitemap(indexable))
     write("robots.txt", robots())

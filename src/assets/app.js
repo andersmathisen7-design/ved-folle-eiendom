@@ -8,7 +8,8 @@
     calculator_to_order: "Brukte vedkalkulatoren", price_check: "Sjekket pris i skjemaet",
     form_invalid: "Trykket Send, men et felt manglet",
     antall_valgt: "Endret antall sekker til", bestilt_antall: "Bestilte antall sekker",
-    dag_valgt: "Valgte leveringsdag"
+    dag_valgt: "Valgte leveringsdag",
+    hyppighet_valgt: "Valgte hvor ofte", bestilt_hyppighet: "Bestilte med hyppighet"
   };
   var track = function (name, params) {
     try { if (window.gtag) gtag("event", name, params || {}); } catch (e) {}
@@ -43,8 +44,9 @@
     try {
       var last = JSON.parse(sessionStorage.getItem("lastOrder") || "null");
       if (last) {
-        ["Din bestilling", last.qty + " sekker bjørkeved", last.carry, last.address,
-          last.day ? "Ønsket leveringsdag: " + last.day : "", "Beregnet: " + last.total]
+        ["Din bestilling", last.qty + " sekker bjørkeved" + (last.freq ? ", " + last.freq.toLowerCase() : ""), last.carry, last.address,
+          last.day ? (last.freq ? "Første leveringsdag: " : "Ønsket leveringsdag: ") + last.day : "",
+          "Beregnet: " + last.total + (last.freq ? " per levering" : "")]
           .forEach(function (t, i) {
             if (!t) return;
             var p = document.createElement(i === 0 || i === 5 ? "strong" : "div");
@@ -84,6 +86,8 @@
 
   var qty = form.querySelector("#f-antall");
   var carry = form.querySelector("#f-baering");
+  var freq = form.querySelector("#f-hyppighet");
+  function freqKey() { return freq ? freq.options[freq.selectedIndex].dataset.key : "en-gang"; }
   var msg = form.querySelector("#form-msg");
   var chips = form.querySelectorAll(".chips button");
   var started = false;
@@ -98,6 +102,10 @@
     document.getElementById("s-total").textContent = fmt(total);
     document.getElementById("s-qty").textContent = n + " sekker = " + fmt(wood) + (S.kg ? " (ca. " + (n * S.kg).toLocaleString("nb-NO") + " kg)" : "");
     document.getElementById("s-btn-total").textContent = fmt(total);
+    var repeat = freqKey() !== "en-gang";
+    document.getElementById("s-total-label").textContent = repeat ? "Per levering" : "Totalt";
+    document.getElementById("f-hyppighet-info").hidden = !repeat;
+    document.getElementById("l-dag").textContent = repeat ? "Første leveringsdag" : "Leveringsdag";
     document.getElementById("f-total").value = fmt(total) + (S.deliveryFee == null ? " + levering (avtales)" : "");
     chips.forEach(function (c) { c.classList.toggle("on", parseInt(c.dataset.qty, 10) === n); });
     return total;
@@ -153,9 +161,14 @@
     if (e.target.classList) e.target.classList.remove("invalid");
     calc();
     if (e.target === qty || e.target === carry) priceCheck();
+    else if (e.target === freq) {}
     else if (!started && e.target.id !== "f-sted") { started = true; track("begin_checkout"); }
   });
-  form.addEventListener("change", function (e) { calc(); if (e.target === qty || e.target === carry) priceCheck(); });
+  form.addEventListener("change", function (e) {
+    calc();
+    if (e.target === qty || e.target === carry) priceCheck();
+    if (e.target === freq) track("hyppighet_valgt:" + freqKey());
+  });
   form.querySelector('[name="Side"]').value = location.pathname;
   // Husk kampanjen (utm_*) kunden kom fra, så vi ser hvilken reklame som gir bestillinger.
   try {
@@ -267,7 +280,9 @@
       body: JSON.stringify({ date: dayInput.value, minutes: orderMinutes(), capacity: D.minutes_per_day || 300,
         area: data["Område"], sacks: +data["Antall sekker"], phone: data["Telefon"],
         address: data["Adresse"], carry: data["Bæring"], total: data["Beregnet totalpris"],
-        email: data.email || "", message: data["Melding"] || "" })
+        email: data.email || "",
+        // Vedabonnement: hyppigheten står først i meldingen, så eieren ser den på eiersiden.
+        message: (freqKey() !== "en-gang" ? "Vedabonnement: " + data["Hyppighet"].toLowerCase() + ". " : "") + (data["Melding"] || "") })
     }).then(function (r) { return r.json(); }).then(function (j) {
       if (j.ok) { reserved = dayInput.value; return true; }
       // Andre feil enn «full» eller «for sent»: bestillingen sendes likevel, med en merknad.
@@ -318,9 +333,12 @@
     delete data._baering;
     var dayBtn = dayBox && dayBox.querySelector('[data-date="' + dayInput.value + '"]');
     var dayText = dayBtn ? dayBtn.dataset.label : dayInput.value;
-    data["Leveringsdag"] = dayText;
+    var repeat = freqKey() !== "en-gang";
+    if (repeat) data["Beregnet totalpris"] += " per levering";
+    data["Leveringsdag"] = (repeat ? "Første levering: " : "") + dayText;
     data["Beregnet tid"] = orderMinutes() + " min (kjøring, lossing og bæring)";
-    data._subject = "Ny vedbestilling: " + data["Antall sekker"] + " sekker – " + data["Adresse"] + ", " + data["Område"] +
+    data._subject = (repeat ? "Nytt vedabonnement: " : "Ny vedbestilling: ") + data["Antall sekker"] + " sekker" +
+      (repeat ? " " + data["Hyppighet"].replace("Fast levering ", "") : "") + " – " + data["Adresse"] + ", " + data["Område"] +
       " – " + dayText.toLowerCase();
     // E-post er valgfritt. Bare en gyldig adresse får automatisk bekreftelse fra FormSubmit.
     var epost = (data["E-post"] || "").trim();
@@ -329,8 +347,8 @@
       data.email = epost;
       data._replyto = epost;
       data._autoresponse = "Takk for bestillingen hos " + S.brand + "! Vi har mottatt bestilling på " +
-        data["Antall sekker"] + " sekker bjørkeved (beregnet " + fmt(total) + "). Vi ringer deg for å bekrefte. " +
-        "Ønsket leveringsdag: " + dayText.toLowerCase() + ". Spørsmål? Ring " + S.phone + ".";
+        data["Antall sekker"] + " sekker bjørkeved (beregnet " + fmt(total) + (repeat ? " per levering, " + data["Hyppighet"].toLowerCase() : "") + "). Vi ringer deg for å bekrefte. " +
+        (repeat ? "Første leveringsdag: " : "Ønsket leveringsdag: ") + dayText.toLowerCase() + ". Spørsmål? Ring " + S.phone + ".";
     } else if (epost) {
       data["E-post (ugyldig)"] = epost;
     }
@@ -356,11 +374,13 @@
         if (!res.ok || String(res.j.success) !== "true") throw new Error(res.j.message || "Feil");
         track("generate_lead", { value: total, currency: "NOK", sacks: +data["Antall sekker"] });
         track("bestilt_antall:" + qtyBucket(+data["Antall sekker"]));
+        track("bestilt_hyppighet:" + freqKey());
         try { if (window.fbq) fbq("track", "Lead", { value: total, currency: "NOK" }); } catch (e) {}
         try { if (window.gtag && S.adsConversion) gtag("event", "conversion", { send_to: S.adsConversion, value: total, currency: "NOK" }); } catch (e) {}
         try {
           sessionStorage.setItem("lastOrder", JSON.stringify({
-            qty: data["Antall sekker"], carry: data["Bæring"], total: fmt(total), day: data["Leveringsdag"],
+            qty: data["Antall sekker"], carry: data["Bæring"], total: fmt(total),
+            day: data["Leveringsdag"].replace("Første levering: ", ""), freq: freqKey() !== "en-gang" ? data["Hyppighet"] : "",
             address: data["Adresse"] + ", " + data["Område"]
           }));
         } catch (e) {}

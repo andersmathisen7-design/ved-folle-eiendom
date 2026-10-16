@@ -166,6 +166,7 @@ p { margin: 0 0 1em; }
 .summary { background: var(--bg); border-radius: 12px; padding: 14px 16px; margin: 6px 0 16px; }
 .summary > div { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; font-size: .95rem; }
 .summary .total { border-top: 1px solid var(--line); margin-top: 6px; padding-top: 8px; font-weight: 800; font-size: 1.15rem; color: var(--green); }
+.summary .total > span:last-child { white-space: nowrap; }
 .form-msg { margin: 10px 0 0; font-weight: 600; }
 .form-msg.err { color: #b0301f; }
 .form-msg.ok { color: var(--green-2); }
