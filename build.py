@@ -338,6 +338,7 @@ def order_form(area_name=""):
         for k, label, fee in C.CARRY_OPTIONS)
     area_opts = "\n".join(
         f'<option{" selected" if a["name"] == area_name else ""}>{esc(a["name"])}</option>' for a in C.AREAS)
+    freq_opts = "\n          ".join(f'<option value="{esc(label)}" data-key="{k}">{esc(label)}</option>' for k, label in C.FREQUENCY_OPTIONS)
     fee_line = ("Avtales ved bekreftelse" if C.DELIVERY_FEE is None
                 else ("Gratis" if C.DELIVERY_FEE == 0 else kr(C.DELIVERY_FEE)))
     return f"""
@@ -372,6 +373,11 @@ def order_form(area_name=""):
         <select id="f-baering" name="Bæring" required>
           {opts}
         </select>
+        <label for="f-hyppighet">Hvor ofte?</label>
+        <select id="f-hyppighet" name="Hyppighet">
+          {freq_opts}
+        </select>
+        <p class="muted small" id="f-hyppighet-info" hidden>Vedabonnement: Vi kommer med samme antall sekker hver gang, og du betaler for én levering om gangen. Du kan endre eller stoppe når du vil.</p>
       </fieldset>
 
       <fieldset>
@@ -400,7 +406,7 @@ def order_form(area_name=""):
         <div><span>Ved</span><span id="s-ved">–</span></div>
         <div><span>Bæring</span><span id="s-baering">–</span></div>
         <div><span>Levering</span><span>{fee_line}</span></div>
-        <div class="total"><span>Totalt {esc(P['vat_text'])}</span><span id="s-total">–</span></div>
+        <div class="total"><span><span id="s-total-label">Totalt</span> {esc(P['vat_text'])}</span><span id="s-total">–</span></div>
       </div>
       <input type="hidden" name="Beregnet totalpris" id="f-total">
 
@@ -1222,6 +1228,7 @@ def llms_txt():
 - Kvalitet: tørket og lagret under tak, produsert etter norsk standard
 - Pris: {P['price']} kr per sekk {P['vat_text']} (10 sekker = {kr(10 * P['price'])})
 - Hjemlevering: {kr(C.DELIVERY_FEE) + ' per bestilling' if C.DELIVERY_FEE else 'avtales'}
+- Vedabonnement: fast levering hver 2., 4. eller 6. uke, til samme pris per levering som en vanlig bestilling
 - Bestilling: skjema på {URL}/#bestill eller telefon {CO['phone']}
 - E-post: {CO['email']}
 - Oppdatert: {TODAY}

@@ -55,6 +55,15 @@ CARRY_OPTIONS = [
     ("etg-6", "Til 6. etasje", 36),
 ]
 
+# Vedabonnement: kunden kan velge fast levering. Hver levering koster som en vanlig bestilling
+# (sekker + bæring + hjemlevering), uten rabatt. Vi ringer og avtaler datoene.
+FREQUENCY_OPTIONS = [
+    ("en-gang", "Én gang"),
+    ("2-uker", "Fast levering hver 2. uke"),
+    ("4-uker", "Fast levering hver 4. uke"),
+    ("6-uker", "Fast levering hver 6. uke"),
+]
+
 # Hjemlevering i kroner per bestilling (samme som gammel side). None = "avtales".
 DELIVERY_FEE = 499
 
@@ -149,6 +158,8 @@ FAQ = [
      "Ja. Vi kan sette sekkene i garasjen, i kjelleren eller helt opp til 6. etasje. Du velger dette i bestillingsskjemaet."),
     ("Hvordan bestiller jeg?",
      "Fyll ut skjemaet på siden. Da får vi bestillingen med en gang, og vi tar kontakt for å avtale leveringsdag. Du kan også ringe oss på {phone}."),
+    ("Har dere vedabonnement?",
+     "Ja. Velg «Fast levering» i bestillingsskjemaet, så kommer vi med samme antall sekker hver 2., 4. eller 6. uke gjennom vinteren. Hver levering koster det samme som en vanlig bestilling, og du betaler for én levering om gangen. Du er sikret ved selv om det blir tomt hos andre, og du kan endre eller stoppe når du vil ved å ringe {phone}."),
     ("Hvordan betaler jeg?",
      "Vi avtaler betaling når vi ringer for å bekrefte bestillingen. Du betaler ingenting når du sender skjemaet."),
 ]
