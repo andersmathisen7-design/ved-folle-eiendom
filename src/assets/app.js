@@ -265,7 +265,7 @@
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" }, // text/plain gir ingen CORS-forhåndsforespørsel
       body: JSON.stringify({ date: dayInput.value, minutes: orderMinutes(), capacity: D.minutes_per_day || 300,
-        area: data["Område"], sacks: +data["Antall sekker"], name: data["Navn"], phone: data["Telefon"],
+        area: data["Område"], sacks: +data["Antall sekker"], phone: data["Telefon"],
         address: data["Adresse"], carry: data["Bæring"], total: data["Beregnet totalpris"],
         email: data.email || "", message: data["Melding"] || "" })
     }).then(function (r) { return r.json(); }).then(function (j) {
@@ -318,7 +318,7 @@
     var dayText = dayBtn ? dayBtn.dataset.label : dayInput.value;
     data["Leveringsdag"] = dayText;
     data["Beregnet tid"] = orderMinutes() + " min (kjøring, lossing og bæring)";
-    data._subject = "Ny vedbestilling: " + data["Antall sekker"] + " sekker – " + data["Navn"] + ", " + data["Område"] +
+    data._subject = "Ny vedbestilling: " + data["Antall sekker"] + " sekker – " + data["Adresse"] + ", " + data["Område"] +
       " – " + dayText.toLowerCase();
     // E-post er valgfritt. Bare en gyldig adresse får automatisk bekreftelse fra FormSubmit.
     var epost = (data["E-post"] || "").trim();

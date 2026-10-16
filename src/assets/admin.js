@@ -94,7 +94,7 @@
         '" data-status="' + s + '"' + (o.status === s ? " disabled" : "") + '>' + label + '</button>';
     };
     return '<article class="card admin-order st-' + esc(o.status.toLowerCase()) + '">' +
-      '<div class="ao-head"><strong>' + esc(o.name || "(uten navn)") + '</strong><span class="pill">' + esc(o.status) + '</span></div>' +
+      '<div class="ao-head"><strong>' + esc(o.name || o.address || o.phone || "(uten navn)") + '</strong><span class="pill">' + esc(o.status) + '</span></div>' +
       '<p class="ao-main"><strong>' + nb(o.sacks) + ' sekker</strong>' + (o.carry ? ' · ' + esc(o.carry) : "") +
       (o.total ? ' · ' + esc(o.total) : "") + ' · ' + o.minutes + ' min</p>' +
       '<p>' + (addr ? '<a href="' + maps + '" target="_blank" rel="noopener">📍 ' + esc(addr) + '</a>' : "") +
@@ -156,7 +156,9 @@
   $("a-add").addEventListener("submit", function (e) {
     e.preventDefault();
     var msg = $("a-add-msg");
-    if (!$("ad-dato").value || !$("ad-navn").value.trim()) { msg.className = "form-msg err"; msg.textContent = "Fyll inn dag og navn."; return; }
+    if (!$("ad-dato").value || !($("ad-tlf").value.trim() || $("ad-adresse").value.trim())) {
+      msg.className = "form-msg err"; msg.textContent = "Fyll inn dag, og telefon eller adresse."; return;
+    }
     msg.className = "form-msg"; msg.textContent = "Lagrer …";
     post({
       action: "add", date: $("ad-dato").value, minutes: +$("ad-min").value || 0, name: $("ad-navn").value.trim(),

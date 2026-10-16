@@ -408,9 +408,7 @@ def order_form(area_name=""):
       </fieldset>
 
       <fieldset>
-        <legend><span class="step-no">3</span> Hvem leverer vi til?</legend>
-        <label for="f-navn">Navn</label>
-        <input id="f-navn" name="Navn" autocomplete="name" required>
+        <legend><span class="step-no">3</span> Hvordan når vi deg?</legend>
         <div class="row2">
           <div><label for="f-tlf">Telefon <span class="muted">· vi ringer og bekrefter</span></label>
           <input id="f-tlf" name="Telefon" type="tel" inputmode="tel" autocomplete="tel" required></div>
@@ -438,7 +436,7 @@ def order_form(area_name=""):
         <li>Vi ringer og bekrefter før vi kjører</li>
       </ul>
       <p class="form-msg" id="form-msg" role="alert"></p>
-      <p class="muted small">Når du sender skjemaet, får vi navnet, adressen og kontaktinfoen din. Vi bruker det bare til å levere veden. Les mer i <a href="/personvern/">personvernerklæringen</a>.</p>
+      <p class="muted small">Når du sender skjemaet, får vi adressen og kontaktinfoen din. Vi bruker det bare til å levere veden. Les mer i <a href="/personvern/">personvernerklæringen</a>.</p>
     </form>
   </div>
 </section>"""
@@ -650,7 +648,7 @@ def page_admin():
           <div><label for="ad-omrade">Område</label><select id="ad-omrade"></select></div>
         </div>
         <div class="row2">
-          <div><label for="ad-navn">Navn</label><input id="ad-navn" required></div>
+          <div><label for="ad-navn">Navn <span class="muted">(valgfritt)</span></label><input id="ad-navn"></div>
           <div><label for="ad-tlf">Telefon</label><input id="ad-tlf" type="tel"></div>
         </div>
         <label for="ad-adresse">Adresse</label><input id="ad-adresse">
@@ -689,7 +687,7 @@ def page_personvern():
     <h1>Personvern</h1>
     <p>{esc(CO['legal_name'])} (org.nr. {CO['org_nr']}), {esc(CO['street'])}, {CO['postal_code']} {esc(CO['city'])}, er ansvarlig for personopplysningene som samles inn på denne nettsiden.</p>
     <h2>Hva vi samler inn</h2>
-    <p>Når du bestiller, får vi navnet ditt, telefonnummeret, e-postadressen hvis du oppgir den, leveringsadressen og det du skriver i meldingsfeltet. Vi bruker opplysningene bare til å behandle og levere bestillingen, og til å sende faktura. Rettslig grunnlag er avtale (GDPR art. 6 nr. 1 b).</p>
+    <p>Når du bestiller, får vi telefonnummeret ditt, e-postadressen hvis du oppgir den, leveringsadressen og det du skriver i meldingsfeltet. Vi bruker opplysningene bare til å behandle og levere bestillingen, og til å sende faktura. Rettslig grunnlag er avtale (GDPR art. 6 nr. 1 b).</p>
     <h2>Hvem som behandler opplysningene</h2>
     <p>Bestillingsskjemaet sendes videre til oss på e-post gjennom tjenesten FormSubmit (formsubmit.co).{" Bestillingen lagres også i et regneark hos Google, slik at vi kan planlegge leveringene." if C.DELIVERY_DAYS.get("calendar_url") else ""} Vi selger ikke opplysningene dine og deler dem ikke med andre.</p>
     <h2>Hvor lenge vi lagrer dem</h2>
