@@ -265,13 +265,17 @@
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" }, // text/plain gir ingen CORS-forhåndsforespørsel
       body: JSON.stringify({ date: dayInput.value, minutes: orderMinutes(), capacity: D.minutes_per_day || 300,
-        area: data["Område"], sacks: +data["Antall sekker"], name: data["Navn"] })
+        area: data["Område"], sacks: +data["Antall sekker"], name: data["Navn"], phone: data["Telefon"],
+        address: data["Adresse"], carry: data["Bæring"], total: data["Beregnet totalpris"],
+        email: data.email || "", message: data["Melding"] || "" })
     }).then(function (r) { return r.json(); }).then(function (j) {
       if (j.ok) { reserved = dayInput.value; return true; }
       if (j.booked) booked = j.booked;
       dayMsg.dataset.keep = "1";
       renderDays();
-      dayMsg.textContent = "Beklager, dagen ble akkurat full. Velg en annen dag og trykk Send igjen.";
+      dayMsg.textContent = j.error === "dato" ? "Den dagen er det for sent å bestille til. Velg en annen dag." :
+        "Beklager, dagen ble akkurat full. Velg en annen dag og trykk Send igjen.";
+      if (j.error === "dato") { closed[dayInput.value] = true; dayInput.value = ""; renderDays(); }
       return false;
     }).catch(function () { data["Leveringsdag"] += " (ikke registrert i kalenderen)"; return true; });
   }

@@ -14,6 +14,7 @@ Markedsplan og analyse med tall og kilder finner du i **[ANALYSE.md](ANALYSE.md)
 | `/fyre-i-dag/` | «Lønner det seg å fyre i dag?»: dagens strømpris time for time mot ved. Innstillingene ligger i `STROM` i `config.py` |
 | `/verktoy/`, `/widget/…` | Vedkalkulator og strøm mot ved som andre kan bygge inn på sine nettsider |
 | `/data/`, `/presse/` | Åpne data (CSV, CC BY 4.0) og en side for journalister |
+| `/admin/` | Ikke i søk. Eiersiden med bestillinger per leveringsdag (krever nøkkel) |
 | `/takk/` | Takkeside etter bestilling. Brukes til å måle konverteringer i Google Ads og Meta |
 | `/llms.txt` | Faktaark skrevet for AI-søkemotorer |
 | `sitemap.xml`, `robots.txt` | Lages automatisk |
@@ -49,6 +50,8 @@ Hvis sending feiler, ser kunden telefonnummeret og kan ringe i stedet.
 Kunden velger leveringsdag i skjemaet. Dere kjører bare mandag og tirsdag, med 5 timer per dag. Hver bestilling får en beregnet tid ut fra kjøretid til området, antall sekker og bæring. Når tiden er brukt opp, vises dagen som «Fullt». Ås har kortest kjøretid, så der får flere plass på samme dag. Innstillingene ligger i `DELIVERY_DAYS` i `config.py`.
 
 For at fulle dager skal oppdateres automatisk, må dere sette opp leveringskalenderen (et gratis Google-regneark). Se **[kalender/README.md](kalender/README.md)**.
+
+**Eiersiden** `/admin/` viser alle bestillinger per leveringsdag, med antall sekker per dag, status (ny, bekreftet, levert, avbestilt), telefonbestillinger og kjøreliste til utskrift. Den bruker samme kalender. Se kalender/README.md.
 
 ## Hosting (gratis): GitHub Pages
 

@@ -400,7 +400,7 @@ def order_form(area_name=""):
         <label for="f-adresse">Gateadresse</label>
         <input id="f-adresse" name="Adresse" autocomplete="street-address" required>
         <div id="f-dag">
-          <span class="label">Leveringsdag <span class="muted">· vi kjører mandag og tirsdag</span></span>
+          <span class="label">Leveringsdag <span class="muted">· mandag og tirsdag, bestill senest kl. {C.DELIVERY_DAYS['order_by_hour']} dagen før</span></span>
           <div class="days" id="f-dager" role="radiogroup" aria-label="Velg leveringsdag"></div>
           <input type="hidden" name="Leveringsdag" id="f-leveringsdag" required>
           <p class="muted small" id="f-dag-msg"></p>
@@ -599,6 +599,89 @@ def page_takk():
     return head(f"Takk for bestillingen | {C.BRAND}", "Bestillingen er mottatt.", "/takk/", noindex=True) + body + footer()
 
 
+def page_admin():
+    """Eiersiden: oversikt over bestillinger per leveringsdag. Dataene hentes fra kalenderen med en nøkkel."""
+    cfg = {"calendarUrl": C.DELIVERY_DAYS.get("calendar_url", ""), "days": C.DELIVERY_DAYS,
+           "areas": [a["name"] for a in C.AREAS] + ["Annet"], "base": BASE}
+    return f"""<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Bestillinger | {esc(C.BRAND)}</title>
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body class="admin">
+<header class="admin-top">
+  <div class="wrap admin-top-in">
+    <strong>🪵 {esc(C.BRAND)} · Bestillinger</strong>
+    <div class="admin-actions" id="a-actions" hidden>
+      <button type="button" class="btn btn-sm btn-ghost" id="a-refresh">Oppdater</button>
+      <button type="button" class="btn btn-sm btn-ghost" id="a-print">Skriv ut</button>
+      <button type="button" class="btn btn-sm btn-ghost" id="a-logout">Logg ut</button>
+    </div>
+  </div>
+</header>
+<main class="wrap admin-main">
+  <form class="card admin-login" id="a-login" hidden>
+    <h1>Logg inn</h1>
+    <p class="muted">Skriv inn nøkkelen (ADMIN_NOKKEL) fra kalenderskriptet. Den huskes på denne enheten.</p>
+    <label for="a-key">Nøkkel</label>
+    <input id="a-key" type="password" autocomplete="current-password" required>
+    <button class="btn btn-block" type="submit">Logg inn</button>
+    <p class="form-msg err" id="a-login-msg"></p>
+  </form>
+  <div id="a-app" hidden>
+    <div class="admin-bar">
+      <div class="admin-tabs" role="tablist">
+        <button type="button" role="tab" data-view="kommende" class="on">Kommende</button>
+        <button type="button" role="tab" data-view="tidligere">Tidligere</button>
+      </div>
+      <p class="muted small" id="a-updated"></p>
+    </div>
+    <div id="a-stats" class="admin-stats"></div>
+    <details class="card admin-add">
+      <summary>+ Legg inn telefonbestilling</summary>
+      <form id="a-add" class="form" novalidate>
+        <div class="row2">
+          <div><label for="ad-dato">Leveringsdag</label><input id="ad-dato" type="date" required></div>
+          <div><label for="ad-omrade">Område</label><select id="ad-omrade"></select></div>
+        </div>
+        <div class="row2">
+          <div><label for="ad-navn">Navn</label><input id="ad-navn" required></div>
+          <div><label for="ad-tlf">Telefon</label><input id="ad-tlf" type="tel"></div>
+        </div>
+        <label for="ad-adresse">Adresse</label><input id="ad-adresse">
+        <div class="row2">
+          <div><label for="ad-sekker">Sekker</label><input id="ad-sekker" type="number" min="1" value="50"></div>
+          <div><label for="ad-baering">Bæring</label><select id="ad-baering"><option value="">Ingen bæring</option><option value="Bæres inn">Bæres inn</option></select></div>
+        </div>
+        <div class="row2">
+          <div><label for="ad-min">Minutter <span class="muted">(regnes ut)</span></label><input id="ad-min" type="number" min="0"></div>
+          <div><label for="ad-pris">Pris</label><input id="ad-pris"></div>
+        </div>
+        <label for="ad-melding">Melding</label><textarea id="ad-melding" rows="2"></textarea>
+        <button class="btn" type="submit">Lagre bestilling</button>
+        <p class="form-msg" id="a-add-msg"></p>
+      </form>
+    </details>
+    <div id="a-list" aria-live="polite"></div>
+  </div>
+  <div class="card" id="a-nocal" hidden>
+    <h1>Kalenderen er ikke satt opp</h1>
+    <p>Eiersiden henter bestillingene fra leveringskalenderen (et Google-regneark). Sett den opp som beskrevet i <code>kalender/README.md</code>, og legg adressen inn som <code>calendar_url</code> i <code>config.py</code>.</p>
+    <p>Til da kommer alle bestillinger som før på e-post.</p>
+  </div>
+</main>
+<script>window.ADMIN={json.dumps(cfg, ensure_ascii=False)};</script>
+<script src="/assets/admin.js" defer></script>
+</body>
+</html>
+"""
+
+
 def page_personvern():
     body = f"""
 <section class="section">
@@ -608,7 +691,7 @@ def page_personvern():
     <h2>Hva vi samler inn</h2>
     <p>Når du bestiller, får vi navnet ditt, telefonnummeret, e-postadressen hvis du oppgir den, leveringsadressen og det du skriver i meldingsfeltet. Vi bruker opplysningene bare til å behandle og levere bestillingen, og til å sende faktura. Rettslig grunnlag er avtale (GDPR art. 6 nr. 1 b).</p>
     <h2>Hvem som behandler opplysningene</h2>
-    <p>Bestillingsskjemaet sendes videre til oss på e-post gjennom tjenesten FormSubmit (formsubmit.co).{" Navnet ditt, området, antall sekker og leveringsdagen lagres også i et regneark hos Google, slik at vi kan planlegge leveringene." if C.DELIVERY_DAYS.get("calendar_url") else ""} Vi selger ikke opplysningene dine og deler dem ikke med andre.</p>
+    <p>Bestillingsskjemaet sendes videre til oss på e-post gjennom tjenesten FormSubmit (formsubmit.co).{" Bestillingen lagres også i et regneark hos Google, slik at vi kan planlegge leveringene." if C.DELIVERY_DAYS.get("calendar_url") else ""} Vi selger ikke opplysningene dine og deler dem ikke med andre.</p>
     <h2>Hvor lenge vi lagrer dem</h2>
     <p>Vi sletter opplysningene når de ikke lenger trengs. Unntaket er det bokføringsloven krever at vi tar vare på, som er 5 år.</p>
     <h2>Informasjonskapsler (cookies)</h2>
@@ -1284,7 +1367,7 @@ def sitemap(paths):
 
 
 def robots():
-    return f"User-agent: *\nAllow: /\nDisallow: {BASE}/takk/\n\nSitemap: {URL}/sitemap.xml\n"
+    return f"User-agent: *\nAllow: /\nDisallow: {BASE}/takk/\nDisallow: {BASE}/admin/\n\nSitemap: {URL}/sitemap.xml\n"
 
 
 def manifest():
@@ -1322,6 +1405,7 @@ def main():
         write(f"{a['slug']}/index.html", page_area(a))
     write("takk/index.html", page_takk())
     write("personvern/index.html", page_personvern())
+    write("admin/index.html", page_admin())
     write("404.html", page_404())
 
     write("fyre-i-dag/index.html", page_fyre())
