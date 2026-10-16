@@ -58,6 +58,34 @@ CARRY_OPTIONS = [
 # Hjemlevering i kroner per bestilling (samme som gammel side). None = "avtales".
 DELIVERY_FEE = 499
 
+# Leveringsdager. Kunden velger dag i skjemaet. En dag blir «full» når de bestilte leveringene fyller tiden.
+# Tiden for en bestilling = kjøretid (tur/retur fra Ås) + lossing + bæring per sekk.
+# Ås har kort kjøretid, så der får vi plass til flere leveringer på samme dag.
+DELIVERY_DAYS = {
+    "weekdays": [1, 2],            # 1 = mandag, 2 = tirsdag (0 = søndag … 6 = lørdag)
+    "minutes_per_day": 5 * 60,     # tid satt av per leveringsdag
+    "weeks_ahead": 4,              # hvor mange uker fram kunden kan velge
+    "order_by_hour": 18,           # bestill senest kl. 18 dagen før
+    "unload_minutes": 10,          # lossing per bestilling
+    "carry_minutes_per_sack": 0.5, # ekstra minutter per sekk når veden skal bæres
+    # Kjøretid tur/retur fra lageret i Ås, i minutter. Navnene må være de samme som i AREAS.
+    "drive_minutes": {
+        "Ås": 20,
+        "Ski og Langhus": 35,
+        "Kolbotn og Oppegård": 50,
+        "Vestby og Son": 45,
+        "Drøbak": 45,
+        "Nesodden": 70,
+        "Enebakk": 60,
+        "Annet": 60,
+    },
+    # Dager dere ikke kjører (ferie o.l.), i formatet "ÅÅÅÅ-MM-DD". Helligdager regnes ut automatisk.
+    "closed": ["2026-12-28", "2026-12-29"],
+    # Kalenderen som teller bestillinger per dag (Google Apps Script, se kalender/README.md).
+    # Tom = alle mandager og tirsdager vises som ledige, og dere må legge fulle dager i "closed" selv.
+    "calendar_url": "",
+}
+
 # Google Search Console-bekreftelse (meta-tag på forsiden).
 GOOGLE_SITE_VERIFICATION = "vnXKmoMZizKbBLImYNoyt1EmqXKDaXkpEYQngFIkxhA"
 
@@ -148,7 +176,7 @@ FAQ = [
     ("Kan dere bære veden inn?",
      "Ja. Vi kan sette sekkene i garasjen, i kjelleren eller helt opp til 6. etasje. Du velger dette i bestillingsskjemaet."),
     ("Hvordan bestiller jeg?",
-     "Fyll ut skjemaet på siden. Da får vi bestillingen med en gang, og vi tar kontakt for å avtale leveringsdag. Du kan også ringe oss på {phone}."),
+     "Fyll ut skjemaet på siden og velg leveringsdag. Vi kjører ut på mandager og tirsdager. Vi ringer deg for å bekrefte bestillingen. Du kan også ringe oss på {phone}."),
     ("Hvordan betaler jeg?",
      "Vi avtaler betaling når vi ringer for å bekrefte bestillingen. Du betaler ingenting når du sender skjemaet."),
 ]

@@ -44,6 +44,12 @@ Skjemaet sender til `ORDER_EMAIL` i `config.py` gjennom [FormSubmit](https://for
 
 Hvis sending feiler, ser kunden telefonnummeret og kan ringe i stedet.
 
+## Leveringsdager
+
+Kunden velger leveringsdag i skjemaet. Dere kjører bare mandag og tirsdag, med 5 timer per dag. Hver bestilling får en beregnet tid ut fra kjøretid til området, antall sekker og bæring. Når tiden er brukt opp, vises dagen som «Fullt». Ås har kortest kjøretid, så der får flere plass på samme dag. Innstillingene ligger i `DELIVERY_DAYS` i `config.py`.
+
+For at fulle dager skal oppdateres automatisk, må dere sette opp leveringskalenderen (et gratis Google-regneark). Se **[kalender/README.md](kalender/README.md)**.
+
 ## Hosting (gratis): GitHub Pages
 
 Siden er live på **https://follobjorkeved.no** (domenet er registrert hos Domeneshop og peker til GitHub Pages).
@@ -62,7 +68,7 @@ Hver push til `main` bygger siden og legger den på `gh-pages`-branchen, som Git
 
 Dashbord: **https://follobjorkeved.goatcounter.com**. Du logger inn med amkleven@gmail.com.
 Det viser besøk per side, hvor folk kommer fra (Google, Facebook osv.) og disse hendelsene:
-«Sjekket pris i skjemaet» (endret antall eller bæring), «Begynte på bestilling» (begynte på adresse eller kontaktinfo), «Trykket Send, men et felt manglet: …» (ett per felt, f.eks. Telefon), «Endret antall sekker til: …» (gruppe, f.eks. 20-29 eller 100+, når kunden endrer fra standard 50), «Bestilling sendt», «Bestilte antall sekker: …», «Trykket på telefonnummer» og «Feil ved sending av bestilling».
+«Sjekket pris i skjemaet» (endret antall eller bæring), «Begynte på bestilling» (begynte på adresse eller kontaktinfo), «Trykket Send, men et felt manglet: …» (ett per felt, f.eks. Telefon), «Endret antall sekker til: …» (gruppe, f.eks. 20-29 eller 100+, når kunden endrer fra standard 50), «Valgte leveringsdag», «Bestilling sendt», «Bestilte antall sekker: …», «Trykket på telefonnummer» og «Feil ved sending av bestilling».
 For hendelsene viser «kilde» (referrer) siden hendelsen skjedde på, for eksempel `follobjorkeved.no/ved-as`. Da ser du hvilke sider som gir bestillinger. Hvor besøkende kom fra, ser du på sidene selv.
 GoatCounter bruker ingen cookies, så siden trenger ikke samtykkebanner.
 

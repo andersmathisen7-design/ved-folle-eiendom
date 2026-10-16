@@ -250,6 +250,7 @@ def site_js_config():
         "phone": CO["phone_display"],
         "adsConversion": C.GADS_CONVERSION,
         "base": BASE,
+        "days": C.DELIVERY_DAYS,
     }
 
 
@@ -324,8 +325,8 @@ def steps_section():
   <div class="wrap">
     <h2>Slik bestiller du</h2>
     <ol class="steps">
-      <li><strong>Fyll ut skjemaet.</strong> Velg hvor mange sekker du vil ha og hvor de skal bæres. Du ser prisen med en gang.</li>
-      <li><strong>Vi ringer deg.</strong> Vi bekrefter bestillingen og avtaler en dag som passer.</li>
+      <li><strong>Fyll ut skjemaet.</strong> Velg antall sekker, bæring og en ledig leveringsdag (mandag eller tirsdag). Du ser prisen med en gang.</li>
+      <li><strong>Vi ringer deg.</strong> Vi bekrefter bestillingen og leveringsdagen.</li>
       <li><strong>Veden kommer.</strong> Vi kjører den hjem til deg og bærer den dit du vil ha den.</li>
     </ol>
   </div>
@@ -345,7 +346,7 @@ def order_form(area_name=""):
   <div class="wrap order-grid">
     <div class="order-intro">
       <h2>Bestill bjørkeved{(' i ' + esc(area_name)) if area_name else ''}</h2>
-      <p>Send bestillingen her. Vi ringer deg, som regel innen én arbeidsdag, for å avtale levering. Du betaler ingenting nå.</p>
+      <p>Velg antall og leveringsdag. Vi kjører ut på mandager og tirsdager, og ringer deg for å bekrefte. Du betaler ingenting nå.</p>
       <p class="muted">Vil du heller ringe? <a href="tel:{CO['phone'].replace(' ', '')}" data-track="tel">{CO['phone_display']}</a></p>
     </div>
     <form class="card form" id="order-form" action="https://formsubmit.co/{C.ORDER_EMAIL}" method="POST" novalidate>
@@ -380,6 +381,14 @@ def order_form(area_name=""):
         <input id="f-adresse" name="Adresse" autocomplete="street-address" required>
         <label for="f-sted">Område</label>
         <select id="f-sted" name="Område">{area_opts}<option>Annet</option></select>
+      </fieldset>
+
+      <fieldset id="f-dag">
+        <legend>Leveringsdag</legend>
+        <p class="muted small">Vi kjører ut på mandager og tirsdager.</p>
+        <div class="days" id="f-dager" role="radiogroup" aria-label="Velg leveringsdag"></div>
+        <input type="hidden" name="Leveringsdag" id="f-leveringsdag" required>
+        <p class="muted small" id="f-dag-msg"></p>
       </fieldset>
 
       <fieldset>
@@ -527,7 +536,7 @@ def page_area(a):
          f"10 sekker koster {kr(10 * P['price'])} uten bæring"
          + (f", pluss hjemlevering {kr(C.DELIVERY_FEE)} per bestilling." if C.DELIVERY_FEE else ".")),
         (f"Hvor raskt kan jeg få ved i {name}?",
-         "Vi ringer deg, som regel innen én arbeidsdag etter at du har bestilt, og avtaler en leveringsdag som passer deg."),
+         "Vi kjører ut på mandager og tirsdager. Du velger leveringsdag i skjemaet, og vi ringer deg for å bekrefte."),
     ] + faq_items()[2:5]
     path = f"/{a['slug']}/"
     title = f"Ved i {name} – tørr bjørkeved levert, {P['price']} kr/sekk | {C.BRAND}"
@@ -558,7 +567,7 @@ def page_takk():
 <section class="section">
   <div class="wrap narrow center">
     <h1>Takk for bestillingen! 🔥</h1>
-    <p class="lead">Vi har fått bestillingen din. Vi ringer deg, som regel innen én arbeidsdag, for å avtale levering.</p>
+    <p class="lead">Vi har fått bestillingen din. Vi ringer deg, som regel innen én arbeidsdag, for å bekrefte leveringsdagen.</p>
     <div id="takk-summary" class="card summary-card" hidden></div>
     <p>Har du spørsmål i mellomtiden? Ring <a href="tel:{CO['phone'].replace(' ', '')}">{CO['phone_display']}</a>.</p>
     <p><a class="btn" href="/">Tilbake til forsiden</a></p>
@@ -576,7 +585,7 @@ def page_personvern():
     <h2>Hva vi samler inn</h2>
     <p>Når du bestiller, får vi navnet ditt, telefonnummeret, e-postadressen hvis du oppgir den, leveringsadressen og det du skriver i meldingsfeltet. Vi bruker opplysningene bare til å behandle og levere bestillingen, og til å sende faktura. Rettslig grunnlag er avtale (GDPR art. 6 nr. 1 b).</p>
     <h2>Hvem som behandler opplysningene</h2>
-    <p>Bestillingsskjemaet sendes videre til oss på e-post gjennom tjenesten FormSubmit (formsubmit.co). Vi selger ikke opplysningene dine og deler dem ikke med andre.</p>
+    <p>Bestillingsskjemaet sendes videre til oss på e-post gjennom tjenesten FormSubmit (formsubmit.co).{" Navnet ditt, området, antall sekker og leveringsdagen lagres også i et regneark hos Google, slik at vi kan planlegge leveringene." if C.DELIVERY_DAYS.get("calendar_url") else ""} Vi selger ikke opplysningene dine og deler dem ikke med andre.</p>
     <h2>Hvor lenge vi lagrer dem</h2>
     <p>Vi sletter opplysningene når de ikke lenger trengs. Unntaket er det bokføringsloven krever at vi tar vare på, som er 5 år.</p>
     <h2>Informasjonskapsler (cookies)</h2>
@@ -1223,6 +1232,7 @@ def llms_txt():
 - Pris: {P['price']} kr per sekk {P['vat_text']} (10 sekker = {kr(10 * P['price'])})
 - Hjemlevering: {kr(C.DELIVERY_FEE) + ' per bestilling' if C.DELIVERY_FEE else 'avtales'}
 - Bestilling: skjema på {URL}/#bestill eller telefon {CO['phone']}
+- Leveringsdager: mandag og tirsdag. Kunden velger dag i skjemaet
 - E-post: {CO['email']}
 - Oppdatert: {TODAY}
 
