@@ -111,8 +111,7 @@
           <button type="button" class="qty-btn" data-step="1" aria-label="Flere sekker">+</button>
         </div>
         <div class="chips" role="group" aria-label="Hurtigvalg antall">
-          <button type="button" data-qty="30">30</button><button type="button" data-qty="50">50</button>
-          <button type="button" data-qty="75">75</button><button type="button" data-qty="100">100</button>
+          <button type="button" data-qty="30">30</button><button type="button" data-qty="50">50</button><button type="button" data-qty="75">75</button><button type="button" data-qty="100">100</button>
         </div>
         <label for="f-baering">Bæring</label>
         <select id="f-baering" name="Bæring" required>
@@ -129,6 +128,14 @@
 <option value="etg-5" data-fee="34">Til 5. etasje (+34 kr per sekk)</option>
 <option value="etg-6" data-fee="36">Til 6. etasje (+36 kr per sekk)</option>
         </select>
+        <label for="f-hyppighet">Hvor ofte?</label>
+        <select id="f-hyppighet" name="Hyppighet">
+          <option value="Én gang" data-key="en-gang" selected>Én gang</option>
+          <option value="Fast levering hver 2. uke" data-key="2-uker">Fast levering hver 2. uke</option>
+          <option value="Fast levering hver 4. uke" data-key="4-uker">Fast levering hver 4. uke</option>
+          <option value="Fast levering hver 6. uke" data-key="6-uker">Fast levering hver 6. uke</option>
+        </select>
+        <p class="muted small" id="f-hyppighet-info" hidden>Vedabonnement: Vi kommer med samme antall sekker hver gang, og du betaler for én levering om gangen. Du kan endre eller stoppe når du vil.</p>
       </fieldset>
 
       <fieldset>
@@ -163,7 +170,7 @@
         <div><span>Ved</span><span id="s-ved">–</span></div>
         <div><span>Bæring</span><span id="s-baering">–</span></div>
         <div><span>Levering</span><span>499 kr</span></div>
-        <div class="total"><span>Totalt inkl. mva</span><span id="s-total">–</span></div>
+        <div class="total"><span><span id="s-total-label">Totalt</span> inkl. mva</span><span id="s-total">–</span></div>
       </div>
       <input type="hidden" name="Beregnet totalpris" id="f-total">
 
@@ -201,7 +208,7 @@
     <div>
       <p class="footer-h">Vi leverer i</p>
       <p class="footer-areas"><a href="/ved-as/">Ås</a> · <a href="/ved-ski/">Ski og Langhus</a> · <a href="/ved-kolbotn/">Kolbotn og Oppegård</a> · <a href="/ved-vestby/">Vestby og Son</a> · <a href="/ved-drobak/">Drøbak</a> · <a href="/ved-nesodden/">Nesodden</a> · <a href="/ved-enebakk/">Enebakk</a></p>
-      <p><a href="https://www.facebook.com/profile.php?id=100063745684398" rel="noopener">Facebook</a> · <a href="/artikler/">Råd om ved</a> · <a href="https://folloes.no/" rel="noopener">Andre tjenester</a> · <a href="/personvern/">Personvern</a></p>
+      <p><a href="https://www.facebook.com/profile.php?id=100063745684398" rel="noopener">Facebook</a> · <a href="/vedabonnement/">Vedabonnement</a> · <a href="/artikler/">Råd om ved</a> · <a href="https://folloes.no/" rel="noopener">Andre tjenester</a> · <a href="/personvern/">Personvern</a></p>
       <p class="footer-h">Verktøy og tall</p>
       <p><a href="/vedpris/">Sekkprisindeksen 2026</a> · <a href="/fyre-i-dag/">Lønner det seg å fyre i dag?</a> · <a href="/verktoy/">Gratis verktøy</a> · <a href="/data/">Åpne data</a> · <a href="/presse/">Presse</a></p>
     </div>

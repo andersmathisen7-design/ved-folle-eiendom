@@ -66,7 +66,7 @@
 <h2 id="tre-gode-tidspunkter-a-kjope">Tre gode tidspunkter å kjøpe</h2>
 <ol><li><strong>August–september:</strong> God tilgang, og du er klar før de første kalde kveldene. Dette er det tryggeste valget.</li><li><strong>Oktober:</strong> Fortsatt god tid, men nå bestiller mange. Bestill tidlig i måneden.</li><li><strong>Senvinter og vår:</strong> Ofte lavest pris, men mindre utvalg. Et godt tidspunkt for å fylle opp til neste vinter hvis du har tørr lagringsplass.</li></ol>
 <h2 id="unnga-dette">Unngå dette</h2>
-<ul><li><strong>Å vente til det blir kaldt.</strong> Når gradestokken kryper under minus ti, øker etterspørselen raskt. I januar 2026 meldte Maxbo at etterspørselen mer enn doblet seg.</li><li><strong>Å kjøpe for lite.</strong> Det er dyrere å bestille levering tre ganger enn én gang. Regn ut behovet med <a href="/artikler/hvor-mye-ved-trenger-jeg/">vedkalkulatoren</a>.</li><li><strong>Å lagre veden feil.</strong> God ved blir dårlig hvis den blir våt. Les <a href="/artikler/hvordan-lagre-ved/">hvordan du lagrer ved</a>.</li></ul>
+<ul><li><strong>Å vente til det blir kaldt.</strong> Når gradestokken kryper under minus ti, øker etterspørselen raskt. I januar 2026 meldte Maxbo at etterspørselen mer enn doblet seg.</li><li><strong>Å kjøpe for lite.</strong> Det er dyrere å bestille levering tre ganger enn én gang. Regn ut behovet med <a href="/artikler/hvor-mye-ved-trenger-jeg/">vedkalkulatoren</a>. Har du lite plass til ved, kan <a href="/vedabonnement/">vedabonnement</a> være et alternativ, så du slipper å gå tom.</li><li><strong>Å lagre veden feil.</strong> God ved blir dårlig hvis den blir våt. Les <a href="/artikler/hvordan-lagre-ved/">hvordan du lagrer ved</a>.</li></ul>
 <h2 id="hva-betyr-det-for-prisen">Hva betyr det for prisen?</h2>
 <p>Høsten 2023 kostet en 40-liters sekk 109–119 kr, mens den kostet 79–89 kr på senvinteren (Norsk Skogbruk). Vår pris er 89 kr per sekk hele sesongen, med hjemlevering 499 kr per bestilling. Se <a href="/artikler/bjorkeved-pris-follo/">prisene i Follo</a>.</p>
 <aside class="cta-box">
@@ -111,8 +111,7 @@
           <button type="button" class="qty-btn" data-step="1" aria-label="Flere sekker">+</button>
         </div>
         <div class="chips" role="group" aria-label="Hurtigvalg antall">
-          <button type="button" data-qty="30">30</button><button type="button" data-qty="50">50</button>
-          <button type="button" data-qty="75">75</button><button type="button" data-qty="100">100</button>
+          <button type="button" data-qty="30">30</button><button type="button" data-qty="50">50</button><button type="button" data-qty="75">75</button><button type="button" data-qty="100">100</button>
         </div>
         <label for="f-baering">Bæring</label>
         <select id="f-baering" name="Bæring" required>
@@ -129,6 +128,14 @@
 <option value="etg-5" data-fee="34">Til 5. etasje (+34 kr per sekk)</option>
 <option value="etg-6" data-fee="36">Til 6. etasje (+36 kr per sekk)</option>
         </select>
+        <label for="f-hyppighet">Hvor ofte?</label>
+        <select id="f-hyppighet" name="Hyppighet">
+          <option value="Én gang" data-key="en-gang" selected>Én gang</option>
+          <option value="Fast levering hver 2. uke" data-key="2-uker">Fast levering hver 2. uke</option>
+          <option value="Fast levering hver 4. uke" data-key="4-uker">Fast levering hver 4. uke</option>
+          <option value="Fast levering hver 6. uke" data-key="6-uker">Fast levering hver 6. uke</option>
+        </select>
+        <p class="muted small" id="f-hyppighet-info" hidden>Vedabonnement: Vi kommer med samme antall sekker hver gang, og du betaler for én levering om gangen. Du kan endre eller stoppe når du vil.</p>
       </fieldset>
 
       <fieldset>
@@ -163,7 +170,7 @@
         <div><span>Ved</span><span id="s-ved">–</span></div>
         <div><span>Bæring</span><span id="s-baering">–</span></div>
         <div><span>Levering</span><span>499 kr</span></div>
-        <div class="total"><span>Totalt inkl. mva</span><span id="s-total">–</span></div>
+        <div class="total"><span><span id="s-total-label">Totalt</span> inkl. mva</span><span id="s-total">–</span></div>
       </div>
       <input type="hidden" name="Beregnet totalpris" id="f-total">
 
@@ -201,7 +208,7 @@
     <div>
       <p class="footer-h">Vi leverer i</p>
       <p class="footer-areas"><a href="/ved-as/">Ås</a> · <a href="/ved-ski/">Ski og Langhus</a> · <a href="/ved-kolbotn/">Kolbotn og Oppegård</a> · <a href="/ved-vestby/">Vestby og Son</a> · <a href="/ved-drobak/">Drøbak</a> · <a href="/ved-nesodden/">Nesodden</a> · <a href="/ved-enebakk/">Enebakk</a></p>
-      <p><a href="https://www.facebook.com/profile.php?id=100063745684398" rel="noopener">Facebook</a> · <a href="/artikler/">Råd om ved</a> · <a href="https://folloes.no/" rel="noopener">Andre tjenester</a> · <a href="/personvern/">Personvern</a></p>
+      <p><a href="https://www.facebook.com/profile.php?id=100063745684398" rel="noopener">Facebook</a> · <a href="/vedabonnement/">Vedabonnement</a> · <a href="/artikler/">Råd om ved</a> · <a href="https://folloes.no/" rel="noopener">Andre tjenester</a> · <a href="/personvern/">Personvern</a></p>
       <p class="footer-h">Verktøy og tall</p>
       <p><a href="/vedpris/">Sekkprisindeksen 2026</a> · <a href="/fyre-i-dag/">Lønner det seg å fyre i dag?</a> · <a href="/verktoy/">Gratis verktøy</a> · <a href="/data/">Åpne data</a> · <a href="/presse/">Presse</a></p>
     </div>
