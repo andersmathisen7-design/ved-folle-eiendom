@@ -180,10 +180,12 @@
   calc();
 
   // Leveringsdag. Vi kjører bare på dagene i S.days.weekdays (mandag og tirsdag), og hver dag har en fast mengde tid.
-  // En bestilling tar kjøretid til området + lossing + bæring per sekk. Ås ligger nær lageret, så der får flere plass.
-  // Hvor mye tid som alt er bestilt, hentes fra kalenderen (Google Apps Script, se kalender/README.md) hvis den er satt opp.
+  // Kalenderen (Google Apps Script, se kalender/README.md) regner ut den raskeste ruten for hver dag. Når kunden har skrevet
+  // adressen, spør vi kalenderen hvilke dager adressen får plass; to bestillinger i samme nabolag deler da kjøringen.
+  // Før det (eller uten kalender) brukes et anslag: kjøretid til området + lossing + bæring per sekk.
   var D = S.days || {}, dayBox = form.querySelector("#f-dager"), dayInput = form.querySelector("#f-leveringsdag"),
-    dayMsg = form.querySelector("#f-dag-msg"), area = form.querySelector("#f-sted"), booked = {}, closed = {}, reserved = null;
+    dayMsg = form.querySelector("#f-dag-msg"), area = form.querySelector("#f-sted"), booked = {}, closed = {}, reserved = null,
+    addr = form.querySelector("#f-adresse"), ledig = null;
   var pad = function (n) { return (n < 10 ? "0" : "") + n; };
   var iso = function (d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); };
   var addDays = function (d, n) { return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n); };
@@ -210,19 +212,47 @@
     }
     return out;
   }
-  function orderMinutes() {
+  // Lossing og bæring hos kunden. Kjøringen kommer i tillegg.
+  function serviceMinutes() {
     var n = Math.max(0, parseInt(qty.value, 10) || 0);
     var carried = (parseInt(carry.options[carry.selectedIndex].dataset.fee, 10) || 0) > 0;
+    return (D.unload_minutes || 0) + (carried ? n * (D.carry_minutes_per_sack || 0) : 0);
+  }
+  function orderMinutes() {
     var drive = (D.drive_minutes || {})[area.value];
     if (drive == null) drive = (D.drive_minutes || {})["Annet"] || 60;
-    return Math.round(drive + (D.unload_minutes || 0) + (carried ? n * (D.carry_minutes_per_sack || 0) : 0));
+    return Math.round(drive + serviceMinutes());
   }
+  function ledigKey() { return [addr.value.trim(), area.value, orderMinutes(), serviceMinutes()].join("|"); }
   function dayLabel(d) {
     var t = d.toLocaleDateString("nb-NO", { weekday: "long", day: "numeric", month: "long" });
     return t.charAt(0).toUpperCase() + t.slice(1);
   }
   // En dag passer hvis bestillingen får plass i tiden som er igjen. En tom dag tar alltid imot (også store bestillinger).
-  function fits(k) { var used = booked[k] || 0; return used === 0 || used + orderMinutes() <= (D.minutes_per_day || 300); }
+  function fits(k) {
+    if (ledig && ledig.key === ledigKey() && k in ledig.fits) return ledig.fits[k];
+    var used = booked[k] || 0; return used === 0 || used + orderMinutes() <= (D.minutes_per_day || 300);
+  }
+  // Spør kalenderen hvilke dager akkurat denne adressen får plass. Feiler det, brukes anslaget.
+  var ledigTimer = null;
+  function checkLedig() {
+    clearTimeout(ledigTimer);
+    if (!D.calendar_url || addr.value.trim().length < 5) return;
+    ledigTimer = setTimeout(function () {
+      var key = ledigKey();
+      if (ledig && ledig.key === key) return;
+      fetch(D.calendar_url, {
+        method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "ledig", address: addr.value.trim(), area: area.value, minutes: orderMinutes(),
+          service: serviceMinutes(), capacity: D.minutes_per_day || 300 })
+      }).then(function (r) { return r.json(); }).then(function (j) {
+        if (!j.ok || key !== ledigKey()) return;
+        ledig = { key: key, fits: j.fits || {} };
+        if (j.booked) booked = j.booked;
+        renderDays();
+      }).catch(function () {});
+    }, 700);
+  }
   function renderDays() {
     if (!dayBox) return;
     var days = deliveryDays(), mins = orderMinutes(), cap = D.minutes_per_day || 300, any = false;
@@ -266,9 +296,13 @@
     }).catch(function () {});
   }
   ["input", "change"].forEach(function (t) {
-    form.addEventListener(t, function (e) { if (e.target === qty || e.target === carry || e.target === area) renderDays(); });
+    form.addEventListener(t, function (e) {
+      if (e.target === qty || e.target === carry || e.target === area || e.target === addr) { renderDays(); checkLedig(); }
+    });
   });
-  form.querySelectorAll(".qty-btn, .chips button").forEach(function (b) { b.addEventListener("click", renderDays); });
+  form.querySelectorAll(".qty-btn, .chips button").forEach(function (b) {
+    b.addEventListener("click", function () { renderDays(); checkLedig(); });
+  });
 
   // Hold av tiden i kalenderen før bestillingen sendes. Svarer kalenderen at dagen er full, må kunden velge en annen dag.
   // Feiler kalenderen (nett, oppsett), sendes bestillingen likevel, med en merknad om at dagen ikke er registrert.
@@ -277,7 +311,7 @@
     return fetch(D.calendar_url, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" }, // text/plain gir ingen CORS-forhåndsforespørsel
-      body: JSON.stringify({ date: dayInput.value, minutes: orderMinutes(), capacity: D.minutes_per_day || 300,
+      body: JSON.stringify({ date: dayInput.value, minutes: orderMinutes(), service: serviceMinutes(), capacity: D.minutes_per_day || 300,
         area: data["Område"], sacks: +data["Antall sekker"], phone: data["Telefon"],
         address: data["Adresse"], carry: data["Bæring"], total: data["Beregnet totalpris"],
         email: data.email || "",
@@ -288,6 +322,7 @@
       // Andre feil enn «full» eller «for sent»: bestillingen sendes likevel, med en merknad.
       if (!j.full && j.error !== "dato") { data["Leveringsdag"] += " (ikke registrert i kalenderen)"; return true; }
       if (j.booked) booked = j.booked;
+      if (ledig && j.full) ledig.fits[dayInput.value] = false;
       dayMsg.dataset.keep = "1";
       renderDays();
       dayMsg.textContent = j.error === "dato" ? "Den dagen er det for sent å bestille til. Velg en annen dag." :

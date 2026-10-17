@@ -4,20 +4,28 @@ Kunden velger leveringsdag i skjemaet. Vi kjører bare **mandag og tirsdag**, og
 
 ## Slik regnes en dag som full
 
-Hver bestilling får en beregnet tid:
+Kalenderen legger en rute for hver dag: fra lageret i Ås, innom alle som skal ha ved, og tilbake. Den velger rekkefølgen som gir kortest kjøretid. Dagen er brukt opp når
 
-> kjøretid tur/retur fra Ås + lossing (10 min) + bæring (0,5 min per sekk, bare hvis kunden har valgt bæring)
+> kjøretiden for hele runden + lossing (10 min per bestilling) + bæring (0,5 min per sekk, bare hvis kunden har valgt bæring)
 
-| Eksempel | Tid | Antall per dag (5 t) |
-|---|---|---|
-| Ås, 50 sekker, ingen bæring | 20 + 10 = 30 min | ca. 10 |
-| Ås, 50 sekker, bæring | 20 + 10 + 25 = 55 min | ca. 5 |
-| Ski, 50 sekker, ingen bæring | 35 + 10 = 45 min | ca. 6 |
-| Nesodden, 50 sekker, bæring | 70 + 10 + 25 = 105 min | ca. 2–3 |
+blir mer enn 5 timer.
 
-Fordi kjøretiden i Ås er kort, får dere plass til flere bestillinger i Ås på samme dag. Når tiden som er igjen ikke rekker til en bestilling, vises dagen som **Fullt** for den kunden. En liten Ås-bestilling kan altså fortsatt få plass på en dag som er full for en kunde på Nesodden.
+Kjøretiden hentes fra to gratis tjenester uten nøkkel eller konto:
 
-Alle tallene endrer du i `DELIVERY_DAYS` i `config.py`: dager, timer per dag, kjøretid per område, lossing, bæring, hvor mange uker fram kunden kan velge og stengte dager (ferie). Helligdager (f.eks. 2. påskedag og 2. pinsedag) hoppes over automatisk.
+- **Kartverket** finner koordinatene til adressen kunden skriver.
+- **OSRM** (ruteberegning på OpenStreetMap) gir kjøretiden mellom alle stoppene. Tallet ganges med 1,2, fordi OSRM regner med personbil (`RUTE_TILLEGG` i `kalender.gs`).
+
+Derfor koster to bestillinger i samme nabolag nesten bare lossetiden for den andre. Fem bestillinger i Ski samme dag blir én tur til Ski, ikke fem.
+
+Når kunden har skrevet adressen i skjemaet, spør nettsiden kalenderen hvilke dager akkurat den adressen får plass, og viser de andre som **Fullt**. Før adressen er skrevet, vises et anslag ut fra kjøretiden per område i `config.py`.
+
+Finner ikke Kartverket adressen, eller svarer ikke OSRM, brukes de faste minuttene per område for den bestillingen, akkurat som før. Lagerets plassering står i `LAGER` øverst i `kalender.gs`.
+
+### Eiersiden viser ruten
+
+På eiersiden står bestillingene for hver dag i kjørerekkefølge, nummerert, med minutter fra forrige stopp. Lenken **Åpne ruten i Google Maps** gir hele runden med stoppene som ikke er levert ennå. Gamle bestillinger og telefonbestillinger slås opp automatisk når eiersiden lastes.
+
+Alle tallene endrer du i `DELIVERY_DAYS` i `config.py`: dager, timer per dag, kjøretid per område (brukes som anslag og reserve), lossing, bæring, hvor mange uker fram kunden kan velge og stengte dager (ferie). Helligdager (f.eks. 2. påskedag og 2. pinsedag) hoppes over automatisk.
 
 ## Uten kalender
 
@@ -68,6 +76,6 @@ Siden er skjult for Google. Uten riktig passord får man ikke se noe, og kundeda
 - **Telefonbestilling:** bruk «Legg inn telefonbestilling» på eiersiden.
 - **Steng en dag:** legg inn en rad i arket med dato og `300` minutter. Eller legg datoen i `closed` i `config.py`.
 - **Levering samme dag** går ikke. Kunden kan tidligst velge dagen etter, og må bestille senest kl. 18 dagen før (`order_by_hour` i `config.py`). Kalenderen avviser også bestillinger til i dag eller tidligere.
-- **Endre skriptet:** etter endringer må du velge **Implementer → Administrer implementeringer → Rediger → Ny versjon**, ellers brukes den gamle koden.
+- **Endre skriptet:** etter endringer må du velge **Implementer → Administrer implementeringer → Rediger → Ny versjon**, ellers brukes den gamle koden. Første gang etter at ruteberegningen kom med, ber Google om tilgang til å «koble til en ekstern tjeneste». Det er oppslagene hos Kartverket og OSRM.
 
 Svarer ikke kalenderen (f.eks. nettfeil), går bestillingen likevel fram på e-post, med merknaden «ikke registrert i kalenderen». Da legger dere den inn i arket selv.

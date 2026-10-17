@@ -78,6 +78,8 @@ DELIVERY_DAYS = {
     "unload_minutes": 10,          # lossing per bestilling
     "carry_minutes_per_sack": 0.5, # ekstra minutter per sekk når veden skal bæres
     # Kjøretid tur/retur fra lageret i Ås, i minutter. Navnene må være de samme som i AREAS.
+    # Kalenderen regner ut den ekte ruten for hver dag. Disse tallene er bare anslaget før kunden har skrevet adressen,
+    # og reserven hvis adressen ikke finnes eller rutetjenesten ikke svarer.
     "drive_minutes": {
         "Ås": 20,
         "Ski og Langhus": 35,
