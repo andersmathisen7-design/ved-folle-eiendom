@@ -48,10 +48,22 @@
     token: "Du er logget ut. Logg inn igjen."
   };
 
+  var SPIN = '<span class="spinner" aria-hidden="true"></span>';
+  // Første lasting viser en stor spinner; ved «Oppdater» blir lista stående (nedtonet) med en liten spinner.
+  function busy(on) {
+    var first = $("a-app").hidden;
+    $("a-loading").hidden = !(on && first);
+    $("a-list").setAttribute("aria-busy", on ? "true" : "false");
+    $("a-refresh").disabled = on;
+    if (on && !first) $("a-updated").innerHTML = SPIN + "Henter …";
+  }
+
   function load() {
-    $("a-updated").textContent = "Henter …";
+    $("a-login").hidden = true;
+    busy(true);
     return post({ action: "list" })
       .then(function (j) {
+        busy(false);
         if (!j.ok) {
           store.clear();
           return showLogin(ERR[j.error] || "Noe gikk galt: " + (j.error || "ukjent"));
@@ -61,7 +73,11 @@
         $("a-updated").textContent = "Oppdatert " + new Date().toLocaleTimeString("nb-NO", { hour: "2-digit", minute: "2-digit" });
         render();
       })
-      .catch(function () { $("a-updated").textContent = "Fikk ikke kontakt med kalenderen. Prøv Oppdater."; });
+      .catch(function () {
+        busy(false);
+        if ($("a-app").hidden) return showLogin("Fikk ikke kontakt med kalenderen. Prøv igjen.");
+        $("a-updated").textContent = "Fikk ikke kontakt med kalenderen. Prøv Oppdater.";
+      });
   }
 
   function post(body) {
@@ -134,7 +150,7 @@
     if (!b) return;
     var st = b.dataset.status;
     if (st === "Avbestilt" && !confirm("Avbestille denne leveringen? Tiden blir ledig for andre kunder.")) return;
-    b.disabled = true; b.textContent = "Lagrer …";
+    b.disabled = true; b.innerHTML = SPIN + "Lagrer …";
     post({ action: "status", id: b.dataset.id, status: st }).then(function (j) {
       if (!j.ok) alert(ERR[j.error] || "Kunne ikke lagre: " + (j.error || "ukjent feil"));
       return load();
@@ -153,14 +169,15 @@
     e.preventDefault();
     var pw = $("a-key").value.trim(), remember = $("a-remember").checked, btn = $("a-login").querySelector("button");
     if (!pw) return;
-    btn.disabled = true; $("a-login-msg").textContent = "";
+    btn.disabled = true; btn.innerHTML = SPIN + "Logger inn …"; $("a-login-msg").textContent = "";
+    var reset = function () { btn.disabled = false; btn.textContent = "Logg inn"; };
     post({ action: "login", password: pw, remember: remember }).then(function (j) {
-      btn.disabled = false;
+      reset();
       if (!j.ok) return showLogin(ERR[j.error] || "Noe gikk galt.");
       $("a-key").value = "";
       store.set(j.token, remember);
       load();
-    }).catch(function () { btn.disabled = false; showLogin("Fikk ikke kontakt med kalenderen."); });
+    }).catch(function () { reset(); showLogin("Fikk ikke kontakt med kalenderen."); });
   });
   $("a-logout").addEventListener("click", function () {
     post({ action: "logout" }).catch(function () {});
@@ -188,19 +205,23 @@
     if (!$("ad-dato").value || !($("ad-tlf").value.trim() || $("ad-adresse").value.trim())) {
       msg.className = "form-msg err"; msg.textContent = "Fyll inn dag, og telefon eller adresse."; return;
     }
-    msg.className = "form-msg"; msg.textContent = "Lagrer …";
+    var sbtn = $("a-add").querySelector("button[type=submit]");
+    msg.className = "form-msg"; msg.textContent = "";
+    sbtn.disabled = true; sbtn.innerHTML = SPIN + "Lagrer …";
+    var done = function () { sbtn.disabled = false; sbtn.textContent = "Lagre bestilling"; };
     post({
       action: "add", date: $("ad-dato").value, minutes: +$("ad-min").value || 0, name: $("ad-navn").value.trim(),
       phone: $("ad-tlf").value.trim(), address: $("ad-adresse").value.trim(), area: $("ad-omrade").value,
       sacks: +$("ad-sekker").value || 0, carry: $("ad-baering").value || "Ingen bæring", total: $("ad-pris").value.trim(),
       message: ($("ad-melding").value.trim() + " (telefonbestilling)").trim()
     }).then(function (j) {
+      done();
       if (!j.ok) { msg.className = "form-msg err"; msg.textContent = ERR[j.error] || "Kunne ikke lagre: " + (j.error || "ukjent feil"); return; }
       msg.className = "form-msg ok"; msg.textContent = "Lagret.";
       ["ad-navn", "ad-tlf", "ad-adresse", "ad-pris", "ad-melding"].forEach(function (id) { $(id).value = ""; });
       minTouched = false; calcMin();
       load();
-    }).catch(function () { msg.className = "form-msg err"; msg.textContent = "Fikk ikke kontakt med kalenderen."; });
+    }).catch(function () { done(); msg.className = "form-msg err"; msg.textContent = "Fikk ikke kontakt med kalenderen."; });
   });
 
   if (token) load(); else showLogin();
