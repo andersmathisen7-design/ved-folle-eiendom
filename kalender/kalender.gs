@@ -25,7 +25,7 @@
 var ARK = "Bestillinger";
 var TIDSSONE = "Europe/Oslo";
 var KOLONNER = ["ID", "Leveringsdag", "Minutter", "Status", "Navn", "Telefon", "Adresse", "Område", "Sekker",
-                "Bæring", "Totalpris", "E-post", "Melding", "Registrert", "Lossetid", "Lat", "Lon"];
+                "Bæring", "Totalpris", "E-post", "Melding", "Registrert", "Lossetid", "Lat", "Lon", "Fast tid"];
 var STATUSER = ["Ny", "Bekreftet", "Levert", "Avbestilt"];
 var LEVERINGSDAGER = [1, 2];          // 1 = mandag, 2 = tirsdag
 var MAKS_DAGER_FRAM = 42;             // nettbestillinger maks 6 uker fram
@@ -41,6 +41,7 @@ var KOMMUNE = { "Ås": "3218", "Ski og Langhus": "3207", "Kolbotn og Oppegård":
                 "Drøbak": "3214", "Nesodden": "3212", "Enebakk": "3220" };
 var FOLLO = ["3207", "3212", "3214", "3216", "3218", "3220"];
 var MAKS_LEDIG_SJEKK_PER_TIME = 600;
+var MAKS_PUNKTER = 100;                         // OSRM tar maks 100 punkter per oppslag
 
 // ------------------------------------------------------------------ meny i regnearket
 
@@ -183,6 +184,8 @@ function bestillinger_() {
       address: String(col(r, "Adresse")), area: String(col(r, "Område")), sacks: Number(col(r, "Sekker")) || 0,
       carry: String(col(r, "Bæring")), total: String(col(r, "Totalpris")), email: String(col(r, "E-post")),
       message: String(col(r, "Melding")), service: num_(col(r, "Lossetid")), lat: num_(col(r, "Lat")), lon: num_(col(r, "Lon")),
+      // Faste minutter: eieren har skrevet inn tiden selv (telefonbestilling eller rad lagt inn for hånd uten ID).
+      fixed: !col(r, "ID") || /^(ja|x|1)$/i.test(String(col(r, "Fast tid")).trim()),
       registered: reg instanceof Date ? Utilities.formatDate(reg, TIDSSONE, "yyyy-MM-dd HH:mm") : String(reg)
     });
   }
@@ -216,7 +219,8 @@ function leggTil_(b, status) {
     "Område": tekst_(b.area, 60), "Sekker": Math.max(0, Math.min(1000, Math.round(Number(b.sacks)) || 0)),
     "Bæring": tekst_(b.carry, 80), "Totalpris": tekst_(b.total, 40), "E-post": tekst_(b.email, 100),
     "Melding": tekst_(b.message, 1000), "Registrert": new Date(),
-    "Lossetid": b.service == null ? "" : b.service, "Lat": b.lat == null ? "" : b.lat, "Lon": b.lon == null ? "" : b.lon
+    "Lossetid": b.service == null ? "" : b.service, "Lat": b.lat == null ? "" : b.lat, "Lon": b.lon == null ? "" : b.lon,
+    "Fast tid": b.fixed ? "ja" : ""
   };
   var sh = ark_(), head = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
   sh.appendRow(head.map(function (h) { return h in verdier ? verdier[h] : ""; }));
@@ -344,7 +348,8 @@ function rute_(m, stopp) {
   return isFinite(sek) ? { rekke: rekke, ben: ben, sek: sek } : null;
 }
 
-function harKoord_(b) { return !!b && b.lat != null && b.lon != null; }
+// Bestillinger med faste minutter tas ikke med i ruten, selv om de har koordinater.
+function harKoord_(b) { return !!b && !b.fixed && b.lat != null && b.lon != null; }
 
 // Lossing og bæring for én bestilling. Gamle rader uten «Lossetid» regnes ut fra sekker og bæring.
 function lossetid_(b) {
@@ -355,20 +360,15 @@ function lossetid_(b) {
 // Plan per dag: { minutter, kjoring, ruteOk, rute: [{ id, ben }], tilbake }.
 // Bestillinger med koordinater kjøres i beste rekkefølge; de uten koordinater teller med de faste minuttene sine.
 // ekstra (valgfri) er en ny bestilling som prøves på hver dag; da får hver plan også «med» = minutter med den.
+// Kjøretidene hentes i ett oppslag for alle dagene når det er plass til det (maks 100 punkter), ellers ett per dag.
 function planer_(perDag, ekstra) {
-  var pkt = [LAGER], plass = {};
-  var punkt = function (b) {
-    var k = b.lat.toFixed(5) + "," + b.lon.toFixed(5);
-    if (!(k in plass)) { plass[k] = pkt.length; pkt.push(b); }
-    return plass[k];
-  };
-  Object.keys(perDag).forEach(function (d) { perDag[d].forEach(function (b) { if (harKoord_(b)) punkt(b); }); });
-  if (harKoord_(ekstra)) punkt(ekstra);
-  var m = matrise_(pkt);
+  var dager = Object.keys(perDag), alle = [];
+  dager.forEach(function (d) { alle = alle.concat(perDag[d]); });
+  var felles = nett_(ekstra ? alle.concat([ekstra]) : alle, true);
   var sum = function (liste, f) { return liste.reduce(function (s, b) { return s + f(b); }, 0); };
-  var plan = function (liste) {
+  var plan = function (liste, n) {
     var med = liste.filter(harKoord_), uten = liste.filter(function (b) { return !harKoord_(b); });
-    var r = m && med.length ? rute_(m, med.map(punkt)) : null;
+    var r = n.m && med.length ? rute_(n.m, med.map(n.nr)) : null;
     if (med.length && !r) return { minutter: sum(liste, function (b) { return b.minutes; }), kjoring: null, ruteOk: false, rute: [] };
     var min = function (sek) { return Math.round(sek / 60 * RUTE_TILLEGG); };
     var kjoring = r ? min(r.sek) : 0;
@@ -380,17 +380,33 @@ function planer_(perDag, ekstra) {
     };
   };
   var out = {};
-  Object.keys(perDag).forEach(function (d) {
-    out[d] = plan(perDag[d]);
-    if (ekstra) out[d].med = plan(perDag[d].concat([ekstra])).minutter;
+  dager.forEach(function (d) {
+    var n = felles || nett_(ekstra ? perDag[d].concat([ekstra]) : perDag[d]);
+    out[d] = plan(perDag[d], n);
+    if (ekstra) out[d].med = plan(perDag[d].concat([ekstra]), n).minutter;
   });
   return out;
 }
 
-// Gamle bestillinger og telefonbestillinger uten koordinater slås opp når eiersiden henter listen (maks 15 om gangen).
+// Punktene (lageret først) for bestillingene med koordinater, og kjøretidene mellom dem.
+// Med kunHvisPlass gir den null når det er for mange punkter for ett oppslag, så planer_ kan dele opp per dag.
+function nett_(liste, kunHvisPlass) {
+  var pkt = [LAGER], plass = {};
+  var nokkel = function (b) { return b.lat.toFixed(5) + "," + b.lon.toFixed(5); };
+  liste.forEach(function (b) {
+    if (harKoord_(b) && !(nokkel(b) in plass)) { plass[nokkel(b)] = pkt.length; pkt.push(b); }
+  });
+  if (kunHvisPlass && pkt.length > MAKS_PUNKTER) return null;
+  return { m: pkt.length > MAKS_PUNKTER ? null : matrise_(pkt), nr: function (b) { return plass[nokkel(b)]; } };
+}
+
+// Gamle bestillinger uten koordinater slås opp når eiersiden henter listen (maks 15 om gangen).
+// Bestillinger med faste minutter hoppes over, så tiden eieren har skrevet inn, blir stående.
 function fyllKoordinater_(alle) {
   var idag = idag_();
-  var mangler = alle.filter(function (b) { return b.date >= idag && b.status !== "Avbestilt" && !harKoord_(b) && b.address; }).slice(0, 15);
+  var mangler = alle.filter(function (b) {
+    return b.date >= idag && b.status !== "Avbestilt" && !b.fixed && !harKoord_(b) && b.address;
+  }).slice(0, 15);
   if (!mangler.length) return;
   var sh = ark_(), rows = sh.getDataRange().getValues(), head = rows[0];
   var iId = head.indexOf("ID"), iLat = head.indexOf("Lat"), iLon = head.indexOf("Lon");
@@ -460,7 +476,9 @@ function doPost(e) {
     if (b.action === "status") return svar_(endreStatus_(String(b.id || ""), String(b.status || "")));
     if (!/^\d{4}-\d{2}-\d{2}$/.test(String(b.date || "")) || !(Number(b.minutes) >= 0 && Number(b.minutes) <= 24 * 60))
       return svar_({ ok: false, error: "ugyldig" });
-    medKoord_(b);
+    // Har eieren skrevet inn minuttene selv, kommer ingen lossetid. Da brukes minuttene som de er.
+    b.fixed = service_(b.service) == null;
+    if (b.fixed) b.service = b.lat = b.lon = null; else medKoord_(b);
     return svar_({ ok: true, id: leggTil_(b, "Bekreftet") });
   }
   if (b.action === "ledig") return svar_(ledig_(b));
@@ -491,6 +509,7 @@ function doPost(e) {
     // En tom dag tar alltid imot, også en stor bestilling som alene er over grensen.
     if (plan && plan.minutter > 0 && plan.med > kap) return svar_({ ok: false, full: true, booked: bestilt_(planer_(dager)) });
     b.name = "";
+    b.fixed = false;   // bare eieren kan sette faste minutter
     var id = leggTil_(b, "Ny");
     cache.put("nettbestillinger", String(n + 1), 3600);
     return svar_({ ok: true, id: id });

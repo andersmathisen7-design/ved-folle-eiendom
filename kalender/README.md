@@ -74,6 +74,7 @@ Siden er skjult for Google. Uten riktig passord får man ikke se noe, og kundeda
 - **Avbestilling:** trykk «Avbestill» på eiersiden. Tiden blir ledig med en gang.
 - **Flytte en levering:** endre datoen i arket.
 - **Telefonbestilling:** bruk «Legg inn telefonbestilling» på eiersiden.
+- **Egne minutter:** endrer du minuttene for en telefonbestilling, brukes de som de er, og bestillingen tas ikke med i ruteberegningen. Det samme gjelder rader du skriver inn i arket selv (uten ID), og rader der kolonnen **Fast tid** er `ja`.
 - **Steng en dag:** legg inn en rad i arket med dato og `300` minutter. Eller legg datoen i `closed` i `config.py`.
 - **Levering samme dag** går ikke. Kunden kan tidligst velge dagen etter, og må bestille senest kl. 18 dagen før (`order_by_hour` i `config.py`). Kalenderen avviser også bestillinger til i dag eller tidligere.
 - **Endre skriptet:** etter endringer må du velge **Implementer → Administrer implementeringer → Rediger → Ny versjon**, ellers brukes den gamle koden. Første gang etter at ruteberegningen kom med, ber Google om tilgang til å «koble til en ekstern tjeneste». Det er oppslagene hos Kartverket og OSRM.
