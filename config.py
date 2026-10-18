@@ -127,7 +127,7 @@ AREAS = [
         "kommune": "Nordre Follo kommune",
         "places": ["Ski sentrum", "Langhus", "Siggerud", "Kråkstad", "Skotbu", "Finstadjordet", "Hebekk"],
         "postnr": "1400–1409",
-        "intro": "Ski og Langhus ligger rett ved lageret vårt i Ås. Vi kjører hit flere ganger i uka i fyringssesongen.",
+        "intro": "Ski og Langhus ligger rett ved lageret vårt i Ås. Vi kjører ut mandag og tirsdag, og hit er det en kort tur.",
     },
     {
         "slug": "ved-kolbotn",

@@ -340,7 +340,8 @@ def order_form(area_name="", freq="en-gang", qty=50, chips=(30, 50, 75, 100)):
         f'<option value="{k}" data-fee="{fee}">{esc(label)}{"" if fee == 0 else f" (+{fee} kr/sekk)"}</option>'
         for k, label, fee in C.CARRY_OPTIONS)
     min_carry = min(fee for _, _, fee in C.CARRY_OPTIONS if fee)
-    area_opts = "\n".join(
+    # På sider uten eget område må kunden velge selv. Før ble Ås valgt av seg selv, og bestillinger fra andre steder ble registrert som Ås.
+    area_opts = ("" if area_name else '<option value="" selected disabled>Velg område</option>') + "\n".join(
         f'<option{" selected" if a["name"] == area_name else ""}>{esc(a["name"])}</option>' for a in C.AREAS)
     freq_opts = "\n          ".join(
         f'<option value="{esc(label)}" data-key="{k}"{" selected" if k == freq else ""}>{esc(label)}</option>'
@@ -406,7 +407,7 @@ def order_form(area_name="", freq="en-gang", qty=50, chips=(30, 50, 75, 100)):
       <fieldset>
         <legend><span class="step-no">2</span> Hvor og når?</legend>
         <label for="f-sted">Område</label>
-        <select id="f-sted" name="Område">{area_opts}<option>Annet</option></select>
+        <select id="f-sted" name="Område" required>{area_opts}<option>Annet</option></select>
         <label for="f-adresse">Gateadresse</label>
         <input id="f-adresse" name="Adresse" autocomplete="street-address" required>
         <div id="f-dag">
