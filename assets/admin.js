@@ -20,7 +20,7 @@
     }
   };
   token = store.get();
-  var orders = [], today = "", view = "kommende";
+  var orders = [], plans = {}, depot = null, today = "", view = "kommende";
 
   if (!A.calendarUrl) { $("a-nocal").hidden = false; return; }
 
@@ -68,7 +68,7 @@
           store.clear();
           return showLogin(ERR[j.error] || "Noe gikk galt: " + (j.error || "ukjent"));
         }
-        orders = j.orders || []; today = j.today || "";
+        orders = j.orders || []; plans = j.plans || {}; depot = j.depot || null; today = j.today || "";
         $("a-login").hidden = true; $("a-app").hidden = false; $("a-actions").hidden = false;
         $("a-updated").textContent = "Oppdatert " + new Date().toLocaleTimeString("nb-NO", { hour: "2-digit", minute: "2-digit" });
         render();
@@ -105,25 +105,45 @@
       $("a-list").innerHTML = '<p class="card muted">' + (upcoming ? "Ingen kommende bestillinger." : "Ingen tidligere bestillinger.") + "</p>";
       return;
     }
-    var order = { "Levert": 1, "Avbestilt": 2 };
     $("a-list").innerHTML = days.map(function (d) {
-      var os = byDay[d].sort(function (a, b) { return (order[a.status] || 0) - (order[b.status] || 0) || a.area.localeCompare(b.area); });
+      // Kommende dager vises i kjørerekkefølgen kalenderen har regnet ut. Avbestilte nederst.
+      var plan = upcoming ? plans[d] : null, stop = {};
+      if (plan && plan.ruteOk) plan.rute.forEach(function (r, i) { stop[r.id] = { nr: i + 1, ben: r.ben }; });
+      var rank = function (o) { return o.status === "Avbestilt" ? 2000 : stop[o.id] ? stop[o.id].nr : (o.status === "Levert" ? 1000 : 500); };
+      var os = byDay[d].sort(function (a, b) { return rank(a) - rank(b) || a.area.localeCompare(b.area); });
       var live = os.filter(function (o) { return o.status !== "Avbestilt"; });
-      var min = live.reduce(function (s, o) { return s + o.minutes; }, 0);
+      var min = plan ? plan.minutter : live.reduce(function (s, o) { return s + o.minutes; }, 0);
       var sacks = live.reduce(function (s, o) { return s + o.sacks; }, 0);
       var pct = Math.min(100, Math.round(min / CAP * 100));
       return '<section class="admin-day">' +
         '<header><h2>' + esc(dayLabel(d)) + '</h2>' +
         '<p>' + live.length + ' levering' + (live.length === 1 ? "" : "er") + ' · <strong>' + nb(sacks) + ' sekker</strong> · ' +
         min + ' av ' + CAP + ' min' + (min > CAP ? ' <span class="over">(over tiden)</span>' : ' · ' + (CAP - min) + ' min ledig') + '</p>' +
-        '<div class="meter' + (min > CAP ? " over" : "") + '"><span data-pct="' + pct + '"></span></div></header>' +
-        os.map(card).join("") + '</section>';
+        '<div class="meter' + (min > CAP ? " over" : "") + '"><span data-pct="' + pct + '"></span></div>' +
+        (plan && plan.ruteOk && plan.rute.length ? '<p class="small">🚗 ' + plan.kjoring + ' min kjøring på den raskeste runden, ' +
+          plan.tilbake + ' min tilbake til lageret' + routeLink(plan, os) + '</p>' : "") + '</header>' +
+        os.map(function (o) { return card(o, stop[o.id]); }).join("") + '</section>';
     }).join("");
     // Bredden settes her og ikke som style-attributt, fordi sikkerhetsregelen (CSP) stopper inline-stil.
     $("a-list").querySelectorAll(".meter span").forEach(function (m) { m.style.width = m.dataset.pct + "%"; });
   }
 
-  function card(o) {
+  // Google Maps-lenke med stoppene i kjørerekkefølge, fra lageret og tilbake. Leverte stopp hoppes over.
+  function routeLink(plan, os) {
+    if (!depot) return "";
+    var byId = {};
+    os.forEach(function (o) { byId[o.id] = o; });
+    var pts = plan.rute.map(function (r) { return byId[r.id]; })
+      .filter(function (o) { return o && o.status !== "Levert" && o.lat != null; })
+      .map(function (o) { return o.lat + "," + o.lon; });
+    if (!pts.length) return "";
+    var home = depot.lat + "," + depot.lon;
+    var url = "https://www.google.com/maps/dir/?api=1&travelmode=driving&origin=" + home + "&destination=" + home +
+      "&waypoints=" + encodeURIComponent(pts.join("|"));
+    return ' · <a href="' + esc(url) + '" target="_blank" rel="noopener">Åpne ruten i Google Maps</a>';
+  }
+
+  function card(o, stop) {
     var addr = [o.address, o.area].filter(Boolean).join(", ");
     var done = o.status === "Levert" || o.status === "Avbestilt";
     var undo = '<button type="button" class="btn btn-sm btn-ghost" data-id="' + esc(o.id) + '" data-status="Ny">Angre</button>';
@@ -133,9 +153,11 @@
         '" data-status="' + s + '"' + (o.status === s ? " disabled" : "") + '>' + label + '</button>';
     };
     return '<article class="card admin-order st-' + esc(o.status.toLowerCase()) + '">' +
-      '<div class="ao-head"><strong>' + esc(o.name || o.address || o.phone || "(uten navn)") + '</strong>' + (done ? '<span class="pill">' + esc(o.status) + '</span>' : "") + '</div>' +
+      '<div class="ao-head"><strong>' + (stop ? stop.nr + '. ' : "") + esc(o.name || o.address || o.phone || "(uten navn)") + '</strong>' +
+      (done ? '<span class="pill">' + esc(o.status) + '</span>' : "") + '</div>' +
       '<p class="ao-main"><strong>' + nb(o.sacks) + ' sekker</strong>' + (o.carry ? ' · ' + esc(o.carry) : "") +
-      (o.total ? ' · ' + esc(o.total) : "") + ' · ' + o.minutes + ' min</p>' +
+      (o.total ? ' · ' + esc(o.total) : "") +
+      (stop ? ' · 🚗 ' + stop.ben + ' min ' + (stop.nr === 1 ? "fra lageret" : "fra forrige stopp") : ' · ' + o.minutes + ' min') + '</p>' +
       '<p>' + (addr ? '<a href="' + maps + '" target="_blank" rel="noopener">📍 ' + esc(addr) + '</a>' : "") +
       (o.phone ? ' &nbsp; <a href="tel:' + esc(o.phone.replace(/\s/g, "")) + '">📞 ' + esc(o.phone) + '</a>' : "") +
       (o.email ? ' &nbsp; <a href="mailto:' + esc(o.email) + '">' + esc(o.email) + '</a>' : "") + '</p>' +
@@ -193,8 +215,11 @@
     if (minTouched) return;
     var drive = (D.drive_minutes || {})[$("ad-omrade").value];
     if (drive == null) drive = (D.drive_minutes || {})["Annet"] || 60;
+    $("ad-min").value = Math.round(drive + serviceMin());
+  }
+  function serviceMin() {
     var n = parseInt($("ad-sekker").value, 10) || 0;
-    $("ad-min").value = Math.round(drive + (D.unload_minutes || 0) + ($("ad-baering").value ? n * (D.carry_minutes_per_sack || 0) : 0));
+    return (D.unload_minutes || 0) + ($("ad-baering").value ? n * (D.carry_minutes_per_sack || 0) : 0);
   }
   ["ad-omrade", "ad-sekker", "ad-baering"].forEach(function (id) { $(id).addEventListener("input", calcMin); $(id).addEventListener("change", calcMin); });
   $("ad-min").addEventListener("input", function () { minTouched = true; });
@@ -210,7 +235,7 @@
     sbtn.disabled = true; sbtn.innerHTML = SPIN + "Lagrer …";
     var done = function () { sbtn.disabled = false; sbtn.textContent = "Lagre bestilling"; };
     post({
-      action: "add", date: $("ad-dato").value, minutes: +$("ad-min").value || 0, name: $("ad-navn").value.trim(),
+      action: "add", date: $("ad-dato").value, minutes: +$("ad-min").value || 0, service: minTouched ? null : serviceMin(), name: $("ad-navn").value.trim(),
       phone: $("ad-tlf").value.trim(), address: $("ad-adresse").value.trim(), area: $("ad-omrade").value,
       sacks: +$("ad-sekker").value || 0, carry: $("ad-baering").value || "Ingen bæring", total: $("ad-pris").value.trim(),
       message: ($("ad-melding").value.trim() + " (telefonbestilling)").trim()
