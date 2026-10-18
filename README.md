@@ -43,6 +43,8 @@ Skjemaet sender til `ORDER_EMAIL` i `config.py` gjennom [FormSubmit](https://for
 3. Etter det kommer alle bestillinger som e-post med en tabell over hva kunden har bestilt. Kunden får også en automatisk bekreftelse.
 4. Anbefalt: I aktiverings-e-posten får du en tilfeldig kode. Sett den inn som `ORDER_EMAIL` i stedet for e-postadressen. Da vises ikke adressen i kildekoden, og du får mindre spam.
 
+Adressene i `ORDER_CC` i `config.py` (nå post@min-eiendom.no) får en kopi av hver bestilling.
+
 Hvis sending feiler, ser kunden telefonnummeret og kan ringe i stedet.
 
 ## Leveringsdager

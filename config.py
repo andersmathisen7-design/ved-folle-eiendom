@@ -13,6 +13,8 @@ BRAND = "Follo Bjørkeved"
 # Etter aktivering gir FormSubmit en tilfeldig kode (f.eks. "a1b2c3...") som kan
 # settes inn her i stedet for e-postadressen, slik at adressen ikke er synlig i kildekoden.
 ORDER_EMAIL = "amkleven@gmail.com"
+# Disse får en kopi av hver bestilling (FormSubmit _cc). Trenger ingen aktivering.
+ORDER_CC = ["post@min-eiendom.no"]
 
 COMPANY = {
     "legal_name": "Follo Eiendomsservice AS",

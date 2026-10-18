@@ -247,6 +247,7 @@ def site_js_config():
         "endpoint": f"https://formsubmit.co/ajax/{C.ORDER_EMAIL}",
         # Reserve-adresse hvis skjemaet feiler (ORDER_EMAIL kan være FormSubmit-koden i stedet for en adresse).
         "orderEmail": C.ORDER_EMAIL if "@" in C.ORDER_EMAIL else CO["email"],
+        "orderCc": ",".join(C.ORDER_CC),
         "brand": C.BRAND,
         "phone": CO["phone_display"],
         "adsConversion": C.GADS_CONVERSION,
@@ -366,7 +367,8 @@ def order_form(area_name="", freq="en-gang", qty=50, chips=(30, 50, 75, 100)):
     </div>
     <form class="card form" id="order-form" action="https://formsubmit.co/{C.ORDER_EMAIL}" method="POST" novalidate>
       <input type="hidden" name="_subject" value="Ny vedbestilling – {esc(C.BRAND)}">
-      <input type="hidden" name="_template" value="table">
+      <input type="hidden" name="_template" value="table">{f"""
+      <input type="hidden" name="_cc" value="{esc(','.join(C.ORDER_CC))}">""" if C.ORDER_CC else ""}
       <input type="hidden" name="_next" value="{URL}/takk/">
       <input type="text" name="_honey" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
       <input type="hidden" name="Side" value="">
