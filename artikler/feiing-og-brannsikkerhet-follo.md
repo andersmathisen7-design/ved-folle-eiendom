@@ -6,7 +6,7 @@ order: 9
 kort: I Ås, Nordre Follo, Nesodden, Frogn og Enebakk er det Follo Brannvesen IKS som feier og fører tilsyn med ildsteder. Feiing skjer etter behov, typisk hvert 2.–8. år, og du får varsel på SMS eller brev ca. en uke før. Selv må du ha minst én røykvarsler per etasje, godkjent slukkeutstyr, og oppbevare aske i en bøtte av metall.
 faq: Hvor ofte feies pipa i Follo? || Etter behov. Forskrift om brannforebygging har ikke et fast intervall. I praksis settes intervallet etter hvert besøk, ofte hvert 2., 4., 6. eller 8. år.
 faq: Hvem feier i Vestby? || Vestby er ikke med i Follo Brannvesen IKS. Sjekk med Vestby kommune hvem som har ansvaret for feiing der.
-faq: Hvordan oppbevarer jeg aske? || I en bøtte av metall med lokk, på et ubrennbart underlag, til asken er helt kald. Regn med minst to døgn. Aske kan inneholde glør lenge etter at det ser slukket ut.
+faq: Hvordan oppbevarer jeg aske? || I en bøtte av metall med lokk, på et ubrennbart underlag, til asken er helt kald. Det kan ta opptil 3 døgn (DSB). Aske kan inneholde glør lenge etter at det ser slukket ut.
 faq: Hva gjør jeg ved pipebrann? || Steng lufttilførselen til ovnen og ring 110. Hold øye med pipa og rommene rundt til brannvesenet kommer.
 ---
 En vedovn er trygg når den brukes riktig og pipa holdes ren. Her er det du trenger å vite som vedfyrer i Follo.
@@ -37,7 +37,8 @@ Ifølge forskrift om brannforebygging (§ 7) skal hver boenhet ha:
 
 - Bruk **bøtte av metall** med lokk.
 - Sett den på et **ubrennbart underlag**, ute eller på trygg avstand fra vegger og treverk.
-- La asken bli **helt kald**, i minst to døgn, før du kaster den.
+- La asken bli **helt kald** før du kaster den. Det kan ta opptil 3 døgn (DSB).
+- Kald aske kastes i restavfallet, i en pose. Les mer i [aske fra vedovnen](/artikler/aske-fra-vedovnen/).
 
 ## Tegn på pipebrann – og hva du gjør
 
@@ -61,4 +62,4 @@ Vil du tenne bål i perioden 15. april–15. september, må du ha tillatelse fra
 - Ås kommune: [Feiing](https://www.as.kommune.no/tjenester/brann-beredskap-og-miljorettet-helsevern/feiing)
 - Nordre Follo kommune: [Brannsikkerhet](https://www.nordrefollo.kommune.no/tjenester/plan-bygg-og-eiendom/brannsikkerhet/)
 - Follo Brannvesen: [Spørsmål og svar om feiing og tilsyn](http://www.follobrannvesen.no/spoersmaal-og-svar-om-feiing-og-tilsyn.6538403.html)
-- DSB: [Pipebrann](https://www.dsb.no/en/Safe-everyday-life/fire/What-to-do-in-the-event-of-a-chimney-fire/)
+- DSB: [Dette gjør du ved pipebrann](https://www.dsb.no/sikkerhverdag/brann/dette-gjor-du-ved-pipebrann/)
