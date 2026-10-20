@@ -219,7 +219,7 @@
   }
   function serviceMin() {
     var n = parseInt($("ad-sekker").value, 10) || 0;
-    return (D.unload_minutes || 0) + ($("ad-baering").value ? n * (D.carry_minutes_per_sack || 0) : 0);
+    return (D.unload_minutes || 0) + n * (D.unload_minutes_per_sack || 0) + ($("ad-baering").value ? n * (D.carry_minutes_per_sack || 0) : 0);
   }
   ["ad-omrade", "ad-sekker", "ad-baering"].forEach(function (id) { $(id).addEventListener("input", calcMin); $(id).addEventListener("change", calcMin); });
   $("ad-min").addEventListener("input", function () { minTouched = true; });
