@@ -182,7 +182,7 @@
   // Leveringsdag. Vi kjører bare på dagene i S.days.weekdays (mandag og tirsdag), og hver dag har en fast mengde tid.
   // Kalenderen (Google Apps Script, se kalender/README.md) regner ut den raskeste ruten for hver dag. Når kunden har skrevet
   // adressen, spør vi kalenderen hvilke dager adressen får plass; to bestillinger i samme nabolag deler da kjøringen.
-  // Før det (eller uten kalender) brukes et anslag: kjøretid til området + lossing + bæring per sekk.
+  // Før det (eller uten kalender) brukes et anslag: kjøretid til området + lossing (fast + per sekk) + bæring per sekk.
   var D = S.days || {}, dayBox = form.querySelector("#f-dager"), dayInput = form.querySelector("#f-leveringsdag"),
     dayMsg = form.querySelector("#f-dag-msg"), area = form.querySelector("#f-sted"), booked = {}, closed = {}, reserved = null,
     addr = form.querySelector("#f-adresse"), ledig = null;
@@ -216,7 +216,7 @@
   function serviceMinutes() {
     var n = Math.max(0, parseInt(qty.value, 10) || 0);
     var carried = (parseInt(carry.options[carry.selectedIndex].dataset.fee, 10) || 0) > 0;
-    return (D.unload_minutes || 0) + (carried ? n * (D.carry_minutes_per_sack || 0) : 0);
+    return (D.unload_minutes || 0) + n * (D.unload_minutes_per_sack || 0) + (carried ? n * (D.carry_minutes_per_sack || 0) : 0);
   }
   function orderMinutes() {
     var drive = (D.drive_minutes || {})[area.value];

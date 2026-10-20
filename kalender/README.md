@@ -6,7 +6,7 @@ Kunden velger leveringsdag i skjemaet. Vi kjører bare **mandag og tirsdag**, og
 
 Kalenderen legger en rute for hver dag: fra lageret i Ås, innom alle som skal ha ved, og tilbake. Den velger rekkefølgen som gir kortest kjøretid. Dagen er brukt opp når
 
-> kjøretiden for hele runden + lossing (10 min per bestilling) + bæring (0,5 min per sekk, bare hvis kunden har valgt bæring)
+> kjøretiden for hele runden + lossing (10 min per bestilling + 0,5 min per sekk) + bæring (0,5 min per sekk, bare hvis kunden har valgt bæring)
 
 blir mer enn 5 timer.
 

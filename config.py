@@ -70,14 +70,15 @@ FREQUENCY_OPTIONS = [
 DELIVERY_FEE = 499
 
 # Leveringsdager. Kunden velger dag i skjemaet. En dag blir «full» når de bestilte leveringene fyller tiden.
-# Tiden for en bestilling = kjøretid (tur/retur fra Ås) + lossing + bæring per sekk.
+# Tiden for en bestilling = kjøretid (tur/retur fra Ås) + lossing + lossing per sekk + bæring per sekk.
 # Ås har kort kjøretid, så der får vi plass til flere leveringer på samme dag.
 DELIVERY_DAYS = {
     "weekdays": [1, 2],            # 1 = mandag, 2 = tirsdag (0 = søndag … 6 = lørdag)
     "minutes_per_day": 5 * 60,     # tid satt av per leveringsdag
     "weeks_ahead": 4,              # hvor mange uker fram kunden kan velge
     "order_by_hour": 18,           # bestill senest kl. 18 dagen før
-    "unload_minutes": 10,          # lossing per bestilling
+    "unload_minutes": 10,          # lossing per bestilling (parkere, hilse på kunden osv.)
+    "unload_minutes_per_sack": 0.5, # minutter per sekk for å ta den ut av bilen, også uten bæring
     "carry_minutes_per_sack": 0.5, # ekstra minutter per sekk når veden skal bæres
     # Kjøretid tur/retur fra lageret i Ås, i minutter. Navnene må være de samme som i AREAS.
     # Kalenderen regner ut den ekte ruten for hver dag. Disse tallene er bare anslaget før kunden har skrevet adressen,
