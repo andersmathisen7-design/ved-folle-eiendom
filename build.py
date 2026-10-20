@@ -336,7 +336,7 @@ def steps_section():
 </section>"""
 
 
-def order_form(area_name="", freq="en-gang", qty=50, chips=(30, 50, 75, 100)):
+def order_form(area_name="", freq="en-gang", qty=20, chips=(10, 20, 30, 50)):
     opts = "\n".join(
         f'<option value="{k}" data-fee="{fee}">{esc(label)}{"" if fee == 0 else f" (+{fee} kr/sekk)"}</option>'
         for k, label, fee in C.CARRY_OPTIONS)
