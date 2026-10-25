@@ -299,7 +299,7 @@ textarea.embed { width: 100%; font-family: ui-monospace, Menlo, Consolas, monosp
 .admin-tabs { display: flex; gap: 4px; background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 4px; }
 .admin-tabs button { border: 0; background: none; font: inherit; font-weight: 600; padding: .35em 1em; border-radius: 999px; cursor: pointer; color: var(--ink); }
 .admin-tabs button.on { background: var(--green); color: #fff; }
-.admin-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.admin-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 14px; }
 .admin-stats:empty { display: none; }
 .admin-stats div { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; }
 .admin-stats strong { display: block; font-size: 1.5rem; color: var(--green); line-height: 1.2; }
@@ -328,6 +328,9 @@ textarea.embed { width: 100%; font-family: ui-monospace, Menlo, Consolas, monosp
 .ao-btns .btn:disabled { opacity: 1; cursor: default; }
 .pill { font-size: .78rem; font-weight: 700; padding: .15em .7em; border-radius: 99px; background: var(--bg-alt); color: var(--muted); white-space: nowrap; }
 .st-levert { opacity: .7; }
+.pill-unpaid { background: #fdecea; color: #c0392b; }
+.pill-full { background: #fdecea; color: #c0392b; vertical-align: .15em; }
+.ad-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
 .st-avbestilt { opacity: .5; }
 .st-avbestilt .ao-main { text-decoration: line-through; }
 /* Lasting: spinner mens kalenderen svarer (Google Apps Script bruker gjerne noen sekunder). */
@@ -341,7 +344,7 @@ textarea.embed { width: 100%; font-family: ui-monospace, Menlo, Consolas, monosp
 #a-list[aria-busy="true"] { opacity: .5; pointer-events: none; transition: opacity .2s; }
 @media (max-width: 560px) { .admin-stats strong { font-size: 1.2rem; } }
 @media print {
-  .admin-top, .admin-bar, .admin-add, .ao-btns, .admin-stats, .st-avbestilt { display: none !important; }
+  .admin-top, .admin-bar, .admin-add, .ao-btns, .ad-head .btn, .admin-stats, .st-avbestilt { display: none !important; }
   .admin { background: #fff; }
   .admin-order { break-inside: avoid; border: 1px solid #999; }
   .admin-day { break-after: page; }

@@ -67,6 +67,14 @@
         <p class="form-msg" id="a-add-msg"></p>
       </form>
     </details>
+    <details class="card admin-add">
+      <summary>Sett en dag som full</summary>
+      <form id="a-full" class="form" novalidate>
+        <p class="muted small">Kundene kan ikke velge dagen i bestillingsskjemaet. Bestillinger som allerede er lagt inn, blir stående. Åpne dagen igjen med knappen ved dagen i lista.</p>
+        <label for="af-dato">Leveringsdag</label><input id="af-dato" type="date" required>
+        <button class="btn" type="submit">Sett som full</button>
+      </form>
+    </details>
     <div id="a-list" aria-live="polite"></div>
   </div>
   <div class="card" id="a-nocal" hidden>
