@@ -62,7 +62,8 @@ Her ser dere alle bestillingene, sortert etter leveringsdag. Logg inn med passor
 
 - **Per dag:** antall leveringer, **antall sekker som skal på bilen**, og hvor mye av de 5 timene som er brukt.
 - **Per bestilling:** navn, antall sekker, bæring, pris, beregnet tid og melding. Trykk på adressen for å åpne den i Google Maps, og på telefonnummeret for å ringe.
-- **Levert** når veden er kjørt ut. **Avbestill** gjør tiden ledig igjen for andre kunder. Trykket feil? Trykk **Angre**.
+- **Betalt og levert** eller **Bare levert** når veden er kjørt ut. Er den bare levert, står det «Levert, ikke betalt», og du kan trykke **Marker som betalt** når pengene er kommet. Øverst ser du hvor mange som er levert, men ikke betalt. Kolonnen **Betalt** i arket blir `ja`. **Avbestill** gjør tiden ledig igjen for andre kunder. Trykket feil? Trykk **Angre**.
+- **Sett dagen som full:** knappen ved hver dag, eller «Sett en dag som full» for en dag uten bestillinger. Kundene ser da dagen som «Fullt» i skjemaet. Bestillinger som er lagt inn, blir stående. Trykk **Åpne dagen igjen** for å angre.
 - **Legg inn telefonbestilling:** minuttene regnes ut av seg selv, og bestillingen teller med i kapasiteten.
 - **Skriv ut:** gir en kjøreliste med én dag per side, uten knapper og avbestilte leveringer.
 - **Tidligere:** viser leveringer som er gjennomført.
@@ -75,7 +76,7 @@ Siden er skjult for Google. Uten riktig passord får man ikke se noe, og kundeda
 - **Flytte en levering:** endre datoen i arket.
 - **Telefonbestilling:** bruk «Legg inn telefonbestilling» på eiersiden.
 - **Egne minutter:** endrer du minuttene for en telefonbestilling, brukes de som de er, og bestillingen tas ikke med i ruteberegningen. Det samme gjelder rader du skriver inn i arket selv (uten ID), og rader der kolonnen **Fast tid** er `ja`.
-- **Steng en dag:** legg inn en rad i arket med dato og `300` minutter. Eller legg datoen i `closed` i `config.py`.
+- **Steng en dag:** trykk «Sett dagen som full» på eiersiden. Eller legg datoen i `closed` i `config.py` (da vises dagen ikke i det hele tatt).
 - **Levering samme dag** går ikke. Kunden kan tidligst velge dagen etter, og må bestille senest kl. 18 dagen før (`order_by_hour` i `config.py`). Kalenderen avviser også bestillinger til i dag eller tidligere.
 - **Endre skriptet:** etter endringer må du velge **Implementer → Administrer implementeringer → Rediger → Ny versjon**, ellers brukes den gamle koden. Første gang etter at ruteberegningen kom med, ber Google om tilgang til å «koble til en ekstern tjeneste». Det er oppslagene hos Kartverket og OSRM.
 

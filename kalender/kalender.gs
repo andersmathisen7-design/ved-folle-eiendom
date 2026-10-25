@@ -25,7 +25,7 @@
 var ARK = "Bestillinger";
 var TIDSSONE = "Europe/Oslo";
 var KOLONNER = ["ID", "Leveringsdag", "Minutter", "Status", "Navn", "Telefon", "Adresse", "Område", "Sekker",
-                "Bæring", "Totalpris", "E-post", "Melding", "Registrert", "Lossetid", "Lat", "Lon", "Fast tid"];
+                "Bæring", "Totalpris", "E-post", "Melding", "Registrert", "Lossetid", "Lat", "Lon", "Fast tid", "Betalt"];
 var STATUSER = ["Ny", "Bekreftet", "Levert", "Avbestilt"];
 var LEVERINGSDAGER = [1, 2];          // 1 = mandag, 2 = tirsdag
 var MAKS_DAGER_FRAM = 42;             // nettbestillinger maks 6 uker fram
@@ -186,6 +186,7 @@ function bestillinger_() {
       message: String(col(r, "Melding")), service: num_(col(r, "Lossetid")), lat: num_(col(r, "Lat")), lon: num_(col(r, "Lon")),
       // Faste minutter: eieren har skrevet inn tiden selv (telefonbestilling eller rad lagt inn for hånd uten ID).
       fixed: !col(r, "ID") || /^(ja|x|1)$/i.test(String(col(r, "Fast tid")).trim()),
+      paid: /^(ja|x|1)$/i.test(String(col(r, "Betalt")).trim()),
       registered: reg instanceof Date ? Utilities.formatDate(reg, TIDSSONE, "yyyy-MM-dd HH:mm") : String(reg)
     });
   }
@@ -227,19 +228,38 @@ function leggTil_(b, status) {
   return id;
 }
 
-function endreStatus_(id, status) {
+// Betalt kan bare være ja for leverte bestillinger. «Angre» (status Ny) fjerner også betalt.
+function endreStatus_(id, status, betalt) {
   if (STATUSER.indexOf(status) < 0) return { ok: false, error: "ugyldig" };
   var sh = ark_(), rows = sh.getDataRange().getValues(), head = rows[0];
-  var iId = head.indexOf("ID"), iStatus = head.indexOf("Status");
+  var iId = head.indexOf("ID"), iStatus = head.indexOf("Status"), iBetalt = head.indexOf("Betalt");
   if (iStatus < 0) return { ok: false, error: "mangler Status-kolonne" };
   for (var i = 1; i < rows.length; i++) {
     var radId = String((iId >= 0 && rows[i][iId]) || "rad-" + (i + 1));
     if (radId === id) {
       sh.getRange(i + 1, iStatus + 1).setValue(status);
+      if (iBetalt >= 0) sh.getRange(i + 1, iBetalt + 1).setValue(status === "Levert" && betalt ? "ja" : "");
       return { ok: true };
     }
   }
   return { ok: false, error: "fant ikke bestillingen" };
+}
+
+// ------------------------------------------------------------------ fulle dager
+
+// Dager eieren har satt som fulle på eiersiden. Lagres i skriptegenskapene; passerte dager ryddes bort.
+function fulleDager_() {
+  var idag = idag_(), liste = [];
+  try { liste = JSON.parse(PropertiesService.getScriptProperties().getProperty("fulle_dager") || "[]"); } catch (e) {}
+  return liste.filter(function (d) { return /^\d{4}-\d{2}-\d{2}$/.test(d) && d >= idag; }).sort();
+}
+
+function settFull_(dato, full) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dato)) return { ok: false, error: "ugyldig" };
+  var liste = fulleDager_().filter(function (d) { return d !== dato; });
+  if (full && dato >= idag_()) liste.push(dato);
+  PropertiesService.getScriptProperties().setProperty("fulle_dager", JSON.stringify(liste.sort()));
+  return { ok: true, fullDays: liste };
 }
 
 // ------------------------------------------------------------------ ruter
@@ -448,14 +468,15 @@ function ledig_(b) {
   if (!(min > 0 && min <= 24 * 60) || !(kap > 0 && kap <= 24 * 60)) return { ok: false, error: "ugyldig" };
   var ny = { address: String(b.address || "").slice(0, 120), area: String(b.area || "").slice(0, 60), service: b.service, minutes: min };
   medKoord_(ny);
-  var planer = planer_(perDag_(), ny), fits = {};
+  var planer = planer_(perDag_(), ny), fits = {}, fulle = fulleDager_();
   Object.keys(planer).forEach(function (d) { fits[d] = !(planer[d].minutter > 0) || planer[d].med <= kap; });
-  return { ok: true, found: harKoord_(ny), fits: fits, booked: bestilt_(planer) };
+  fulle.forEach(function (d) { fits[d] = false; });
+  return { ok: true, found: harKoord_(ny), fits: fits, booked: bestilt_(planer), fullDays: fulle };
 }
 
-// GET: bare bestilt tid per dag (brukes av bestillingsskjemaet). Ingen kundedata.
+// GET: bare bestilt tid per dag og dagene som er satt som fulle (brukes av bestillingsskjemaet). Ingen kundedata.
 function doGet() {
-  return svar_({ booked: bestilt_() });
+  return svar_({ booked: bestilt_(), fullDays: fulleDager_() });
 }
 
 function doPost(e) {
@@ -466,14 +487,15 @@ function doPost(e) {
   // Eiersiden.
   if (b.action === "login") return svar_(loggInn_(b.password, b.remember === true));
   if (b.action === "logout") { loggUt_(b.token); return svar_({ ok: true }); }
-  if (b.action === "list" || b.action === "status" || b.action === "add") {
+  if (b.action === "list" || b.action === "status" || b.action === "add" || b.action === "full") {
     if (!gyldigBillett_(b.token)) return svar_({ ok: false, error: "token" });
     if (b.action === "list") {
       var alle = bestillinger_();
       fyllKoordinater_(alle);
-      return svar_({ ok: true, orders: alle, today: idag_(), plans: planer_(perDag_(alle)), depot: LAGER });
+      return svar_({ ok: true, orders: alle, today: idag_(), plans: planer_(perDag_(alle)), depot: LAGER, fullDays: fulleDager_() });
     }
-    if (b.action === "status") return svar_(endreStatus_(String(b.id || ""), String(b.status || "")));
+    if (b.action === "status") return svar_(endreStatus_(String(b.id || ""), String(b.status || ""), b.paid === true));
+    if (b.action === "full") return svar_(settFull_(String(b.date || ""), b.full === true));
     if (!/^\d{4}-\d{2}-\d{2}$/.test(String(b.date || "")) || !(Number(b.minutes) >= 0 && Number(b.minutes) <= 24 * 60))
       return svar_({ ok: false, error: "ugyldig" });
     // Har eieren skrevet inn minuttene selv, kommer ingen lossetid. Da brukes minuttene som de er.
@@ -505,6 +527,7 @@ function doPost(e) {
     b.minutes = min;
     var dager = perDag_(), enDag = {};
     if (dager[dag]) enDag[dag] = dager[dag];
+    if (fulleDager_().indexOf(dag) >= 0) return svar_({ ok: false, full: true, booked: bestilt_(planer_(dager)), fullDays: fulleDager_() });
     var plan = planer_(enDag, b)[dag];
     // En tom dag tar alltid imot, også en stor bestilling som alene er over grensen.
     if (plan && plan.minutter > 0 && plan.med > kap) return svar_({ ok: false, full: true, booked: bestilt_(planer_(dager)) });

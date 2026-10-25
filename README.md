@@ -53,7 +53,7 @@ Kunden velger leveringsdag i skjemaet. Dere kjører bare mandag og tirsdag, med 
 
 For at fulle dager skal oppdateres automatisk, må dere sette opp leveringskalenderen (et gratis Google-regneark). Se **[kalender/README.md](kalender/README.md)**.
 
-**Eiersiden** `/admin/` viser alle bestillinger per leveringsdag, med antall sekker per dag, status (ny, bekreftet, levert, avbestilt), telefonbestillinger og kjøreliste til utskrift. Den bruker samme kalender. Se kalender/README.md.
+**Eiersiden** `/admin/` viser alle bestillinger per leveringsdag, med antall sekker per dag, status (ny, bekreftet, levert, betalt og levert, avbestilt), knapp for å sette en dag som full, telefonbestillinger og kjøreliste til utskrift. Den bruker samme kalender. Se kalender/README.md.
 
 ## Hosting (gratis): GitHub Pages
 

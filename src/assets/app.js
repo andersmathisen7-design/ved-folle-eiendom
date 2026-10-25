@@ -184,7 +184,7 @@
   // adressen, spør vi kalenderen hvilke dager adressen får plass; to bestillinger i samme nabolag deler da kjøringen.
   // Før det (eller uten kalender) brukes et anslag: kjøretid til området + lossing (fast + per sekk) + bæring per sekk.
   var D = S.days || {}, dayBox = form.querySelector("#f-dager"), dayInput = form.querySelector("#f-leveringsdag"),
-    dayMsg = form.querySelector("#f-dag-msg"), area = form.querySelector("#f-sted"), booked = {}, closed = {}, reserved = null,
+    dayMsg = form.querySelector("#f-dag-msg"), area = form.querySelector("#f-sted"), booked = {}, closed = {}, full = {}, reserved = null,
     addr = form.querySelector("#f-adresse"), ledig = null;
   var pad = function (n) { return (n < 10 ? "0" : "") + n; };
   var iso = function (d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); };
@@ -229,7 +229,10 @@
     return t.charAt(0).toUpperCase() + t.slice(1);
   }
   // En dag passer hvis bestillingen får plass i tiden som er igjen. En tom dag tar alltid imot (også store bestillinger).
+  // Dager eieren har satt som fulle på eiersiden, tar ikke imot noe.
+  function setFull(list) { if (list) { full = {}; list.forEach(function (k) { full[k] = true; }); } }
   function fits(k) {
+    if (full[k]) return false;
     if (ledig && ledig.key === ledigKey() && k in ledig.fits) return ledig.fits[k];
     var used = booked[k] || 0; return used === 0 || used + orderMinutes() <= (D.minutes_per_day || 300);
   }
@@ -249,6 +252,7 @@
         if (!j.ok || key !== ledigKey()) return;
         ledig = { key: key, fits: j.fits || {} };
         if (j.booked) booked = j.booked;
+        setFull(j.fullDays);
         renderDays();
       }).catch(function () {});
     }, 700);
@@ -292,7 +296,7 @@
   renderDays();
   if (D.calendar_url) {
     fetch(D.calendar_url).then(function (r) { return r.json(); }).then(function (j) {
-      booked = j.booked || {}; (j.closed || []).forEach(function (k) { closed[k] = true; }); renderDays();
+      booked = j.booked || {}; setFull(j.fullDays); (j.closed || []).forEach(function (k) { closed[k] = true; }); renderDays();
     }).catch(function () {});
   }
   ["input", "change"].forEach(function (t) {
@@ -322,6 +326,7 @@
       // Andre feil enn «full» eller «for sent»: bestillingen sendes likevel, med en merknad.
       if (!j.full && j.error !== "dato") { data["Leveringsdag"] += " (ikke registrert i kalenderen)"; return true; }
       if (j.booked) booked = j.booked;
+      setFull(j.fullDays);
       if (ledig && j.full) ledig.fits[dayInput.value] = false;
       dayMsg.dataset.keep = "1";
       renderDays();
