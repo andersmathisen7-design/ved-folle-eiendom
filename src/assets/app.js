@@ -142,12 +142,13 @@
   // Målingen deles i to steg: «sjekket pris» (antall/bæring) og «begynte på bestilling» (adresse/kontaktinfo).
   var priced = false;
   function priceCheck() { if (!priced) { priced = true; track("price_check"); } qtyChoice(); }
-  // Skrur folk antallet opp eller ned fra standard (50)? Måles som «antall_valgt:20-49» osv., én gang per gruppe,
+  // Skrur folk antallet opp eller ned fra standardantallet? Måles som «antall_valgt:30-49» osv., én gang per gruppe,
   // og først når antallet har ligget stille i 2 sekunder (så + og − ikke gir en hendelse per klikk).
   var qtyDefault = parseInt(qty.defaultValue, 10) || 0, qtySeen = {}, qtyTimer = null;
+  // Faste grupper, uavhengig av standardantallet, så ukene kan sammenlignes. Standardantallet får egen gruppe (f.eks. «20»).
   function qtyBucket(n) {
-    return n < qtyDefault ? (n < 10 ? "under-10" : n < 20 ? "10-19" : n < 30 ? "20-29" : "30-" + (qtyDefault - 1)) :
-      n === qtyDefault ? String(qtyDefault) : n < 100 ? (qtyDefault + 1) + "-99" : "100+";
+    if (n === qtyDefault) return String(qtyDefault);
+    return n < 10 ? "under-10" : n < 20 ? "10-19" : n < 30 ? "20-29" : n < 50 ? "30-49" : n < 100 ? "50-99" : "100+";
   }
   function qtyChoice() {
     clearTimeout(qtyTimer);
@@ -439,7 +440,8 @@
         msg.className = "form-msg err";
         msg.innerHTML = "Beklager, bestillingen kom ikke fram. <a href=\"" + mailto + "\">Send den på e-post i stedet</a> " +
           "(alt er fylt ut for deg), eller ring oss på <a href=\"tel:" + S.phone.replace(/\s/g, "") + "\">" + S.phone + "</a>.";
-        track("order_error", { reason: (err && err.message) || "ukjent" });
+        // Grunnen står i hendelsesnavnet (f.eks. «order_error:Failed to fetch»), for GoatCounter lagrer bare én tittel per hendelse.
+        track("order_error:" + String((err && err.message) || "ukjent").replace(/[^\wæøåÆØÅ .-]/g, "").trim().slice(0, 40));
       });
   }
 })();
