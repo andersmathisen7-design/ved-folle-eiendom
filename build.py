@@ -425,8 +425,8 @@ def order_form(area_name="", freq="en-gang", qty=20, chips=(10, 20, 30, 50)):
         <div class="row2">
           <div><label for="f-tlf">Telefon <span class="muted">· vi ringer og bekrefter</span></label>
           <input id="f-tlf" name="Telefon" type="tel" inputmode="tel" autocomplete="tel" required></div>
-          <div><label for="f-epost">E-post <span class="muted">(valgfritt)</span></label>
-          <input id="f-epost" name="E-post" type="email" autocomplete="email"></div>
+          <div><label for="f-epost">E-post <span class="muted">· du får bekreftelse</span></label>
+          <input id="f-epost" name="E-post" type="email" autocomplete="email" required></div>
         </div>
         <details class="more">
           <summary>Legg til en melding <span class="muted">(valgfritt)</span></summary>
@@ -806,7 +806,7 @@ def page_personvern():
     <h1>Personvern</h1>
     <p>{esc(CO['legal_name'])} (org.nr. {CO['org_nr']}), {esc(CO['street'])}, {CO['postal_code']} {esc(CO['city'])}, er ansvarlig for personopplysningene som samles inn på denne nettsiden.</p>
     <h2>Hva vi samler inn</h2>
-    <p>Når du bestiller, får vi telefonnummeret ditt, e-postadressen hvis du oppgir den, leveringsadressen og det du skriver i meldingsfeltet. Vi bruker opplysningene bare til å behandle og levere bestillingen, og til å sende faktura. Rettslig grunnlag er avtale (GDPR art. 6 nr. 1 b).</p>
+    <p>Når du bestiller, får vi telefonnummeret ditt, e-postadressen din, leveringsadressen og det du skriver i meldingsfeltet. Vi bruker opplysningene bare til å behandle og levere bestillingen, og til å sende faktura. Rettslig grunnlag er avtale (GDPR art. 6 nr. 1 b).</p>
     <h2>Hvem som behandler opplysningene</h2>
     <p>Bestillingsskjemaet sendes videre til oss på e-post gjennom tjenesten FormSubmit (formsubmit.co).{" Bestillingen lagres også i et regneark hos Google, slik at vi kan planlegge leveringene. For å planlegge kjøreruten slår vi opp adressen hos Kartverket og sender koordinatene (ikke navn eller telefon) til rutetjenesten OSRM." if C.DELIVERY_DAYS.get("calendar_url") else ""} Vi selger ikke opplysningene dine og deler dem ikke med andre.</p>
     <h2>Hvor lenge vi lagrer dem</h2>
