@@ -381,18 +381,14 @@
     data._subject = (repeat ? "Nytt vedabonnement: " : "Ny vedbestilling: ") + data["Antall sekker"] + " sekker" +
       (repeat ? " " + data["Hyppighet"].replace("Fast levering ", "") : "") + " – " + data["Adresse"] + ", " + data["Område"] +
       " – " + dayText.toLowerCase();
-    // E-post er valgfritt. Bare en gyldig adresse får automatisk bekreftelse fra FormSubmit.
-    var epost = (data["E-post"] || "").trim();
+    // E-post er påkrevd og sjekket i validate(), så kunden får alltid automatisk bekreftelse fra FormSubmit.
+    var epost = data["E-post"].trim();
     delete data["E-post"];
-    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(epost)) {
-      data.email = epost;
-      data._replyto = epost;
-      data._autoresponse = "Takk for bestillingen hos " + S.brand + "! Vi har mottatt bestilling på " +
-        data["Antall sekker"] + " sekker bjørkeved (beregnet " + fmt(total) + (repeat ? " per levering, " + data["Hyppighet"].toLowerCase() : "") + "). Vi ringer deg for å bekrefte. " +
-        (repeat ? "Første leveringsdag: " : "Ønsket leveringsdag: ") + dayText.toLowerCase() + ". Spørsmål? Ring " + S.phone + ".";
-    } else if (epost) {
-      data["E-post (ugyldig)"] = epost;
-    }
+    data.email = epost;
+    data._replyto = epost;
+    data._autoresponse = "Takk for bestillingen hos " + S.brand + "! Vi har mottatt bestilling på " +
+      data["Antall sekker"] + " sekker bjørkeved (beregnet " + fmt(total) + (repeat ? " per levering, " + data["Hyppighet"].toLowerCase() : "") + "). Vi ringer deg for å bekrefte. " +
+      (repeat ? "Første leveringsdag: " : "Ønsket leveringsdag: ") + dayText.toLowerCase() + ". Spørsmål? Ring " + S.phone + ".";
     delete data._next;
 
     var btn = form.querySelector('button[type="submit"]');
