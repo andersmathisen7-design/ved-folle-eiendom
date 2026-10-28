@@ -422,6 +422,8 @@ def order_form(area_name="", freq="en-gang", qty=20, chips=(10, 20, 30, 50)):
 
       <fieldset>
         <legend><span class="step-no">3</span> Hvordan når vi deg?</legend>
+        <label for="f-navn">Navn <span class="muted">· står på fakturaen</span></label>
+        <input id="f-navn" name="Navn" autocomplete="name" required>
         <div class="row2">
           <div><label for="f-tlf">Telefon <span class="muted">· vi ringer og bekrefter</span></label>
           <input id="f-tlf" name="Telefon" type="tel" inputmode="tel" autocomplete="tel" required></div>
@@ -759,7 +761,7 @@ def page_admin():
           <div><label for="ad-omrade">Område</label><select id="ad-omrade"></select></div>
         </div>
         <div class="row2">
-          <div><label for="ad-navn">Navn <span class="muted">(valgfritt)</span></label><input id="ad-navn"></div>
+          <div><label for="ad-navn">Navn <span class="muted">(trengs for Duett)</span></label><input id="ad-navn"></div>
           <div><label for="ad-tlf">Telefon</label><input id="ad-tlf" type="tel"></div>
         </div>
         <label for="ad-adresse">Adresse</label><input id="ad-adresse">

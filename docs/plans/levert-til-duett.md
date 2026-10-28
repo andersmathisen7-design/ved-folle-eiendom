@@ -1,18 +1,21 @@
 # Plan: «Levert» på eiersiden lager fakturagrunnlag i Duett
 
-> **Utkast 2026-10-28.** Ingen kode er skrevet. Planen bygger på det som er
-> lest fra Duett-API-et (bare GET) og Duetts dokumentasjon samme dag.
-> Fase 2 starter først når Anders har sagt ja, og når skrivetilgang og varer
-> er på plass (se «Det som mangler»).
+> **2026-10-28.** Koden er skrevet (fase 2) etter ja fra Anders, men står av
+> (`duett_på` = `nei`) til Duett har gitt skrivetilgang. Den er testet med et
+> falskt regneark og et falskt Duett, ikke mot det ekte Duett. Planen bygger
+> på det som er lest fra Duett-API-et (bare GET) og Duetts dokumentasjon.
 
 ## Mål
 
-Når vi trykker **Betalt og levert** eller **Bare levert** på eiersiden
-(follobjorkeved.no/admin/), skal kalenderskriptet:
+Når vi trykker **Bare levert** på eiersiden (follobjorkeved.no/admin/), skal
+kalenderskriptet:
 
 1. finne kunden i Duett, eller opprette den hvis den ikke finnes,
 2. opprette en ordre for leveringen i **FOLLO EIENDOMSSERVICE AS**,
 3. la ordren ligge i Duett uten å fakturere eller sende den.
+
+**Betalt og levert** og **Marker som betalt** gjør ingenting i Duett
+(avklart med Anders 2026-10-28).
 
 Vi går gjennom og sender fakturaene selv fra Duett. Statusendringen i arket
 skal alltid lykkes, også når Duett feiler.
@@ -68,10 +71,11 @@ Vedfakturaene har som regel bæreren **prosjekt 198 «Ved»** (`carrierId` 247).
 
 **Bæring mangler som vare for de fleste valgene.** Nettsiden har 12 valg fra
 12 til 36 kr per sekk (inkl. mva), Duett har bare garasje (15 kr inkl.) og
-1. etasje (16 kr inkl.). Forslag: én vare «Bæring av ved, per sekk», der
-prisen settes per linje og linjeteksten er valget kunden gjorde. API-et
-tillater å overstyre `salesPrice` og `name` per linje. Det må regnskapsfører
-eller Anders godkjenne.
+1. etasje (16 kr inkl.). Valgt løsning: varen «Tjeneste» (51938574, intern
+`articleId` 172), med pris og tekst per linje. Den er brukt slik før på
+vedfakturaer, med linjeteksten «Bæring» (observert). API-et tillater å
+overstyre `salesPrice` og `name` per linje. Vil regnskapsfører ha en egen
+vare, endres `DUETT_VARER` i `kalender.gs`.
 
 ## Det som mangler før fase 2
 
@@ -79,16 +83,13 @@ eller Anders godkjenne.
    integrasjon med `OrderWrite` (og helst `OrderRead`, så varene kan leses
    med `articleId`). Må avklares med Duett (utkast til e-post ligger i
    Gmail-utkastene, ikke sendt).
-2. **Bæringsvare.** Én vare for bæring per sekk, eller én vare per valg.
-3. **Kundenavn fra nettbestillinger.** Bestillingsskjemaet spør ikke etter
-   navn, og kalenderen lagrer tomt navn for nettbestillinger. Duett krever
-   navn på kunden. Forslag: et nytt felt «Navn (står på fakturaen)» i
-   skjemaet, som sendes til kalenderen. Til det er på plass: merknad
-   «mangler navn – skriv navnet i arket og prøv igjen».
-4. **Postnummer.** Skjemaet har bare fritekstadresse. Duett vil ha gyldig
-   postnummer. Forslag: hente postnummer og poststed fra Kartverket-oppslaget
-   som kalenderen alt gjør (`geokod_`), og lagre dem i arket.
-5. **Avklaringer med Anders** (se «Spørsmål» nederst).
+2. ~~Bæringsvare~~ Løst med «Tjeneste» og pris per linje (over).
+3. ~~Kundenavn fra nettbestillinger~~ Skjemaet har fått et påkrevd felt
+   «Navn (står på fakturaen)», og kalenderen lagrer det. Gamle rader uten navn
+   gir merknaden «mangler navn – skriv navnet i arket og prøv igjen».
+4. ~~Postnummer~~ Står postnummeret i adressen, brukes det. Ellers hentes det
+   fra Kartverket-oppslaget (`geokod_`). Det lagres ikke i arket, men står på
+   kunden i Duett.
 
 ## Filer
 
@@ -110,8 +111,6 @@ Legges bakerst av `ark_()`, som i dag.
 | Duett kunde | Kundenummeret i Duett. Kan også fylles inn for hånd for å velge kunde. |
 | Duett ordre | Ordrenummeret og året, f.eks. `123/2026`. Finnes det, lages ingen ny ordre. |
 | Duett merknad | Siste feil, f.eks. «ikke sendt til Duett – fant ikke postnummer». Tom når alt gikk bra. |
-| Postnr | Fra Kartverket (punkt 4). |
-| Poststed | Fra Kartverket (punkt 4). |
 
 ## Feltmapping
 
@@ -121,7 +120,7 @@ Legges bakerst av `ark_()`, som i dag.
 |---|---|---|
 | Navn | `name` | påkrevd, maks 250 tegn |
 | Adresse (gate og nr.) | `address.address1` | delen før første komma |
-| Postnr | `address.zipCodeKey` | fra Kartverket |
+| Postnummer | `address.zipCodeKey` | fra adressen eller Kartverket |
 | E-post | `contactInfo.email`, `paymentInfo.invoiceEmail` | |
 | E-post finnes | `paymentInfo.invoiceSendOption = "email"` | ellers tom, Duett velger selv |
 | Telefon | `contactInfo.mobile` | normalisert til 8 siffer |
@@ -147,22 +146,23 @@ bankkonto.
 | `orderCategory` / `orderType` | `order` / `normal` |
 | `status` | `saved` (startet ordre, avklart med Anders 2026-10-28) |
 | `config.directInvoicing` | `false`, alltid |
-| `payType` | `invoice` (spørsmål 2) |
+| `payType` | `invoice` |
 | `invoiceYear` | året for ordredatoen |
 | `orderDate` | dagen knappen trykkes |
 | `deliveryDate` | Leveringsdag |
 | `deliveryAddress` | Adresse, postnr og poststed |
-| `ourReference` | fast tekst fra Script Properties (`duett_var_referanse`) |
-| `orderReference` | `follobjorkeved-<ID>`, brukes også til å oppdage dobbeltordre |
-| `invoiceNote` | «Levering av bjørkeved <leveringsdag>. Bestilling <ID>.» |
-| `carriers` | `[{ carrierId: 247 }]`, prosjekt 198 «Ved» (spørsmål 4) |
+| `ourReference` | fra Script Properties (`duett_var_referanse`, settes i «Koble til Duett»), ellers «Follo Bjørkeved» |
+| `orderReference` | `follobjorkeved-<ID>`, brukes også til å oppdage dobbeltordre. Rader uten ID får en. |
+| `internalReference` | «follobjorkeved.no, bestilling <ID>» |
+| `invoiceNote` | «Levering av bjørkeved <leveringsdag>.» |
+| `carriers` | `[{ carrierId: 247 }]`, prosjekt 198 «Ved», som tidligere vedfakturaer |
 
 Linjer (`lineType: "normal"`, `taxSaleId: "vat"`):
 
 | Linje | `articleId` | `countAgreed` | `salesPrice` (eks. mva) |
 |---|---|---|---|
 | Ved | 189 (Ved (40l)) | Sekker | pris inkl. mva / 1,25 |
-| Bæring (hvis valgt) | bæringsvaren (mangler) | Sekker | tillegg per sekk inkl. mva / 1,25, linjetekst = valget |
+| Bæring (hvis valgt) | 172 (Tjeneste) | Sekker | tillegg per sekk inkl. mva / 1,25, linjetekst = valget |
 | Hjemlevering | 190 (Hjemlevering) | 1 | gebyr inkl. mva / 1,25 |
 
 Prisene hentes fra konstanter i `kalender.gs` som speiler `config.py`
@@ -191,10 +191,10 @@ kunden fikk oppgitt.
 ```
 endreStatus_(id, status, betalt)
   ├─ skriver Status og Betalt som i dag            ← alltid først, alltid ferdig
-  └─ hvis status går fra noe annet til «Levert»:
-       faktureringsutkast_(rad)                     ← feil fanges, gir bare merknad
+  └─ hvis status går fra noe annet til «Levert», og ikke betalt:
+       duettKladd_(id)                              ← feil fanges, gir bare merknad
 
-faktureringsutkast_(rad)
+duettKladd_(id)
   0. duett_på ≠ «ja» → hopp over (ingen merknad)
   1. LockService.getScriptLock().waitLock(20000)
   2. les raden på nytt; «Duett ordre» finnes → ferdig
@@ -210,13 +210,14 @@ faktureringsutkast_(rad)
 - **Selskapskontroll:** før første skriving i hver kjøring:
   `GET /System/v2/integration`, og navnet må være «FOLLO EIENDOMSSERVICE AS».
   Svaret huskes i 6 timer i CacheService. Annet selskap: stopp, merknad.
-- **«Marker som betalt»** (Levert → Levert) lager ingen ordre.
+- **«Betalt og levert»** og **«Marker som betalt»** lager ingen ordre.
 - **«Angre»** sletter ingenting i Duett. Eiersiden viser «Ordre #N ligger i
   Duett – slett den der for hånd hvis den ikke skal faktureres». Blir raden
   levert igjen, finnes ordrenummeret, og det lages ingen ny ordre.
 - **Avbestill** etter levert: samme som Angre.
 - **Prøv igjen:** ny handling `{action: "duett", id}` fra eiersiden, krever
-  innlogging som de andre. Kjører `faktureringsutkast_` for raden.
+  innlogging som de andre. Kjører `duettKladd_` for raden, bare når den er
+  levert og ikke betalt.
 - **Tidsbruk:** 3–5 kall mot Duett per levering, langt under grensen på
   2 500 kall i timen.
 
@@ -245,13 +246,14 @@ Apps Script til api.duett.no, aldri via nettleseren.
 
 ## Testtilfeller
 
-Kjøres først med en egen testfunksjon i Apps Script som bygger forespørslene
-uten å sende dem (tørrkjøring), deretter én ekte testbestilling etter ja fra
-Anders.
+Alle tilfellene under er kjørt 2026-10-28 i Node med et falskt regneark og et
+falskt Duett-API (28 tester, alle grønne). Eiersiden er sjekket i Chromium med
+en falsk kalender. Ekte test mot Duett gjenstår: én testbestilling med Anders
+som kunde, etter at skrivetilgangen er på plass.
 
 | # | Tilfelle | Forventet |
 |---|---|---|
-| 1 | Ny kunde, 20 sekker, ingen bæring, «Bare levert» | Kunde opprettes, ordre med 2 linjer, sum 2 279 kr inkl. mva, ligger som utkast |
+| 1 | Ny kunde, 20 sekker, ingen bæring, «Bare levert» | Kunde opprettes, ordre med 2 linjer, sum 2 279 kr inkl. mva, ligger som kladd |
 | 2 | Samme e-post som en eksisterende kunde | Ingen ny kunde, ordre på eksisterende |
 | 3 | Bare telefon, finnes i Duett | Kunden finnes på telefon |
 | 4 | To kunder med samme e-post | Ingen ordre, merknad |
@@ -262,7 +264,7 @@ Anders.
 | 9 | Nettbestilling uten navn | Ingen ordre, merknad «mangler navn» |
 | 10 | Adresse Kartverket ikke finner | Ingen ordre, merknad «fant ikke postnummer» |
 | 11 | Trykk «levert» to ganger raskt (to faner) | Én ordre (lås + `orderReference`-sjekk) |
-| 12 | «Marker som betalt» etterpå | Ingen ny ordre |
+| 12 | «Betalt og levert», eller «Marker som betalt» etterpå | Ingen kall mot Duett |
 | 13 | «Angre», så «levert» igjen | Ingen ny ordre, varsel om ordren i Duett |
 | 14 | Duett svarer 401/403/500, eller nett nede | Status i arket er endret, merknad og «Prøv igjen» |
 | 15 | `duett_på` = nei | Bare status i arket, ingen kall mot Duett |
@@ -280,21 +282,25 @@ stund, kan det vurderes:
 
 - automatisk sending bare for «Bare levert», og bare når navn, postnummer,
   e-post og sum er i orden; ellers blir ordren liggende som kladd,
-- ingen vanlig faktura for «Betalt og levert» (spørsmål 2),
+- «Betalt og levert» gjør fortsatt ingenting i Duett,
 - en bryter `duett_send` = `ja`/`nei` i Script Properties,
 - `CLAUDE.md` i regnskap-duett oppdateres først, siden regelen i dag er at
   ingenting skrives i Duett uten godkjenning.
 
-## Spørsmål til Anders
+## Avklart med Anders 2026-10-28
 
-1. ~~Status på ordren~~ **Avklart 2026-10-28:** i første omgang bare kladd
-   (`saved`, «startet ordre») for å teste. Ingenting faktureres eller sendes
-   automatisk.
-2. **«Betalt og levert»:** Kunden har allerede betalt (Vipps eller kontant?).
-   Skal det da lages en vanlig faktura, en kontantfaktura (`payType: cash`),
-   eller ingen ordre? En vanlig faktura ber kunden betale én gang til.
-3. **Navn i bestillingsskjemaet:** Skal vi legge til et påkrevd navnefelt?
-4. **Prosjekt og selger:** Skal ordrene ha prosjekt 198 «Ved» som før, og
-   hvem skal stå som «Vår referanse»?
-5. **Bæringsvare:** Én vare med pris per linje, eller én vare per valg?
-   Hvem oppretter den: regnskapsfører, eller dere i Duett?
+1. Bare kladd (`saved`) i første omgang, for å teste.
+2. «Betalt og levert» gjør ingenting i Duett.
+3. «Lag alt»: standardvalgene over (navnefelt i skjemaet, prosjekt 198 «Ved»,
+   bæring på «Tjeneste», vår referanse settes i «Koble til Duett») er brukt.
+   Kan endres.
+
+## Det som gjenstår
+
+- Skrivetilgang (OrderWrite) fra Duett. E-postutkast til api@duett.no ligger i
+  Gmail, ikke sendt.
+- Nøklene legges inn med «Koble til Duett», og bryteren slås på.
+- Én ekte testbestilling med Anders som kunde. Bekreft i Duett at kladden
+  havner under «Startede ordre», at kundenummeret ble laget, og at summen er
+  riktig. Oppdater `regnskap-duett/docs/duett-api.md` med det som da er
+  observert.

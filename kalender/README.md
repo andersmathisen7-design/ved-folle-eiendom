@@ -61,8 +61,8 @@ Regnearket **«Follo Bjørkeved – leveringskalender»** er allerede laget i Go
 Her ser dere alle bestillingene, sortert etter leveringsdag. Logg inn med passordet fra menyen **Vedlevering** i regnearket. Kryss av for «Husk meg» på din egen telefon.
 
 - **Per dag:** antall leveringer, **antall sekker som skal på bilen**, og hvor mye av de 5 timene som er brukt.
-- **Per bestilling:** navn, antall sekker, bæring, pris, beregnet tid og melding. Trykk på adressen for å åpne den i Google Maps, og på telefonnummeret for å ringe.
-- **Betalt og levert** eller **Bare levert** når veden er kjørt ut. Er den bare levert, står det «Levert, ikke betalt», og du kan trykke **Marker som betalt** når pengene er kommet. Øverst ser du hvor mange som er levert, men ikke betalt. Kolonnen **Betalt** i arket blir `ja`. **Avbestill** gjør tiden ledig igjen for andre kunder. Trykket feil? Trykk **Angre**.
+- **Per bestilling:** navn, antall sekker, bæring, pris, beregnet tid og melding. På leverte bestillinger står det om kladden er laget i Duett. Trykk på adressen for å åpne den i Google Maps, og på telefonnummeret for å ringe.
+- **Betalt og levert** eller **Bare levert** når veden er kjørt ut. **Bare levert** lager også en kladd i Duett (se «Faktura i Duett» under). Er den bare levert, står det «Levert, ikke betalt», og du kan trykke **Marker som betalt** når pengene er kommet. Øverst ser du hvor mange som er levert, men ikke betalt. Kolonnen **Betalt** i arket blir `ja`. **Avbestill** gjør tiden ledig igjen for andre kunder. Trykket feil? Trykk **Angre**.
 - **Sett dagen som full:** knappen ved hver dag, eller «Sett en dag som full» for en dag uten bestillinger. Kundene ser da dagen som «Fullt» i skjemaet. Bestillinger som er lagt inn, blir stående. Trykk **Åpne dagen igjen** for å angre.
 - **Legg inn telefonbestilling:** minuttene regnes ut av seg selv, og bestillingen teller med i kapasiteten.
 - **Skriv ut:** gir en kjøreliste med én dag per side, uten knapper og avbestilte leveringer.
@@ -81,3 +81,39 @@ Siden er skjult for Google. Uten riktig passord får man ikke se noe, og kundeda
 - **Endre skriptet:** etter endringer må du velge **Implementer → Administrer implementeringer → Rediger → Ny versjon**, ellers brukes den gamle koden. Første gang etter at ruteberegningen kom med, ber Google om tilgang til å «koble til en ekstern tjeneste». Det er oppslagene hos Kartverket og OSRM.
 
 Svarer ikke kalenderen (f.eks. nettfeil), går bestillingen likevel fram på e-post, med merknaden «ikke registrert i kalenderen». Da legger dere den inn i arket selv.
+
+## Faktura i Duett (kladd)
+
+Når du trykker **Bare levert** på eiersiden, lager kalenderen en **kladd** (startet ordre) i Duett for **FOLLO EIENDOMSSERVICE AS**. Ingenting faktureres eller sendes automatisk. Dere går gjennom kladden og sender fakturaen selv fra Duett.
+
+- **Betalt og levert** og **Marker som betalt** gjør ingenting i Duett.
+- **Kunden** finnes i Duett på e-post, og deretter på telefon. Finnes den ikke, opprettes den som privatkunde med navn, adresse, postnummer, e-post og telefon. Kundenummeret står i kolonnen **Duett kunde**. Står det et kundenummer der fra før, brukes det.
+- **Ordren** får tre linjer: ved (sekker × 89 kr), bæring (hvis valgt) og hjemlevering (499 kr). Prisene i Duett er uten mva, med 25 % mva på hver linje. Ordren får prosjekt 198 «Ved», bestillings-ID-en som referanse og leveringsdagen i fakturateksten. Ordrenummeret står i kolonnen **Duett ordre**.
+- **Kontroll:** summen av linjene må være lik **Totalpris** i arket, regnet i hele øre. Avviker den, lages ingen kladd.
+- **Aldri to kladder:** har raden et ordrenummer, eller finnes det alt en ordre i Duett med samme bestillings-ID, lages det ingen ny.
+- **Angre** eller **Avbestill** sletter ingenting i Duett. Eiersiden sier fra om at kladden må slettes i Duett for hånd.
+
+### Når Duett feiler
+
+Statusen i arket blir alltid lagret. Feilen står i kolonnen **Duett merknad** og på eiersiden («Ikke sendt til Duett – …»), med knappen **Prøv Duett igjen**. Vanlige grunner:
+
+| Merknad | Gjør dette |
+|---|---|
+| mangler navn | Skriv navnet i kolonnen **Navn**, og trykk «Prøv Duett igjen». |
+| fant ikke postnummer | Skriv adressen som «Gate 1, 1234 Sted» i kolonnen **Adresse**, og prøv igjen. |
+| summen stemmer ikke / kunne ikke lese totalprisen | Rett **Totalpris** (f.eks. `2279`), **Sekker** eller **Bæring**, og prøv igjen. Telefonbestillinger med «Bæres inn» må ha en pris som passer med et av bæringstilleggene på nettsiden. |
+| flere kunder i Duett passer | Finn riktig kunde i Duett, skriv kundenummeret i **Duett kunde**, og prøv igjen. |
+| nøkkelen har ikke skrivetilgang | Duett må gi integrasjonen rollen OrderWrite. |
+| fikk ikke kontakt med Duett / Duett svarte 500 | Vent litt og prøv igjen. |
+
+Feilmeldingene viser aldri nøklene.
+
+### Sett opp Duett (én gang)
+
+1. Få en integrasjonsnøkkel og en klientnøkkel med **skrivetilgang (OrderWrite)** fra Duett. Nøklene for «Datauttrekk» kan bare lese, og virker ikke til dette.
+2. Lim inn ny `kalender.gs` i Apps Script, og velg **Implementer → Administrer implementeringer → Rediger (blyanten) → Versjon: Ny versjon → Implementer**. Ellers brukes den gamle koden.
+3. Last regnearket på nytt. Velg **Vedlevering → Koble til Duett**, og lim inn integrasjonsnøkkelen, klientnøkkelen og hva som skal stå som «Vår referanse». Skriptet sjekker at nøklene gjelder FOLLO EIENDOMSSERVICE AS og viser hvilke tilganger de gir. Nøklene lagres bare i skriptets egne innstillinger, ikke i koden, i GitHub eller i nettleseren.
+4. Velg **Vedlevering → Slå Duett-kladd av eller på** for å slå det på. Det står av til du slår det på (`duett_på` = `nei`).
+5. Test med én bestilling der du selv er kunden. Sjekk i Duett at kunden og kladden ser riktige ut. Ikke send fakturaen.
+
+Kundedata går bare fra Apps Script til api.duett.no, aldri via nettleseren. Bæring føres på varen «Tjeneste» med pris per linje, fordi Duett bare har bæringsvarer for garasje og 1. etasje. Vil regnskapsfører heller ha en egen vare, endres `DUETT_VARER` øverst i `kalender.gs`.

@@ -25,7 +25,8 @@
 var ARK = "Bestillinger";
 var TIDSSONE = "Europe/Oslo";
 var KOLONNER = ["ID", "Leveringsdag", "Minutter", "Status", "Navn", "Telefon", "Adresse", "Område", "Sekker",
-                "Bæring", "Totalpris", "E-post", "Melding", "Registrert", "Lossetid", "Lat", "Lon", "Fast tid", "Betalt"];
+                "Bæring", "Totalpris", "E-post", "Melding", "Registrert", "Lossetid", "Lat", "Lon", "Fast tid", "Betalt",
+                "Duett kunde", "Duett ordre", "Duett merknad"];
 var STATUSER = ["Ny", "Bekreftet", "Levert", "Avbestilt"];
 var LEVERINGSDAGER = [1, 2];          // 1 = mandag, 2 = tirsdag
 var MAKS_DAGER_FRAM = 42;             // nettbestillinger maks 6 uker fram
@@ -43,12 +44,24 @@ var FOLLO = ["3207", "3212", "3214", "3216", "3218", "3220"];
 var MAKS_LEDIG_SJEKK_PER_TIME = 600;
 var MAKS_PUNKTER = 100;                         // OSRM tar maks 100 punkter per oppslag
 
+// Duett. «Bare levert» lager en kladd (startet ordre) i Duett for FOLLO EIENDOMSSERVICE AS. Ingenting faktureres
+// eller sendes herfra. Se docs/plans/levert-til-duett.md. Nøklene ligger bare i skriptegenskapene.
+var DUETT_URL = "https://api.duett.no";
+var DUETT_SELSKAP = "FOLLO EIENDOMSSERVICE AS";
+var DUETT_VARER = { ved: 189, levering: 190, baering: 172 };   // interne varer: Ved (40l), Hjemlevering, Tjeneste
+var DUETT_PROSJEKT_VED = 247;                                 // bæreren for prosjekt 198 «Ved»
+var PRIS_SEKK = 89, PRIS_LEVERING = 499;                       // kr inkl. mva, samme tall som config.py
+var BAERING_TILLEGG = [12, 15, 16, 20, 24, 28, 34, 36];        // kr per sekk inkl. mva, CARRY_OPTIONS i config.py
+
 // ------------------------------------------------------------------ meny i regnearket
 
 function onOpen() {
   SpreadsheetApp.getUi().createMenu("Vedlevering")
     .addItem("Lag nytt passord til eiersiden", "lagNyttPassord")
     .addItem("Logg ut alle enheter", "loggUtAlle")
+    .addSeparator()
+    .addItem("Koble til Duett", "kobleTilDuett")
+    .addItem("Slå Duett-kladd av eller på", "duettAvPa")
     .addToUi();
 }
 
@@ -187,6 +200,8 @@ function bestillinger_() {
       // Faste minutter: eieren har skrevet inn tiden selv (telefonbestilling eller rad lagt inn for hånd uten ID).
       fixed: !col(r, "ID") || /^(ja|x|1)$/i.test(String(col(r, "Fast tid")).trim()),
       paid: /^(ja|x|1)$/i.test(String(col(r, "Betalt")).trim()),
+      duettCustomer: String(col(r, "Duett kunde")).trim(), duettOrder: String(col(r, "Duett ordre")).trim(),
+      duettNote: String(col(r, "Duett merknad")).trim(),
       registered: reg instanceof Date ? Utilities.formatDate(reg, TIDSSONE, "yyyy-MM-dd HH:mm") : String(reg)
     });
   }
@@ -229,6 +244,8 @@ function leggTil_(b, status) {
 }
 
 // Betalt kan bare være ja for leverte bestillinger. «Angre» (status Ny) fjerner også betalt.
+// «Bare levert» lager en kladd i Duett etter at statusen er lagret. «Betalt og levert» og «Marker som betalt»
+// gjør ingenting i Duett. Feiler Duett, er statusen likevel lagret, og feilen står i «Duett merknad».
 function endreStatus_(id, status, betalt) {
   if (STATUSER.indexOf(status) < 0) return { ok: false, error: "ugyldig" };
   var sh = ark_(), rows = sh.getDataRange().getValues(), head = rows[0];
@@ -237,9 +254,15 @@ function endreStatus_(id, status, betalt) {
   for (var i = 1; i < rows.length; i++) {
     var radId = String((iId >= 0 && rows[i][iId]) || "rad-" + (i + 1));
     if (radId === id) {
+      var forrige = String(rows[i][iStatus]);
       sh.getRange(i + 1, iStatus + 1).setValue(status);
       if (iBetalt >= 0) sh.getRange(i + 1, iBetalt + 1).setValue(status === "Levert" && betalt ? "ja" : "");
-      return { ok: true };
+      var svar = { ok: true };
+      if (status === "Levert" && !betalt && forrige !== "Levert") {
+        SpreadsheetApp.flush();
+        svar.duett = duettKladd_(id);
+      }
+      return svar;
     }
   }
   return { ok: false, error: "fant ikke bestillingen" };
@@ -264,11 +287,11 @@ function settFull_(dato, full) {
 
 // ------------------------------------------------------------------ ruter
 
-// Slår opp en adresse i Follo hos Kartverket. Gir { lat, lon }, eller null. Svaret huskes i 6 timer.
+// Slår opp en adresse i Follo hos Kartverket. Gir { lat, lon, postnr, poststed }, eller null. Svaret huskes i 6 timer.
 function geokod_(adresse, omrade) {
   var a = String(adresse || "").replace(/\s+/g, " ").trim();
   if (a.length < 3) return null;
-  var cache = CacheService.getScriptCache(), nokkel = "geo_" + sha_(a.toLowerCase() + "|" + omrade).slice(0, 32);
+  var cache = CacheService.getScriptCache(), nokkel = "geo2_" + sha_(a.toLowerCase() + "|" + omrade).slice(0, 32);
   var husket = cache.get(nokkel);
   if (husket) return husket === "-" ? null : JSON.parse(husket);
   // Først bare gatenavn og nummer i kommunen for området, så hele teksten i hele landet (men bare treff i Follo).
@@ -287,7 +310,8 @@ function geokod_(adresse, omrade) {
       var liste = (JSON.parse(r.getContentText()).adresser || [])
         .filter(function (x) { return FOLLO.indexOf(x.kommunenummer) >= 0 && x.representasjonspunkt; });
       var adr = liste.filter(riktigNr)[0] || liste[0];
-      if (adr) treff = { lat: +adr.representasjonspunkt.lat.toFixed(6), lon: +adr.representasjonspunkt.lon.toFixed(6) };
+      if (adr) treff = { lat: +adr.representasjonspunkt.lat.toFixed(6), lon: +adr.representasjonspunkt.lon.toFixed(6),
+                         postnr: String(adr.postnummer || ""), poststed: String(adr.poststed || "") };
     } catch (e) { svarte = false; }
   }
   // «Fant ikke» huskes bare når Kartverket faktisk svarte, så et kort brudd ikke henger igjen.
@@ -487,7 +511,7 @@ function doPost(e) {
   // Eiersiden.
   if (b.action === "login") return svar_(loggInn_(b.password, b.remember === true));
   if (b.action === "logout") { loggUt_(b.token); return svar_({ ok: true }); }
-  if (b.action === "list" || b.action === "status" || b.action === "add" || b.action === "full") {
+  if (b.action === "list" || b.action === "status" || b.action === "add" || b.action === "full" || b.action === "duett") {
     if (!gyldigBillett_(b.token)) return svar_({ ok: false, error: "token" });
     if (b.action === "list") {
       var alle = bestillinger_();
@@ -496,6 +520,7 @@ function doPost(e) {
     }
     if (b.action === "status") return svar_(endreStatus_(String(b.id || ""), String(b.status || ""), b.paid === true));
     if (b.action === "full") return svar_(settFull_(String(b.date || ""), b.full === true));
+    if (b.action === "duett") return svar_(provDuettIgjen_(String(b.id || "")));
     if (!/^\d{4}-\d{2}-\d{2}$/.test(String(b.date || "")) || !(Number(b.minutes) >= 0 && Number(b.minutes) <= 24 * 60))
       return svar_({ ok: false, error: "ugyldig" });
     // Har eieren skrevet inn minuttene selv, kommer ingen lossetid. Da brukes minuttene som de er.
@@ -531,7 +556,6 @@ function doPost(e) {
     var plan = planer_(enDag, b)[dag];
     // En tom dag tar alltid imot, også en stor bestilling som alene er over grensen.
     if (plan && plan.minutter > 0 && plan.med > kap) return svar_({ ok: false, full: true, booked: bestilt_(planer_(dager)) });
-    b.name = "";
     b.fixed = false;   // bare eieren kan sette faste minutter
     var id = leggTil_(b, "Ny");
     cache.put("nettbestillinger", String(n + 1), 3600);
@@ -539,4 +563,321 @@ function doPost(e) {
   } finally {
     lock.releaseLock();
   }
+}
+
+// ------------------------------------------------------------------ Duett
+
+// Menyvalg: spør etter nøklene, tester dem, og lagrer dem i skriptegenskapene. Nøklene vises aldri igjen.
+function kobleTilDuett() {
+  var ui = SpreadsheetApp.getUi(), props = PropertiesService.getScriptProperties();
+  var spor = function (tekst) {
+    var r = ui.prompt("Koble til Duett", tekst, ui.ButtonSet.OK_CANCEL);
+    return r.getSelectedButton() === ui.Button.OK ? r.getResponseText().trim() : null;
+  };
+  var ik = spor("Integrasjonsnøkkel (X-Api-Integration-Key):");
+  if (!ik) return;
+  var ck = spor("Klientnøkkel (X-Api-Client-Key):");
+  if (!ck) return;
+  var ref = spor("«Vår referanse» på ordrene, f.eks. navnet ditt:");
+  if (ref === null) return;
+  var test = duettIntegrasjon_({ integrasjon: ik, klient: ck });
+  if (!test.ok) return ui.alert("Fikk ikke koblet til Duett: " + test.feil + "\n\nNøklene er ikke lagret.");
+  props.setProperties({ DUETT_INTEGRATION_KEY: ik, DUETT_CLIENT_KEY: ck, duett_var_referanse: ref || "Follo Bjørkeved" });
+  CacheService.getScriptCache().remove("duett_ok");
+  ui.alert("Koblet til " + test.selskap + ".\nTilgang: " + test.roller.join(", ") + "\n\n" +
+    (test.kanSkrive ? "Nøkkelen kan lage ordrer." : "Nøkkelen kan IKKE lage ordrer ennå (mangler OrderWrite). Be Duett om tilgang.") +
+    "\nDuett-kladd er " + (duettPa_() ? "på." : "av. Slå den på med «Slå Duett-kladd av eller på»."));
+}
+
+// Menyvalg: bryteren duett_på = ja/nei. Av betyr at «levert» bare endrer arket.
+function duettAvPa() {
+  var ui = SpreadsheetApp.getUi(), pa = !duettPa_();
+  if (ui.alert("Duett-kladd er " + (pa ? "av" : "på") + ".", (pa ? "Slå på" : "Slå av") + " nå?", ui.ButtonSet.YES_NO) !== ui.Button.YES) return;
+  PropertiesService.getScriptProperties().setProperty("duett_på", pa ? "ja" : "nei");
+  ui.alert("Duett-kladd er " + (pa ? "på. «Bare levert» lager nå en kladd i Duett." : "av."));
+}
+
+function duettPa_() { return PropertiesService.getScriptProperties().getProperty("duett_på") === "ja"; }
+
+function duettNokler_() {
+  var p = PropertiesService.getScriptProperties();
+  var ik = p.getProperty("DUETT_INTEGRATION_KEY"), ck = p.getProperty("DUETT_CLIENT_KEY");
+  return ik && ck ? { integrasjon: ik, klient: ck } : null;
+}
+
+// Ett kall mot Duett. Gir { ok, kode, data } eller { ok: false, feil }. Feilteksten har aldri nøkler, headere eller adressen.
+function duettKall_(metode, sti, body, nokler) {
+  nokler = nokler || duettNokler_();
+  if (!nokler) return { ok: false, feil: "Duett er ikke koblet til (Vedlevering → Koble til Duett)" };
+  var opt = { method: metode, muteHttpExceptions: true,
+    headers: { "X-Api-Integration-Key": nokler.integrasjon, "X-Api-Client-Key": nokler.klient, Accept: "application/json" } };
+  if (body) { opt.contentType = "application/json"; opt.payload = JSON.stringify(body); }
+  var r;
+  try { r = UrlFetchApp.fetch(DUETT_URL + sti, opt); }
+  catch (e) { return { ok: false, feil: "fikk ikke kontakt med Duett" }; }   // feilteksten kan inneholde adressen med kundedata
+  var kode = r.getResponseCode(), data = null;
+  try { data = JSON.parse(r.getContentText()); } catch (e) {}
+  if (kode >= 200 && kode < 300) return { ok: true, kode: kode, data: data };
+  return { ok: false, kode: kode, feil: duettFeiltekst_(kode, data) };
+}
+
+function duettFeiltekst_(kode, data) {
+  var kjent = { 401: "nøklene ble ikke godtatt", 403: "nøkkelen har ikke tilgang til dette", 429: "for mange kall, prøv igjen om litt" };
+  var deler = [];
+  if (data && typeof data === "object") {
+    ["title", "detail", "message"].forEach(function (k) { if (typeof data[k] === "string" && data[k]) deler.push(data[k]); });
+    if (data.errors && typeof data.errors === "object") Object.keys(data.errors).forEach(function (k) { deler.push(k + ": " + data.errors[k]); });
+  }
+  return ("Duett svarte " + kode + (kjent[kode] ? " (" + kjent[kode] + ")" : "") + (deler.length ? ": " + deler.join(" – ") : "")).slice(0, 200);
+}
+
+// GET-adresse med filter. Duett vil ha filter[felt][OP]=verdi.
+function duettSti_(base, par) {
+  return base + "?" + par.map(function (p) { return encodeURIComponent(p[0]) + "=" + encodeURIComponent(p[1]); }).join("&");
+}
+
+// Hvilket selskap og hvilke roller nøklene gir. Bare FOLLO EIENDOMSSERVICE AS godtas.
+function duettIntegrasjon_(nokler) {
+  var r = duettKall_("get", "/System/v2/integration", null, nokler);
+  if (!r.ok) return r;
+  var d = r.data || {}, selskap = String((d.clientAccess || {}).name || ""), roller = d.grantedAccess || [];
+  if (selskap.toUpperCase() !== DUETT_SELSKAP) return { ok: false, feil: "nøklene gjelder et annet selskap (" + selskap + ")" };
+  return { ok: true, selskap: selskap, roller: roller, kanSkrive: roller.indexOf("OrderWrite") >= 0 };
+}
+
+// Sjekkes før første skriving, og huskes i 6 timer.
+function duettKlar_() {
+  var cache = CacheService.getScriptCache();
+  if (cache.get("duett_ok")) return { ok: true };
+  var t = duettIntegrasjon_();
+  if (!t.ok) return t;
+  if (!t.kanSkrive) return { ok: false, feil: "nøkkelen har ikke skrivetilgang i Duett (OrderWrite)" };
+  cache.put("duett_ok", "1", 6 * 3600);
+  return { ok: true };
+}
+
+// ------------------------------------------------------------------ Duett: beløp og adresse
+
+// «2 279 kr», «2 279 kr per levering» eller «2279,-» → øre som heltall. Null hvis beløpet ikke kan leses.
+function ore_(tekst) {
+  var s = String(tekst == null ? "" : tekst);
+  if (/avtales/i.test(s)) return null;
+  var m = s.match(/\d[\d   .]*(,\d{1,2})?/);
+  if (!m) return null;
+  var kr = m[0].split(",")[0].replace(/\D/g, ""), des = m[1] ? m[1].slice(1) : "";
+  if (!kr || kr.length > 7) return null;
+  return Number(kr) * 100 + (des ? Number((des + "0").slice(0, 2)) : 0);
+}
+
+// Bæringstillegget per sekk i hele kroner. Nettbestillinger har «(+16 kr/sekk)» i teksten, «Ingen bæring …» er 0.
+// Telefonbestillinger har bare «Bæres inn». Da regnes tillegget ut fra totalprisen, og det må være et av tilleggene på nettsiden.
+function baering_(b, totalOre) {
+  var t = String(b.carry || "").trim(), m = t.match(/\(\+\s*(\d+)\s*kr\s*\/\s*sekk\)/i);
+  if (m) return Number(m[1]);
+  if (!t || /^ingen/i.test(t)) return 0;
+  if (!(b.sacks > 0) || totalOre == null) return null;
+  var rest = totalOre - b.sacks * PRIS_SEKK * 100 - PRIS_LEVERING * 100;
+  if (rest <= 0 || rest % (b.sacks * 100)) return null;
+  return BAERING_TILLEGG.indexOf(rest / (b.sacks * 100)) >= 0 ? rest / (b.sacks * 100) : null;
+}
+
+// Pris uten mva i kroner, fra øre med 25 % mva. Null hvis det ikke går opp i hele øre.
+function eksMva_(ore) { return (ore * 4) % 5 ? null : ore * 4 / 5 / 100; }
+
+// Gateadresse, postnummer og poststed. Står postnummeret i adressen, brukes det; ellers slås adressen opp hos Kartverket.
+function postadresse_(b) {
+  var a = String(b.address || "").replace(/\s+/g, " ").trim();
+  var m = a.match(/^(.*?)[,\s]+(\d{4})\s+([A-Za-zÆØÅæøå][A-Za-zÆØÅæøå .\-]*)$/);
+  if (m && m[1]) return { gate: m[1].replace(/,\s*$/, "").trim(), postnr: m[2], poststed: m[3].trim() };
+  var p = geokod_(a, b.area);
+  return p && /^\d{4}$/.test(p.postnr) ? { gate: a.split(",")[0].trim(), postnr: p.postnr, poststed: p.poststed } : null;
+}
+
+function telefon8_(t) {
+  var d = String(t || "").replace(/\D/g, "");
+  if (d.length === 12 && d.indexOf("0047") === 0) d = d.slice(4);
+  if (d.length === 10 && d.indexOf("47") === 0) d = d.slice(2);
+  return /^\d{8}$/.test(d) ? d : "";
+}
+
+// Ordrelinjene og summen i øre. Gir { linjer, sumOre } eller { feil }.
+function ordrelinjer_(b) {
+  var totalOre = ore_(b.total);
+  if (totalOre == null) return { feil: "kunne ikke lese totalprisen («" + String(b.total).slice(0, 40) + "»)" };
+  if (!(b.sacks > 0)) return { feil: "mangler antall sekker" };
+  var tillegg = baering_(b, totalOre);
+  if (tillegg == null) return { feil: "kunne ikke finne bæringstillegget («" + String(b.carry).slice(0, 40) + "»)" };
+  var linje = function (vare, navn, antall, kr) {
+    return { articleId: vare, lineType: "normal", name: navn, countAgreed: antall, salesPrice: eksMva_(kr * 100), taxSaleId: "vat" };
+  };
+  var linjer = [linje(DUETT_VARER.ved, "Bjørkeved, 40 l sekk", b.sacks, PRIS_SEKK)];
+  if (tillegg) {
+    var valg = String(b.carry).replace(/\s*\(\+.*$/, "").trim();
+    linjer.push(linje(DUETT_VARER.baering, "Bæring av ved" + (valg && !/^bæres inn$/i.test(valg) ? ": " + valg : ""), b.sacks, tillegg));
+  }
+  linjer.push(linje(DUETT_VARER.levering, "Hjemlevering", 1, PRIS_LEVERING));
+  if (linjer.some(function (l) { return l.salesPrice == null; })) return { feil: "en pris går ikke opp i hele øre uten mva" };
+  var sumOre = b.sacks * PRIS_SEKK * 100 + b.sacks * tillegg * 100 + PRIS_LEVERING * 100;
+  if (sumOre !== totalOre)
+    return { feil: "summen stemmer ikke: sekker og bæring gir " + sumOre / 100 + " kr, arket sier " + totalOre / 100 + " kr" };
+  return { linjer: linjer, sumOre: sumOre };
+}
+
+// ------------------------------------------------------------------ Duett: kunde og ordre
+
+// Kunder som passer, uten slettede. Gir { ok, liste } eller { ok: false, feil }.
+function duettKunder_(par) {
+  var r = duettKall_("get", duettSti_("/Customer/v2", par.concat([["extend", "ContactInfo"], ["filter[take]", "10"]])));
+  if (!r.ok) return r;
+  return { ok: true, liste: (r.data || []).filter(function (k) { return k && k.show !== false; }) };
+}
+
+// Finner kunden: kundenummeret i arket, så e-post, så telefon. Gir { kunde }, { feil } eller {} (ingen treff).
+function finnKunde_(b) {
+  if (b.duettCustomer) {
+    var n = duettKunder_([["filter[customerNumber][EQ]", b.duettCustomer]]);
+    if (!n.ok) return { feil: n.feil };
+    return n.liste.length === 1 ? { kunde: n.liste[0] } : { feil: "fant ikke kundenummer " + b.duettCustomer + " i Duett" };
+  }
+  var tlf = telefon8_(b.phone), sok = [];
+  if (b.email) sok.push([["filter[contactInfo.email][EQ]", String(b.email).trim().toLowerCase()]]);
+  if (tlf) {
+    var former = [tlf, "+47" + tlf, tlf.replace(/(\d{3})(\d{2})(\d{3})/, "$1 $2 $3"), "+47 " + tlf.replace(/(\d{3})(\d{2})(\d{3})/, "$1 $2 $3")];
+    sok.push(former.map(function (f) { return ["filter[contactInfo.mobile][IN]", f]; }));
+    sok.push(former.map(function (f) { return ["filter[contactInfo.phone1][IN]", f]; }));
+  }
+  for (var i = 0; i < sok.length; i++) {
+    var r = duettKunder_(sok[i]);
+    if (!r.ok) return { feil: r.feil };
+    var unike = {};
+    r.liste.forEach(function (k) { unike[k.id] = k; });
+    var ider = Object.keys(unike);
+    if (ider.length === 1) return { kunde: unike[ider[0]] };
+    if (ider.length > 1) return { feil: "flere kunder i Duett passer – skriv kundenummeret i kolonnen «Duett kunde» og prøv igjen" };
+  }
+  return {};
+}
+
+// Ny privatkunde. Duett lager kundenummeret selv.
+function nyKunde_(b, adr) {
+  var tlf = telefon8_(b.phone), epost = String(b.email || "").trim().toLowerCase();
+  var r = duettKall_("post", "/Customer/v2", {
+    name: String(b.name).slice(0, 250),
+    address: { address1: adr.gate.slice(0, 250), zipCodeKey: adr.postnr },
+    contactInfo: { email: epost || null, mobile: tlf || null },
+    paymentInfo: epost ? { invoiceEmail: epost, invoiceSendOption: "email" } : null
+  });
+  if (r.ok && r.data && r.data.id) return { kunde: r.data };
+  if (r.ok || r.kode === 409) {
+    var igjen = finnKunde_(b);   // laget, men svaret manglet kunden, eller samme kall to ganger
+    if (igjen.kunde) return igjen;
+  }
+  return { feil: r.ok ? "kunden ble kanskje laget, men Duett svarte uten kundenummer – sjekk i Duett" : r.feil };
+}
+
+// Ordre som allerede er laget for bestillingen (finnes på orderReference). Gir { ok, ordre } (ordre kan være null).
+function finnOrdre_(ref) {
+  var r = duettKall_("get", duettSti_("/Order/v2", [["filter[orderReference][EQ]", ref], ["filter[take]", "5"]]));
+  if (!r.ok) return r;
+  return { ok: true, ordre: (r.data || [])[0] || null };
+}
+
+function ordreNr_(o) { return (o.number || "id " + o.id) + "/" + o.invoiceYear; }
+
+// Lager kladden i Duett for én bestilling. Statusen i arket er alt lagret. Gir { ok, ordre } eller { ok: false, feil },
+// og skriver kundenummer, ordrenummer eller merknad i raden. Kaster aldri.
+function duettKladd_(id) {
+  if (!duettPa_()) return { ok: false, av: true };
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(20000)) return { ok: false, feil: "kalenderen var opptatt – prøv igjen" };
+  var rad = null;
+  try {
+    rad = duettRad_(id);
+    if (!rad) return { ok: false, feil: "fant ikke bestillingen" };
+    var b = rad.b;
+    if (b.duettOrder) return { ok: true, ordre: b.duettOrder };
+    var ut = lagKladd_(b, rad);
+    rad.sett("Duett merknad", ut.ok ? (ut.merknad || "") : ut.feil);
+    if (ut.ok) rad.sett("Duett ordre", ut.ordre);
+    return ut;
+  } catch (e) {
+    if (rad) try { rad.sett("Duett merknad", "uventet feil i skriptet"); } catch (e2) {}
+    return { ok: false, feil: "uventet feil i skriptet" };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function lagKladd_(b, rad) {
+  var klar = duettKlar_();
+  if (!klar.ok) return klar;
+  var ref = "follobjorkeved-" + b.id;
+  var fra = finnOrdre_(ref);
+  if (!fra.ok) return fra;
+  if (fra.ordre) return { ok: true, ordre: ordreNr_(fra.ordre) };   // laget før, men nummeret kom ikke inn i arket
+
+  if (!String(b.name || "").trim()) return { ok: false, feil: "mangler navn – skriv navnet i arket og prøv igjen" };
+  var l = ordrelinjer_(b);
+  if (l.feil) return { ok: false, feil: l.feil };
+  var adr = postadresse_(b);
+  if (!adr) return { ok: false, feil: "fant ikke postnummer – skriv adressen som «Gate 1, 1234 Sted» i arket og prøv igjen" };
+
+  var k = finnKunde_(b);
+  if (k.feil) return { ok: false, feil: k.feil };
+  if (!k.kunde) k = nyKunde_(b, adr);
+  if (k.feil) return { ok: false, feil: k.feil };
+  if (k.kunde.customerNumber) rad.sett("Duett kunde", k.kunde.customerNumber);
+
+  var idag = idag_(), p = b.date.split("-");
+  var ordre = {
+    customerId: k.kunde.id, orderCategory: "order", orderType: "normal", status: "saved", payType: "invoice",
+    config: { directInvoicing: false },
+    invoiceYear: Number(idag.slice(0, 4)), orderDate: idag + "T00:00:00", deliveryDate: b.date + "T00:00:00",
+    deliveryAddress: adr.gate + "\r\n" + adr.postnr + " " + adr.poststed,
+    ourReference: PropertiesService.getScriptProperties().getProperty("duett_var_referanse") || "Follo Bjørkeved",
+    orderReference: ref, internalReference: "follobjorkeved.no, bestilling " + b.id,
+    invoiceNote: "Levering av bjørkeved " + Number(p[2]) + "." + Number(p[1]) + "." + p[0] + ".",
+    carriers: [{ carrierId: DUETT_PROSJEKT_VED }],
+    orderLines: l.linjer
+  };
+  var r = duettKall_("post", "/Order/v2", ordre);
+  var o = r.ok ? r.data : null;
+  if (!o || !o.id) {
+    var igjen = finnOrdre_(ref);   // 409 (samme kall to ganger) eller svar uten ordre: sjekk om den ble laget
+    if (igjen.ok && igjen.ordre) o = igjen.ordre;
+    else return { ok: false, feil: r.ok ? "Duett svarte uten ordrenummer – sjekk i Duett før du prøver igjen" : r.feil };
+  }
+  var nr = ordreNr_(o), brutto = Math.round(Number(o.grossAmount) * 100);
+  var merknad = o.grossAmount != null && brutto !== l.sumOre
+    ? "kladd " + nr + " er laget, men Duett regnet " + brutto / 100 + " kr i stedet for " + l.sumOre / 100 + " kr – sjekk den" : "";
+  return { ok: true, ordre: nr, merknad: merknad };
+}
+
+// Raden for en bestilling, med en hjelper som skriver i en kolonne. Rader uten ID får en, så orderReference blir fast.
+function duettRad_(id) {
+  var sh = ark_(), head = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0], iId = head.indexOf("ID");
+  var alle = bestillinger_(), b = alle.filter(function (x) { return x.id === id; })[0];
+  if (!b) return null;
+  var rows = sh.getDataRange().getValues(), nr = -1;
+  for (var i = 1; i < rows.length; i++) if (String((iId >= 0 && rows[i][iId]) || "rad-" + (i + 1)) === id) { nr = i + 1; break; }
+  if (nr < 0) return null;
+  var sett = function (navn, verdi) {
+    var c = head.indexOf(navn);
+    if (c >= 0) sh.getRange(nr, c + 1).setValue(verdi === "" ? "" : "'" + tekst_(verdi, 300).replace(/^'/, ""));
+  };
+  if (!rows[nr - 1][iId] && iId >= 0) {
+    b.id = Utilities.getUuid().slice(0, 8);
+    sh.getRange(nr, iId + 1).setValue(b.id);
+  }
+  return { b: b, sett: sett };
+}
+
+// «Prøv igjen» på eiersiden. Bare for leverte bestillinger som ikke er betalt og ikke har en ordre i Duett.
+function provDuettIgjen_(id) {
+  var b = bestillinger_().filter(function (x) { return x.id === id; })[0];
+  if (!b) return { ok: false, error: "fant ikke bestillingen" };
+  if (b.status !== "Levert" || b.paid) return { ok: false, error: "bare bestillinger som er levert og ikke betalt, sendes til Duett" };
+  if (!duettPa_()) return { ok: false, error: "Duett-kladd er slått av (Vedlevering → Slå Duett-kladd av eller på)" };
+  var r = duettKladd_(id);
+  return r.ok ? { ok: true, duett: r } : { ok: false, error: "ikke sendt til Duett – " + r.feil };
 }

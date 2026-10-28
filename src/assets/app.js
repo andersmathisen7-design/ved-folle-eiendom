@@ -317,7 +317,7 @@
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" }, // text/plain gir ingen CORS-forhåndsforespørsel
       body: JSON.stringify({ date: dayInput.value, minutes: orderMinutes(), service: serviceMinutes(), capacity: D.minutes_per_day || 300,
-        area: data["Område"], sacks: +data["Antall sekker"], phone: data["Telefon"],
+        area: data["Område"], sacks: +data["Antall sekker"], name: data["Navn"] || "", phone: data["Telefon"],
         address: data["Adresse"], carry: data["Bæring"], total: data["Beregnet totalpris"],
         email: data.email || "",
         // Vedabonnement: hyppigheten står først i meldingen, så eieren ser den på eiersiden.

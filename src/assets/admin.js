@@ -163,6 +163,14 @@
     // Levert, men ikke betalt: kan merkes som betalt senere.
     var btns = !done ? btn("Levert", "Betalt og levert", true) + btn("Levert", "Bare levert", false, true) + btn("Avbestilt", "Avbestill", false, true) :
       (o.status === "Levert" && !o.paid ? btn("Levert", "Marker som betalt", true) : "") + btn("Ny", "Angre", false, true);
+    // Duett: «Bare levert» lager en kladd der. Feil vises med en knapp for å prøve igjen.
+    var retry = o.status === "Levert" && !o.paid && !o.duettOrder && o.duettNote;
+    if (retry) btns += '<button type="button" class="btn btn-sm btn-ghost" data-duett="' + esc(o.id) + '">Prøv Duett igjen</button>';
+    var duett = o.duettOrder ? (o.status === "Levert"
+        ? '<p class="ao-duett">Sendt til Duett som kladd #' + esc(o.duettOrder) + (o.paid ? ". Betalt, så kladden skal kanskje ikke faktureres." : "") + '</p>'
+        : '<p class="ao-duett warn">Kladd #' + esc(o.duettOrder) + ' ligger i Duett. Slett den der for hånd hvis den ikke skal faktureres.</p>') +
+        (o.duettNote ? '<p class="ao-duett warn">' + esc(o.duettNote) + '</p>' : "")
+      : retry ? '<p class="ao-duett warn">Ikke sendt til Duett – ' + esc(o.duettNote) + '</p>' : "";
     return '<article class="card admin-order st-' + esc(o.status.toLowerCase()) + '">' +
       '<div class="ao-head"><strong>' + (stop ? stop.nr + '. ' : "") + esc(o.name || o.address || o.phone || "(uten navn)") + '</strong>' +
       (done ? '<span class="pill' + (o.status === "Levert" && !o.paid ? " pill-unpaid" : "") + '">' + esc(pill) + '</span>' : "") + '</div>' +
@@ -174,6 +182,7 @@
       (o.email ? ' &nbsp; <a href="mailto:' + esc(o.email) + '">' + esc(o.email) + '</a>' : "") + '</p>' +
       (o.message ? '<p class="ao-msg">💬 ' + esc(o.message) + '</p>' : "") +
       '<p class="muted small">Bestilt ' + esc(o.registered) + '</p>' +
+      duett +
       '<div class="ao-btns">' + btns + '</div>' +
       '</article>';
   }
@@ -181,10 +190,21 @@
   $("a-list").addEventListener("click", function (e) {
     var f = e.target.closest("button[data-full]");
     if (f) return setFull(f, f.dataset.date, f.dataset.full === "1");
+    var dt = e.target.closest("button[data-duett]");
+    if (dt) {
+      dt.disabled = true; dt.innerHTML = SPIN + "Sender …";
+      return post({ action: "duett", id: dt.dataset.duett }).then(function (j) {
+        if (!j.ok) alert(ERR[j.error] || j.error || "Ikke sendt til Duett.");
+        return load();
+      }).catch(function () { alert("Fikk ikke kontakt med kalenderen."); load(); });
+    }
     var b = e.target.closest("button[data-status]");
     if (!b) return;
     var st = b.dataset.status;
     if (st === "Avbestilt" && !confirm("Avbestille denne leveringen? Tiden blir ledig for andre kunder.")) return;
+    var o = orders.filter(function (x) { return x.id === b.dataset.id; })[0];
+    if (o && o.duettOrder && (st === "Ny" || st === "Avbestilt") &&
+        !confirm("Kladd #" + o.duettOrder + " ligger i Duett og blir ikke slettet. Slett den i Duett for hånd hvis den ikke skal faktureres. Fortsette?")) return;
     b.disabled = true; b.innerHTML = SPIN + "Lagrer …";
     post({ action: "status", id: b.dataset.id, status: st, paid: b.dataset.paid === "1" }).then(function (j) {
       if (!j.ok) alert(ERR[j.error] || "Kunne ikke lagre: " + (j.error || "ukjent feil"));
