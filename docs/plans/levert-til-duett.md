@@ -145,7 +145,7 @@ bankkonto.
 |---|---|
 | `customerId` | fra kunden |
 | `orderCategory` / `orderType` | `order` / `normal` |
-| `status` | `saved` eller `orderReadyToSend` (spørsmål 1) |
+| `status` | `saved` (startet ordre, avklart med Anders 2026-10-28) |
 | `config.directInvoicing` | `false`, alltid |
 | `payType` | `invoice` (spørsmål 2) |
 | `invoiceYear` | året for ordredatoen |
@@ -270,12 +270,26 @@ Anders.
 | 17 | POST gir 409 | Ordren finnes via `orderReference`, nummeret skrives i arket |
 | 18 | Vedabonnement («… per levering») | Beløpet leses riktig, én ordre per levert rad |
 
+## Senere: automatisk sending (ikke en del av denne runden)
+
+Anders har spurt om fakturaen kan sendes automatisk når han trykker
+«levert». API-et kan det (`config.directInvoicing: true` og
+`sendMethod: "email"`), men en sendt faktura kan bare rettes med kreditnota.
+Avtalt 2026-10-28: først bare kladd, for å teste. Når tallene har stemt en
+stund, kan det vurderes:
+
+- automatisk sending bare for «Bare levert», og bare når navn, postnummer,
+  e-post og sum er i orden; ellers blir ordren liggende som kladd,
+- ingen vanlig faktura for «Betalt og levert» (spørsmål 2),
+- en bryter `duett_send` = `ja`/`nei` i Script Properties,
+- `CLAUDE.md` i regnskap-duett oppdateres først, siden regelen i dag er at
+  ingenting skrives i Duett uten godkjenning.
+
 ## Spørsmål til Anders
 
-1. **Status på ordren:** `saved` («startet ordre», et rent utkast) eller
-   `orderReadyToSend` («klar til sending»)? Begge blir liggende til dere
-   sender selv. Forslag: `saved` i testperioden, `orderReadyToSend` når
-   dere stoler på tallene.
+1. ~~Status på ordren~~ **Avklart 2026-10-28:** i første omgang bare kladd
+   (`saved`, «startet ordre») for å teste. Ingenting faktureres eller sendes
+   automatisk.
 2. **«Betalt og levert»:** Kunden har allerede betalt (Vipps eller kontant?).
    Skal det da lages en vanlig faktura, en kontantfaktura (`payType: cash`),
    eller ingen ordre? En vanlig faktura ber kunden betale én gang til.
