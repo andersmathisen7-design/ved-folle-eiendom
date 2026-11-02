@@ -3,7 +3,7 @@
   var fmt = function (n) { return n.toLocaleString("nb-NO") + " kr"; };
   var EVENT_NAMES = {
     click_tel: "Trykket på telefonnummer", begin_checkout: "Begynte på bestilling",
-    generate_lead: "Bestilling sendt", order_error: "Feil ved sending av bestilling",
+    generate_lead: "Bestilling sendt", order_error: "Feil ved sending av bestilling", order_retry_ok: "Bestillingen kom fram på forsøk",
     purchase_lead_view: "Så takkesiden", article_cta: "Klikket bestill i artikkel",
     calculator_to_order: "Brukte vedkalkulatoren", price_check: "Sjekket pris i skjemaet",
     form_invalid: "Trykket Send, men et felt manglet",
@@ -401,7 +401,12 @@
     });
   });
 
-  function send(data, total, setBtn) {
+  // FormSubmit feiler av og til («Load failed», «Failed to fetch», «Server Error»). Da prøver vi på nytt to ganger
+  // før kunden får feilmelding. Uke 44 i 2026 feilet 5 av 9 innsendinger. Ulempe: kom den første fram likevel, kan dere få
+  // samme bestilling to ganger (samme telefonnummer).
+  var RETRY_MS = [1500, 4000];
+  function send(data, total, setBtn, attempt) {
+    attempt = attempt || 0;
     fetch(S.endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
@@ -409,6 +414,7 @@
     }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (res) {
         if (!res.ok || String(res.j.success) !== "true") throw new Error(res.j.message || "Feil");
+        if (attempt) track("order_retry_ok:" + (attempt + 1));
         track("generate_lead", { value: total, currency: "NOK", sacks: +data["Antall sekker"] });
         track("bestilt_antall:" + qtyBucket(+data["Antall sekker"]));
         track("bestilt_hyppighet:" + freqKey());
@@ -424,6 +430,10 @@
         location.href = (S.base || "") + "/takk/";
       })
       .catch(function (err) {
+        if (attempt < RETRY_MS.length) {
+          setTimeout(function () { send(data, total, setBtn, attempt + 1); }, RETRY_MS[attempt]);
+          return;
+        }
         setBtn(false);
         // Bestillingen skal ikke gå tapt: la kunden sende den som vanlig e-post med alt ferdig utfylt.
         var lines = [];
