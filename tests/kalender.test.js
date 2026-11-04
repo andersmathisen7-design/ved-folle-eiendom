@@ -26,7 +26,7 @@ const tests = [
   ["Vanlig bestilling: emne og innhold til eieren", () => {
     const m = F.bestillingEpost_(basis, "abc12345");
     assert.strictEqual(m.subject, "Ny vedbestilling: 20 sekker – Storgata 1, Ås – tirsdag 10. november");
-    for (const s of ["Leveringsdag: Mandag 10. november", "Antall sekker: 20", "Bæring: Til 2. etasje (+20 kr/sekk)",
+    for (const s of ["Leveringsdag: Tirsdag 10. november", "Antall sekker: 20", "Bæring: Til 2. etasje (+20 kr/sekk)",
       "Adresse: Storgata 1, Ås", "Telefon: 48993900", "E-post: kunde@example.com", "Totalpris: 2 679 kr",
       "Melding: Sett dem ved døra", "ID: abc12345"]) assert.ok(m.body.includes(s), "mangler «" + s + "» i:\n" + m.body);
   }],
