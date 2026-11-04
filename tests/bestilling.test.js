@@ -87,7 +87,6 @@ const tests = [
     assert.strictEqual(r.seen.calendar.length, 1);
     const c = r.seen.calendar[0];
     assert.strictEqual(c.phone, "48993900");
-    assert.ok(/^(Mandag|Tirsdag) \d+\. \w+$/.test(c.day_label), "kalenderen fikk ikke leveringsdagen i klartekst: " + c.day_label);
     assert.strictEqual(c.frequency, "", "engangskjøp skal ha tom hyppighet");
     assert.ok(r.events.includes("generate_lead"), "generate_lead mangler: " + r.events);
     assert.ok(r.events.includes("bestilt_via:kalender"), "bestilt_via:kalender mangler: " + r.events);

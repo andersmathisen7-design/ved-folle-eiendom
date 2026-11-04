@@ -552,19 +552,31 @@ function doPost(e) {
 // Én linje, uten linjeskift (så tekst fra nettsiden aldri kan lage ekstra e-posthoder), og uten formeltegn først.
 function linje_(v, max) { return tekst_(String(v == null ? "" : v).replace(/[\r\n]+/g, " "), max); }
 
+// Leveringsdagen i klartekst, regnet ut fra den kontrollerte datoen (yyyy-mm-dd), ikke fra tekst nettsiden sender.
+var UKEDAGER = ["søndag", "mandag", "tirsdag", "onsdag", "torsdag", "fredag", "lørdag"];
+var MANEDER = ["januar", "februar", "mars", "april", "mai", "juni", "juli", "august", "september", "oktober", "november", "desember"];
+function dagTekst_(iso) {
+  var d = new Date(String(iso) + "T12:00:00Z");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(iso)) || isNaN(d.getTime())) return String(iso);
+  return UKEDAGER[d.getUTCDay()] + " " + d.getUTCDate() + ". " + MANEDER[d.getUTCMonth()];
+}
+var HYPPIGHETER = ["Fast levering hver 2. uke", "Fast levering hver 4. uke", "Fast levering hver 6. uke"];
+
 // Teksten til eieren og bekreftelsen til kunden, for en nettbestilling som akkurat er lagt i arket.
+// Eieren får alt kunden skrev. Kunden får bare en fast tekst med tall og dato vi har kontrollert selv, aldri fritekst
+// fra skjemaet: adressen til kunden kommer fra nettsiden, så ellers kunne hvem som helst sende falske e-poster fra
+// kontoen vår til hvem som helst.
 function bestillingEpost_(b, id) {
-  var abonnement = !!linje_(b.frequency, 60);
-  var hyppighet = linje_(b.frequency, 60), kort = hyppighet.replace(/^Fast levering /, "").toLowerCase();
+  var hyppighet = linje_(b.frequency, 60), abonnement = !!hyppighet, kort = hyppighet.replace(/^Fast levering /, "").toLowerCase();
+  var hyppKunde = HYPPIGHETER.indexOf(hyppighet) >= 0 ? hyppighet : "";
   var sekker = Math.max(0, Math.min(1000, Math.round(Number(b.sacks)) || 0));
-  var dag = linje_(b.day_label, 40) || linje_(b.date, 10);
-  var dagLiten = dag.charAt(0).toLowerCase() + dag.slice(1);
+  var dag = dagTekst_(b.date), dagStor = dag.charAt(0).toUpperCase() + dag.slice(1);
   var adresse = linje_(b.address, 120), omrade = linje_(b.area, 60), total = linje_(b.total, 40);
   var subject = (abonnement ? "Nytt vedabonnement: " + sekker + " sekker " + kort : "Ny vedbestilling: " + sekker + " sekker") +
-    " – " + adresse + ", " + omrade + " – " + dagLiten;
+    " – " + adresse + ", " + omrade + " – " + dag;
   var linjer = [
     (abonnement ? "Nytt vedabonnement" : "Ny vedbestilling") + " fra follobjorkeved.no", "",
-    (abonnement ? "Første leveringsdag: " : "Leveringsdag: ") + dag + " (" + linje_(b.date, 10) + ")",
+    (abonnement ? "Første leveringsdag: " : "Leveringsdag: ") + dagStor + " (" + linje_(b.date, 10) + ")",
     "Antall sekker: " + sekker,
     "Bæring: " + linje_(b.carry, 80)];
   if (abonnement) linjer.push("Hyppighet: " + hyppighet);
@@ -577,11 +589,10 @@ function bestillingEpost_(b, id) {
     "Melding: " + tekst_(b.message, 1000),
     "ID: " + id + " (står som «Ny» på eiersiden)", "",
     "Eiersiden: https://follobjorkeved.no/admin/"]);
-  var kunde = "Takk for bestillingen hos " + FIRMA + "! Vi har mottatt bestilling på " + sekker + " sekker bjørkeved (beregnet " + total +
-    (abonnement ? " per levering, " + hyppighet.toLowerCase() : "") + "). Veden kommer på dagen du valgte. " +
-    (abonnement ? "Første leveringsdag: " : "Ønsket leveringsdag: ") + dagLiten + ". " +
-    "Bæring: " + linje_(b.carry, 80).toLowerCase() + ". Adresse: " + adresse + ", " + omrade + ". " +
-    "Spørsmål? Ring " + TELEFON + ".";
+  var kunde = "Takk for bestillingen hos " + FIRMA + "! Vi har mottatt bestilling på " + sekker + " sekker bjørkeved" +
+    (hyppKunde ? ", " + hyppKunde.toLowerCase() : "") + ". Veden kommer på dagen du valgte. " +
+    (hyppKunde ? "Første leveringsdag: " : "Ønsket leveringsdag: ") + dag + ". " +
+    "Prisen du så i skjemaet gjelder, og du betaler ingenting nå. Spørsmål? Ring " + TELEFON + ".";
   return { subject: subject, body: linjer.join("\n"), customerSubject: "Takk for bestillingen hos " + FIRMA, customerBody: kunde };
 }
 

@@ -325,7 +325,7 @@
         area: data["Område"], sacks: +data["Antall sekker"], phone: data["Telefon"],
         address: data["Adresse"], carry: data["Bæring"], total: data["Beregnet totalpris"],
         email: data.email || "",
-        day_label: extra.dayLabel || "", frequency: extra.frequency || "",
+        frequency: extra.frequency || "",
         // Vedabonnement: hyppigheten står først i meldingen, så eieren ser den på eiersiden.
         message: (freqKey() !== "en-gang" ? "Vedabonnement: " + data["Hyppighet"].toLowerCase() + ". " : "") + (data["Melding"] || "") })
     }).then(function (r) { return r.json(); }).then(function (j) {
@@ -401,7 +401,7 @@
     var setBtn = function (busy) { btn.disabled = busy; btn.querySelector(".btn-label").textContent = busy ? "Sender …" : "Send bestilling"; };
     setBtn(true);
 
-    reserve(data, { dayLabel: dayText, frequency: repeat ? data["Hyppighet"] : "" }).then(function (go) {
+    reserve(data, { frequency: repeat ? data["Hyppighet"] : "" }).then(function (go) {
       if (!go) { setBtn(false); return; }
       if (mailedByCalendar) { track("bestilt_via:kalender"); done(data, total); return; }
       send(data, total, setBtn);
