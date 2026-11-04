@@ -36,7 +36,12 @@ Hver push til `main` publiseres automatisk med GitHub Actions.
 
 ## Bestillinger på e-post
 
-Skjemaet sender til `ORDER_EMAIL` i `config.py` gjennom [FormSubmit](https://formsubmit.co). Tjenesten er gratis og trenger ingen server.
+Bestillingen går to veier, så den ikke er avhengig av én tjeneste:
+
+1. **Leveringskalenderen (Google Apps Script)** får alle opplysningene når kunden trykker Send, legger dem i regnearket, og sender e-posten til `BESTILLING_TIL` i `kalender/kalender.gs` (skal være lik `ORDER_EMAIL`) med kopi til `BESTILLING_KOPI`. Kunden får bekreftelse. Se [kalender/README.md](kalender/README.md).
+2. **FormSubmit** brukes bare hvis kalenderen ikke svarer, eller ikke fikk sendt e-posten. Da prøver skjemaet opptil tre ganger, med 10 sekunders grense per forsøk, før kunden får en e-postlenke og telefonnummeret.
+
+FormSubmit sender til `ORDER_EMAIL` i `config.py` ([FormSubmit](https://formsubmit.co) er gratis og trenger ingen server):
 
 1. Når siden er ute, sender du én testbestilling.
 2. FormSubmit sender da en aktiverings-e-post til adressen. Klikk **Activate**.
@@ -45,7 +50,9 @@ Skjemaet sender til `ORDER_EMAIL` i `config.py` gjennom [FormSubmit](https://for
 
 Adressene i `ORDER_CC` i `config.py` (nå post@min-eiendom.no) får en kopi av hver bestilling.
 
-Hvis sending feiler, ser kunden telefonnummeret og kan ringe i stedet.
+Hvis begge veiene feiler, ser kunden en lenke som åpner bestillingen som ferdig utfylt e-post, og telefonnummeret.
+
+Tester for skjemaet og e-posten fra kalenderen ligger i `tests/` (kjøres lokalt, se [tests/README.md](tests/README.md)).
 
 ## Leveringsdager
 

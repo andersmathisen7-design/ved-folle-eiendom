@@ -24,6 +24,11 @@
 
 var ARK = "Bestillinger";
 var TIDSSONE = "Europe/Oslo";
+// Bestillingen sendes på e-post herfra (MailApp), så den ikke er avhengig av FormSubmit. Hold adressene like config.py.
+var FIRMA = "Follo Bjørkeved";                 // BRAND
+var TELEFON = "48 99 39 00";                   // CO["phone_display"]
+var BESTILLING_TIL = "amkleven@gmail.com";     // ORDER_EMAIL
+var BESTILLING_KOPI = "post@min-eiendom.no";   // ORDER_CC (tom streng = ingen kopi)
 var KOLONNER = ["ID", "Leveringsdag", "Minutter", "Status", "Navn", "Telefon", "Adresse", "Område", "Sekker",
                 "Bæring", "Totalpris", "E-post", "Melding", "Registrert", "Lossetid", "Lat", "Lon", "Fast tid", "Betalt"];
 var STATUSER = ["Ny", "Bekreftet", "Levert", "Avbestilt"];
@@ -518,7 +523,7 @@ function doPost(e) {
   medKoord_(b);   // utenfor låsen, siden oppslaget kan ta litt tid
 
   // Lås, så to kunder som sender samtidig ikke begge får den siste plassen.
-  var lock = LockService.getScriptLock();
+  var id, lock = LockService.getScriptLock();
   lock.waitLock(15000);
   try {
     // Vern mot at noen fyller kalenderen med falske bestillinger.
@@ -533,10 +538,68 @@ function doPost(e) {
     if (plan && plan.minutter > 0 && plan.med > kap) return svar_({ ok: false, full: true, booked: bestilt_(planer_(dager)) });
     b.name = "";
     b.fixed = false;   // bare eieren kan sette faste minutter
-    var id = leggTil_(b, "Ny");
+    id = leggTil_(b, "Ny");
     cache.put("nettbestillinger", String(n + 1), 3600);
-    return svar_({ ok: true, id: id });
   } finally {
     lock.releaseLock();
   }
+  // E-posten sendes utenfor låsen. Svarer vi «mailed: true», hopper nettsiden over FormSubmit.
+  return svar_({ ok: true, id: id, mailed: sendBestillingEpost_(b, id) });
+}
+
+// ------------------------------------------------------------------ e-post om bestillingen
+
+// Én linje, uten linjeskift (så tekst fra nettsiden aldri kan lage ekstra e-posthoder), og uten formeltegn først.
+function linje_(v, max) { return tekst_(String(v == null ? "" : v).replace(/[\r\n]+/g, " "), max); }
+
+// Teksten til eieren og bekreftelsen til kunden, for en nettbestilling som akkurat er lagt i arket.
+function bestillingEpost_(b, id) {
+  var abonnement = !!linje_(b.frequency, 60);
+  var hyppighet = linje_(b.frequency, 60), kort = hyppighet.replace(/^Fast levering /, "").toLowerCase();
+  var sekker = Math.max(0, Math.min(1000, Math.round(Number(b.sacks)) || 0));
+  var dag = linje_(b.day_label, 40) || linje_(b.date, 10);
+  var dagLiten = dag.charAt(0).toLowerCase() + dag.slice(1);
+  var adresse = linje_(b.address, 120), omrade = linje_(b.area, 60), total = linje_(b.total, 40);
+  var subject = (abonnement ? "Nytt vedabonnement: " + sekker + " sekker " + kort : "Ny vedbestilling: " + sekker + " sekker") +
+    " – " + adresse + ", " + omrade + " – " + dagLiten;
+  var linjer = [
+    (abonnement ? "Nytt vedabonnement" : "Ny vedbestilling") + " fra follobjorkeved.no", "",
+    (abonnement ? "Første leveringsdag: " : "Leveringsdag: ") + dag + " (" + linje_(b.date, 10) + ")",
+    "Antall sekker: " + sekker,
+    "Bæring: " + linje_(b.carry, 80)];
+  if (abonnement) linjer.push("Hyppighet: " + hyppighet);
+  linjer = linjer.concat([
+    "Adresse: " + adresse + ", " + omrade,
+    "Telefon: " + linje_(b.phone, 30),
+    "E-post: " + linje_(b.email, 100),
+    "Totalpris: " + total + (abonnement ? " per levering" : ""),
+    "Beregnet tid: " + (Math.round(Number(b.minutes)) || 0) + " min (kjøring, lossing og bæring)",
+    "Melding: " + tekst_(b.message, 1000),
+    "ID: " + id + " (står som «Ny» på eiersiden)", "",
+    "Eiersiden: https://follobjorkeved.no/admin/"]);
+  var kunde = "Takk for bestillingen hos " + FIRMA + "! Vi har mottatt bestilling på " + sekker + " sekker bjørkeved (beregnet " + total +
+    (abonnement ? " per levering, " + hyppighet.toLowerCase() : "") + "). Veden kommer på dagen du valgte. " +
+    (abonnement ? "Første leveringsdag: " : "Ønsket leveringsdag: ") + dagLiten + ". " +
+    "Bæring: " + linje_(b.carry, 80).toLowerCase() + ". Adresse: " + adresse + ", " + omrade + ". " +
+    "Spørsmål? Ring " + TELEFON + ".";
+  return { subject: subject, body: linjer.join("\n"), customerSubject: "Takk for bestillingen hos " + FIRMA, customerBody: kunde };
+}
+
+// Sender bestillingen til eieren (med kopi) og bekreftelsen til kunden. Svarer true når eieren har fått den.
+// Feiler det (kvote, manglende tilgang), svarer vi false, og nettsiden sender gjennom FormSubmit i stedet.
+function sendBestillingEpost_(b, id) {
+  var m, epost = String(b.email || "").trim(), gyldig = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(epost);
+  try {
+    m = bestillingEpost_(b, id);
+    var til = { to: BESTILLING_TIL, subject: m.subject, body: m.body, name: FIRMA };
+    if (BESTILLING_KOPI) til.cc = BESTILLING_KOPI;
+    if (gyldig) til.replyTo = epost;
+    MailApp.sendEmail(til);
+  } catch (e) {
+    return false;
+  }
+  if (gyldig) {
+    try { MailApp.sendEmail({ to: epost, subject: m.customerSubject, body: m.customerBody, name: FIRMA }); } catch (e) {}
+  }
+  return true;
 }

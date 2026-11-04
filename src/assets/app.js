@@ -4,6 +4,7 @@
   var EVENT_NAMES = {
     click_tel: "Trykket på telefonnummer", begin_checkout: "Begynte på bestilling",
     generate_lead: "Bestilling sendt", order_error: "Feil ved sending av bestilling", order_retry_ok: "Bestillingen kom fram på forsøk",
+    bestilt_via: "Bestillingen gikk via",
     purchase_lead_view: "Så takkesiden", article_cta: "Klikket bestill i artikkel",
     calculator_to_order: "Brukte vedkalkulatoren", price_check: "Sjekket pris i skjemaet",
     form_invalid: "Trykket Send, men et felt manglet",
@@ -310,9 +311,13 @@
   });
 
   // Hold av tiden i kalenderen før bestillingen sendes. Svarer kalenderen at dagen er full, må kunden velge en annen dag.
-  // Feiler kalenderen (nett, oppsett), sendes bestillingen likevel, med en merknad om at dagen ikke er registrert.
-  function reserve(data) {
+  // Kalenderen (Google Apps Script) sender også bestillingen til oss på e-post og bekreftelsen til kunden. Svarer den
+  // «mailed: true», er bestillingen framme, og FormSubmit trengs ikke. Feiler kalenderen (nett, oppsett) eller er
+  // skriptet en gammel versjon uten e-post, sendes bestillingen gjennom FormSubmit som før.
+  var mailedByCalendar = false;
+  function reserve(data, extra) {
     if (!D.calendar_url || reserved === dayInput.value) return Promise.resolve(true);
+    mailedByCalendar = false;
     return fetch(D.calendar_url, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" }, // text/plain gir ingen CORS-forhåndsforespørsel
@@ -320,10 +325,11 @@
         area: data["Område"], sacks: +data["Antall sekker"], phone: data["Telefon"],
         address: data["Adresse"], carry: data["Bæring"], total: data["Beregnet totalpris"],
         email: data.email || "",
+        day_label: extra.dayLabel || "", frequency: extra.frequency || "",
         // Vedabonnement: hyppigheten står først i meldingen, så eieren ser den på eiersiden.
         message: (freqKey() !== "en-gang" ? "Vedabonnement: " + data["Hyppighet"].toLowerCase() + ". " : "") + (data["Melding"] || "") })
     }).then(function (r) { return r.json(); }).then(function (j) {
-      if (j.ok) { reserved = dayInput.value; return true; }
+      if (j.ok) { reserved = dayInput.value; mailedByCalendar = j.mailed === true; return true; }
       // Andre feil enn «full» eller «for sent»: bestillingen sendes likevel, med en merknad.
       if (!j.full && j.error !== "dato") { data["Leveringsdag"] += " (ikke registrert i kalenderen)"; return true; }
       if (j.booked) booked = j.booked;
@@ -395,41 +401,55 @@
     var setBtn = function (busy) { btn.disabled = busy; btn.querySelector(".btn-label").textContent = busy ? "Sender …" : "Send bestilling"; };
     setBtn(true);
 
-    reserve(data).then(function (go) {
+    reserve(data, { dayLabel: dayText, frequency: repeat ? data["Hyppighet"] : "" }).then(function (go) {
       if (!go) { setBtn(false); return; }
+      if (mailedByCalendar) { track("bestilt_via:kalender"); done(data, total); return; }
       send(data, total, setBtn);
     });
   });
 
-  // FormSubmit feiler av og til («Load failed», «Failed to fetch», «Server Error»). Da prøver vi på nytt to ganger
-  // før kunden får feilmelding. Uke 44 i 2026 feilet 5 av 9 innsendinger. Ulempe: kom den første fram likevel, kan dere få
-  // samme bestilling to ganger (samme telefonnummer).
-  var RETRY_MS = [1500, 4000];
+  // Bestillingen er framme: mål den, husk oppsummeringen til takkesiden, og gå dit.
+  function done(data, total) {
+    track("generate_lead", { value: total, currency: "NOK", sacks: +data["Antall sekker"] });
+    track("bestilt_antall:" + qtyBucket(+data["Antall sekker"]));
+    track("bestilt_hyppighet:" + freqKey());
+    try { if (window.fbq) fbq("track", "Lead", { value: total, currency: "NOK" }); } catch (e) {}
+    try { if (window.gtag && S.adsConversion) gtag("event", "conversion", { send_to: S.adsConversion, value: total, currency: "NOK" }); } catch (e) {}
+    try {
+      sessionStorage.setItem("lastOrder", JSON.stringify({
+        qty: data["Antall sekker"], carry: data["Bæring"], total: fmt(total),
+        day: data["Leveringsdag"].replace("Første levering: ", ""), freq: freqKey() !== "en-gang" ? data["Hyppighet"] : "",
+        address: data["Adresse"] + ", " + data["Område"]
+      }));
+    } catch (e) {}
+    location.href = (S.base || "") + "/takk/";
+  }
+
+  // Reserveløsningen når kalenderen ikke sendte e-posten: FormSubmit. Den feiler av og til («Load failed», «Failed to fetch»,
+  // «Server Error»). 4.11.2026 svarte den 522 fra Cloudflare etter 20 sekunder på alt. Derfor avbrytes hvert forsøk etter
+  // 10 sekunder, og vi prøver på nytt to ganger før kunden får feilmelding. Uke 44 i 2026 feilet 5 av 9 innsendinger.
+  // Ulempe: kom den første fram likevel, kan dere få samme bestilling to ganger (samme telefonnummer).
+  var RETRY_MS = [1500, 4000], FORMSUBMIT_TIMEOUT_MS = 10000;
   function send(data, total, setBtn, attempt) {
     attempt = attempt || 0;
+    var ctl = typeof AbortController === "function" ? new AbortController() : null;
+    var timer = ctl ? setTimeout(function () { ctl.abort(); }, FORMSUBMIT_TIMEOUT_MS) : null;
     fetch(S.endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
+      signal: ctl ? ctl.signal : undefined
     }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
       .then(function (res) {
+        clearTimeout(timer);
         if (!res.ok || String(res.j.success) !== "true") throw new Error(res.j.message || "Feil");
         if (attempt) track("order_retry_ok:" + (attempt + 1));
-        track("generate_lead", { value: total, currency: "NOK", sacks: +data["Antall sekker"] });
-        track("bestilt_antall:" + qtyBucket(+data["Antall sekker"]));
-        track("bestilt_hyppighet:" + freqKey());
-        try { if (window.fbq) fbq("track", "Lead", { value: total, currency: "NOK" }); } catch (e) {}
-        try { if (window.gtag && S.adsConversion) gtag("event", "conversion", { send_to: S.adsConversion, value: total, currency: "NOK" }); } catch (e) {}
-        try {
-          sessionStorage.setItem("lastOrder", JSON.stringify({
-            qty: data["Antall sekker"], carry: data["Bæring"], total: fmt(total),
-            day: data["Leveringsdag"].replace("Første levering: ", ""), freq: freqKey() !== "en-gang" ? data["Hyppighet"] : "",
-            address: data["Adresse"] + ", " + data["Område"]
-          }));
-        } catch (e) {}
-        location.href = (S.base || "") + "/takk/";
+        track("bestilt_via:formsubmit");
+        done(data, total);
       })
       .catch(function (err) {
+        clearTimeout(timer);
+        if (err && err.name === "AbortError") err = new Error("Tidsavbrudd " + (FORMSUBMIT_TIMEOUT_MS / 1000) + " s");
         if (attempt < RETRY_MS.length) {
           setTimeout(function () { send(data, total, setBtn, attempt + 1); }, RETRY_MS[attempt]);
           return;

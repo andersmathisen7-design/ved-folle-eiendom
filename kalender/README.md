@@ -33,7 +33,7 @@ Er `calendar_url` tom, vises alle mandager og tirsdager som ledige. Da må dere 
 
 ## Sett opp kalenderen (ca. 5 min, gratis)
 
-Kalenderen er et Google-regneark med et lite skript. Nettsiden spør regnearket hvor mye tid som alt er bestilt hver dag, og legger inn en ny rad for hver bestilling. Det er også herfra eiersiden henter bestillingene.
+Kalenderen er et Google-regneark med et lite skript. Nettsiden spør regnearket hvor mye tid som alt er bestilt hver dag, og legger inn en ny rad for hver bestilling. Skriptet sender så bestillingen til dere på e-post og en bekreftelse til kunden. Det er også herfra eiersiden henter bestillingene.
 
 Regnearket **«Follo Bjørkeved – leveringskalender»** er allerede laget i Google Drive (amkleven@gmail.com). Det er privat, så bare du har tilgang. Ikke del det med andre enn de som skal se kundedataene.
 
@@ -80,4 +80,22 @@ Siden er skjult for Google. Uten riktig passord får man ikke se noe, og kundeda
 - **Levering samme dag** går ikke. Kunden kan tidligst velge dagen etter, og må bestille senest kl. 18 dagen før (`order_by_hour` i `config.py`). Kalenderen avviser også bestillinger til i dag eller tidligere.
 - **Endre skriptet:** etter endringer må du velge **Implementer → Administrer implementeringer → Rediger → Ny versjon**, ellers brukes den gamle koden. Første gang etter at ruteberegningen kom med, ber Google om tilgang til å «koble til en ekstern tjeneste». Det er oppslagene hos Kartverket og OSRM.
 
-Svarer ikke kalenderen (f.eks. nettfeil), går bestillingen likevel fram på e-post, med merknaden «ikke registrert i kalenderen». Da legger dere den inn i arket selv.
+Svarer ikke kalenderen (f.eks. nettfeil), går bestillingen likevel fram på e-post gjennom FormSubmit, med merknaden «ikke registrert i kalenderen». Da legger dere den inn i arket selv.
+
+## E-posten om bestillingen kommer fra kalenderen (fra november 2026)
+
+Før gikk bestillingen bare gjennom FormSubmit, og uke 44 i 2026 feilet 5 av 9 innsendinger fordi FormSubmit var nede. Nå sender skriptet selv e-posten, rett etter at raden er lagt i arket:
+
+- Til `BESTILLING_TIL` med kopi til `BESTILLING_KOPI` (øverst i `kalender.gs`, hold dem like `ORDER_EMAIL` og `ORDER_CC` i `config.py`), med svar-til satt til kundens adresse.
+- Bekreftelse til kunden, hvis e-postadressen ser gyldig ut.
+- Svarer skriptet `mailed: true`, hopper nettsiden over FormSubmit. Svarer det `mailed: false` (kvote, manglende tilgang) eller mangler feltet (gammel versjon av skriptet), sendes bestillingen gjennom FormSubmit som før. Dere får derfor aldri to e-poster om samme bestilling fra én innsending.
+- Google tillater 100 mottakere per dag fra en vanlig Gmail-konto. Hver bestilling bruker 2–3, så grensen er ca. 30 bestillinger om dagen.
+
+**Dette må du gjøre én gang for at det skal virke:**
+
+1. Lim inn den nye `kalender/kalender.gs` i Apps Script, og lagre.
+2. Velg **Implementer → Administrer implementeringer → Rediger → Ny versjon → Implementer**.
+3. Google ber om ny tilgang, fordi skriptet nå skal «sende e-post på dine vegne». Godkjenn den. Til det er gjort, svarer skriptet `mailed: false`, og bestillingene går gjennom FormSubmit som før.
+4. Send én testbestilling fra nettsiden, og sjekk at e-posten kommer fra skriptet (avsender er Google-kontoen som eier regnearket, med navnet «Follo Bjørkeved»). Fjern testbestillingen på eiersiden etterpå.
+
+I GoatCounter ser du hvilken vei bestillingen gikk: «Bestillingen gikk via: kalender» eller «… formsubmit».
