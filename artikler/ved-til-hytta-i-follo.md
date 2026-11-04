@@ -6,7 +6,7 @@ order: 13
 kort: Follo har ca. 7 900 fritidsboliger (SSB 2026), og nesten 5 900 av dem ligger i Frogn, Vestby og Nesodden. Vi leverer tørr bjørkeved til hytter i hele Follo og kan bære sekkene inntil 50 meter fra bilen. Bestill før sesongen, og lagre veden tørt og luftig – hytter som står tomme, kan bli fuktige.
 faq: Leverer dere ved til hytta? || Ja, i hele Follo. Vi trenger vei fram til hytta, eller et sted i nærheten der vi kan sette sekkene. Vi kan bære inntil 50 meter utendørs mot et lite tillegg per sekk.
 faq: Hvordan lagrer jeg ved på en hytte som står tom? || Under tak, luftig og over bakken – for eksempel i en bod eller under et takutspring. Ikke pakk veden inn i plast, for da stenges fukten inne.
-faq: Må jeg være til stede når veden leveres? || Det avtaler vi når vi ringer for å bekrefte bestillingen. Beskriv gjerne i meldingsfeltet hvor sekkene skal stå.
+faq: Må jeg være til stede når veden leveres? || Nei. Skriv i meldingsfeltet hvor sekkene skal stå, så setter vi dem der.
 ---
 Mange hytter i Follo ligger ved sjøen: i Drøbak, Son, Hvitsten, Hølen og langs hele Nesodden. En kveld foran peisen er en del av hyttelivet, men det er tungt å frakte ved i bilen.
 

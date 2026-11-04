@@ -58,7 +58,7 @@ CARRY_OPTIONS = [
 ]
 
 # Vedabonnement: kunden kan velge fast levering. Hver levering koster som en vanlig bestilling
-# (sekker + bæring + hjemlevering), uten rabatt. Vi ringer og avtaler datoene.
+# (sekker + bæring + hjemlevering), uten rabatt. Kunden velger datoene i skjemaet.
 FREQUENCY_OPTIONS = [
     ("en-gang", "Én gang"),
     ("2-uker", "Fast levering hver 2. uke"),
@@ -190,11 +190,11 @@ FAQ = [
     ("Kan dere bære veden inn?",
      "Ja. Vi kan sette sekkene i garasjen, i kjelleren eller helt opp til 6. etasje. Du velger dette i bestillingsskjemaet."),
     ("Hvordan bestiller jeg?",
-     "Fyll ut skjemaet på siden og velg leveringsdag. Vi kjører ut på mandager og tirsdager. Vi ringer deg for å bekrefte bestillingen. Du kan også ringe oss på {phone}."),
+     "Fyll ut skjemaet på siden og velg leveringsdag. Vi kjører ut på mandager og tirsdager. Du får bekreftelse på e-post med en gang. Du kan også ringe oss på {phone}."),
     ("Har dere vedabonnement?",
      "Ja. Velg «Fast levering» i bestillingsskjemaet, så kommer vi med samme antall sekker hver 2., 4. eller 6. uke gjennom vinteren. Hver levering koster det samme som en vanlig bestilling, og du betaler for én levering om gangen. Du slipper å huske å bestille, og du kan endre eller stoppe når du vil ved å ringe {phone}."),
     ("Hvordan betaler jeg?",
-     "Vi avtaler betaling når vi ringer for å bekrefte bestillingen. Du betaler ingenting når du sender skjemaet."),
+     "Du betaler ingenting når du sender skjemaet. Betalingen skjer ved levering."),
 ]
 
 # Lokale tall per kommune (vises på områdesidene og i artikkelen om vedfyring i Follo).
