@@ -78,7 +78,7 @@ Siden er skjult for Google. Uten riktig passord får man ikke se noe, og kundeda
 - **Egne minutter:** endrer du minuttene for en telefonbestilling, brukes de som de er, og bestillingen tas ikke med i ruteberegningen. Det samme gjelder rader du skriver inn i arket selv (uten ID), og rader der kolonnen **Fast tid** er `ja`.
 - **Steng en dag:** trykk «Sett dagen som full» på eiersiden. Eller legg datoen i `closed` i `config.py` (da vises dagen ikke i det hele tatt).
 - **Levering samme dag** går ikke. Kunden kan tidligst velge dagen etter, og må bestille senest kl. 18 dagen før (`order_by_hour` i `config.py`). Kalenderen avviser også bestillinger til i dag eller tidligere.
-- **Endre skriptet:** etter endringer må du velge **Implementer → Administrer implementeringer → Rediger → Ny versjon**, ellers brukes den gamle koden. Første gang etter at ruteberegningen kom med, ber Google om tilgang til å «koble til en ekstern tjeneste». Det er oppslagene hos Kartverket og OSRM.
+- **Endre skriptet:** kjør `kalender/publiser.sh` (se «Publisere fra repoet» under). Gjør du det for hånd i stedet: lim inn koden, og velg **Implementer → Administrer implementeringer → Rediger → Ny versjon**, ellers brukes den gamle koden. Første gang etter at ruteberegningen kom med, ber Google om tilgang til å «koble til en ekstern tjeneste». Det er oppslagene hos Kartverket og OSRM.
 
 Svarer ikke kalenderen (f.eks. nettfeil), går bestillingen likevel fram på e-post gjennom FormSubmit, med merknaden «ikke registrert i kalenderen». Da legger dere den inn i arket selv.
 
@@ -99,3 +99,23 @@ Før gikk bestillingen bare gjennom FormSubmit, og uke 44 i 2026 feilet 5 av 9 i
 4. Send én testbestilling fra nettsiden, og sjekk at e-posten kommer fra skriptet (avsender er Google-kontoen som eier regnearket, med navnet «Follo Bjørkeved»). Fjern testbestillingen på eiersiden etterpå.
 
 I GoatCounter ser du hvilken vei bestillingen gikk: «Bestillingen gikk via: kalender» eller «… formsubmit».
+
+## Publisere fra repoet (clasp)
+
+Googles verktøy [clasp](https://github.com/google/clasp) laster `kalender.gs` opp til Apps Script og lager ny versjon av nettappen fra kommandolinjen, så Claude kan oppdatere skriptet selv. Adressen som slutter på `/exec` blir den samme.
+
+**Én gang, må gjøres av deg:**
+
+1. Slå på Apps Script API for kontoen som eier regnearket (amkleven@gmail.com): https://script.google.com/home/usersettings → **Google Apps Script API: På**.
+2. I en terminal: `npm i -g @google/clasp` (allerede gjort på denne maskinen), så `clasp login`. Nettleseren åpner seg, og du logger inn med samme konto. Innloggingen lagres i `~/.clasprc.json`.
+3. Finn skript-ID-en: åpne regnearket → **Utvidelser → Apps Script → Prosjektinnstillinger (tannhjulet) → Skript-ID**. Legg den inn i `.clasp.json` i repoet (erstatt `SETT_INN_SKRIPT_ID`).
+
+**Hver gang skriptet er endret:**
+
+```bash
+kalender/publiser.sh                 # clasp push + ny versjon av implementeringen i config.py
+```
+
+Trenger den nye koden ny tilgang (for eksempel «sende e-post» første gang), må du godkjenne det én gang: åpne Apps Script, velg funksjonen `onOpen` øverst og trykk **Kjør**, og godkjenn. Til det er gjort, svarer skriptet som før (bestillinger går gjennom FormSubmit).
+
+Filene `.clasp.json`, `.claspignore` og `kalender/appsscript.json` hører til dette. Manifestet sier at nettappen kjører som deg og er åpen for alle, som i oppsettet over.
