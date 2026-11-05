@@ -407,7 +407,7 @@
     data.email = epost;
     data._replyto = epost;
     data._autoresponse = "Takk for bestillingen hos " + S.brand + "! Vi har mottatt bestilling på " +
-      data["Antall sekker"] + " sekker bjørkeved (beregnet " + fmt(total) + (repeat ? " per levering, " + data["Hyppighet"].toLowerCase() : "") + "). Vi ringer deg for å bekrefte. " +
+      data["Antall sekker"] + " sekker bjørkeved (beregnet " + fmt(total) + (repeat ? " per levering, " + data["Hyppighet"].toLowerCase() : "") + "). Veden kommer på dagen du valgte. " +
       (repeat ? "Første leveringsdag: " : "Ønsket leveringsdag: ") + dayText.toLowerCase() + ". Spørsmål? Ring " + S.phone + ".";
     delete data._next;
 
