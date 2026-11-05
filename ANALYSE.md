@@ -130,7 +130,7 @@ Jeg sjekket hvert navn direkte i Norids register ([rdap.norid.no](https://rdap.n
 | Strukturerte data: `LocalBusiness`, `Product` + `Offer`, `FAQPage` og `BreadcrumbList` | Google og KI-søk kan da lese pris, område og svar direkte, og kan vise dem som utvidede treff. |
 | `llms.txt` (faktaark for KI) | Hjelper ChatGPT, Perplexity og Gemini å gjengi riktig pris og område når noen spør «hvor kjøper jeg ved i Ås?». |
 | Priskalkulator i skjemaet, med knapper for 5, 10, 20 og 40 sekker | Kunden ser totalprisen før bestilling. 10 sekker er valgt fra starten, så kundene bestiller mer. |
-| Ingen betaling eller innlogging. Vi ringer kunden. | Så få steg som mulig. For en lokal tjeneste er dette det som gir flest bestillinger. |
+| Ingen betaling eller innlogging. Kunden får bekreftelse på e-post. | Så få steg som mulig. For en lokal tjeneste er dette det som gir flest bestillinger. |
 | «Bestill»-knapp som alltid er synlig på mobil | De fleste lokale søk skjer på mobil. |
 | Ren HTML, ingen WordPress, bildet i WebP | Siden laster raskt, og fart påvirker både plassering i Google og hvor mange som bestiller. |
 | Feltene «Hvor fant du oss?» og kampanjekode (UTM) | Hver bestilling viser hvilken kanal kunden kom fra. Det er grunnlaget for alle budsjettvalg (kap. 7). |
