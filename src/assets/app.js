@@ -259,23 +259,32 @@
       }).catch(function () {});
     }, 700);
   }
+  // Knappene lages én gang per sett med dager og oppdateres på stedet. Ble de byttet ut mens kunden holdt fingeren nede
+  // (adressefeltet mister fokus idet kunden trykker på en dag, og «change» tegnet alt på nytt), laget nettleseren aldri
+  // noe klikk, og dagen ble ikke valgt. Derfor også én klikklytter på boksen, ikke på hver knapp.
   function renderDays() {
     if (!dayBox) return;
     var days = deliveryDays(), mins = orderMinutes(), cap = D.minutes_per_day || 300, any = false;
-    dayBox.innerHTML = "";
-    days.forEach(function (d) {
-      var k = iso(d), ok = fits(k), left = cap - (booked[k] || 0);
-      var b = document.createElement("button");
-      b.type = "button"; b.setAttribute("role", "radio"); b.dataset.date = k; b.dataset.label = dayLabel(d);
+    var buttons = Array.prototype.slice.call(dayBox.querySelectorAll("button[data-date]"));
+    var same = buttons.length === days.length && buttons.every(function (b, i) { return b.dataset.date === iso(days[i]); });
+    if (!same) {
+      dayBox.innerHTML = "";
+      buttons = days.map(function (d) {
+        var b = document.createElement("button");
+        b.type = "button"; b.setAttribute("role", "radio"); b.dataset.date = iso(d); b.dataset.label = dayLabel(d);
+        var t = d.toLocaleDateString("nb-NO", { weekday: "short", day: "numeric", month: "short" }).replace(/\./g, "");
+        b.innerHTML = "<strong></strong><span></span>";
+        b.firstChild.textContent = t.charAt(0).toUpperCase() + t.slice(1);
+        dayBox.appendChild(b);
+        return b;
+      });
+    }
+    buttons.forEach(function (b) {
+      var k = b.dataset.date, ok = fits(k), left = cap - (booked[k] || 0), on = dayInput.value === k && ok;
       b.disabled = !ok;
-      b.setAttribute("aria-checked", String(dayInput.value === k && ok));
-      if (dayInput.value === k && ok) b.classList.add("on");
-      var t = d.toLocaleDateString("nb-NO", { weekday: "short", day: "numeric", month: "short" }).replace(/\./g, "");
-      b.innerHTML = "<strong></strong><span></span>";
-      b.firstChild.textContent = t.charAt(0).toUpperCase() + t.slice(1);
+      b.setAttribute("aria-checked", String(on));
+      if (on) b.classList.add("on"); else b.classList.remove("on");
       b.lastChild.textContent = !ok ? "Fullt" : (booked[k] && left < mins * 2) ? "Få plasser" : "Ledig";
-      b.addEventListener("click", function () { pickDay(k); });
-      dayBox.appendChild(b);
       if (ok) any = true;
     });
     if (dayInput.value && !(days.some(function (d) { return iso(d) === dayInput.value; }) && fits(dayInput.value))) {
@@ -295,6 +304,11 @@
     var on = dayBox.querySelector(".on"); if (on) on.focus();
     track("dag_valgt");
   }
+  if (dayBox) dayBox.addEventListener("click", function (e) {
+    var b = e.target;
+    while (b && b !== dayBox && !(b.dataset && b.dataset.date)) b = b.parentNode;
+    if (b && b !== dayBox && !b.disabled) pickDay(b.dataset.date);
+  });
   renderDays();
   if (D.calendar_url) {
     fetch(D.calendar_url).then(function (r) { return r.json(); }).then(function (j) {

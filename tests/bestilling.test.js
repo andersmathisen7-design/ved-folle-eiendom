@@ -79,7 +79,32 @@ async function order(browser, opts) {
   return out;
 }
 
+// Kunden skriver adressen og trykker rett på en dag, slik man gjør på mobil. Et ekte trykk, ikke et JS-klikk.
+async function dagKlikkRettEtterAdresse(browser) {
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  await ctx.route("**/gc.zgo.at/**", (r) => r.abort());
+  await ctx.route("**/script.google.com/**", (route) => {
+    const body = route.request().method() === "GET" ? { booked: {}, fullDays: [] } : { ok: true, fits: {} };
+    return route.fulfill({ status: 200, headers: CORS, contentType: "application/json", body: JSON.stringify(body) });
+  });
+  await page.goto(BASE + "/ved-as/");
+  await page.fill("#f-adresse", "Storgata 1");
+  await page.click("#f-dager button:not([disabled])");
+  const out = {
+    dag: await page.$eval("#f-leveringsdag", (el) => el.value),
+    valgt: await page.$eval("#f-dager", (el) => (el.querySelector(".on") || { dataset: {} }).dataset.date || ""),
+  };
+  await ctx.close();
+  return out;
+}
+
 const tests = [
+  ["Et ekte trykk på dagen rett etter at adressen er skrevet, velger dagen (knappene må ikke byttes ut mens fingeren er nede)", async (b) => {
+    const r = await dagKlikkRettEtterAdresse(b);
+    assert.ok(r.dag, "ingen dag valgt etter trykk");
+    assert.strictEqual(r.valgt, r.dag, "knappen er ikke markert som valgt");
+  }],
   ["Kalenderen sender e-posten: FormSubmit brukes ikke, kunden kommer til takkesiden", async (b) => {
     const r = await order(b, { calendar: { ok: true, id: "abc12345", mailed: true } });
     assert.ok(r.url.endsWith("/takk/"), "kom ikke til /takk/: " + r.url + " " + r.error);
