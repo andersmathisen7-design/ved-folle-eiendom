@@ -95,7 +95,7 @@ Før gikk bestillingen bare gjennom FormSubmit, og uke 44 i 2026 feilet 5 av 9 i
 
 1. Lim inn den nye `kalender/kalender.gs` i Apps Script, og lagre.
 2. Velg **Implementer → Administrer implementeringer → Rediger → Ny versjon → Implementer**.
-3. Google ber om ny tilgang, fordi skriptet nå skal «sende e-post på dine vegne». Godkjenn den. Til det er gjort, svarer skriptet `mailed: false`, og bestillingene går gjennom FormSubmit som før.
+3. Google ber om ny tilgang, fordi skriptet nå skal «sende e-post på dine vegne». Godkjenn den (enklest: kjør `godkjennEpost` fra editoren, se under). Til det er gjort, svarer skriptet `mailed: false`, og bestillingene går gjennom FormSubmit som før. Gjort 5.11.2026.
 4. Send én testbestilling fra nettsiden, og sjekk at e-posten kommer fra skriptet (avsender er Google-kontoen som eier regnearket, med navnet «Follo Bjørkeved»). Fjern testbestillingen på eiersiden etterpå.
 
 I GoatCounter ser du hvilken vei bestillingen gikk: «Bestillingen gikk via: kalender» eller «… formsubmit».
@@ -116,6 +116,6 @@ Googles verktøy [clasp](https://github.com/google/clasp) laster `kalender.gs` o
 kalender/publiser.sh                 # clasp push + ny versjon av implementeringen i config.py
 ```
 
-Trenger den nye koden ny tilgang (for eksempel «sende e-post» første gang), må du godkjenne det én gang: åpne Apps Script, velg funksjonen `onOpen` øverst og trykk **Kjør**, og godkjenn. Til det er gjort, svarer skriptet som før (bestillinger går gjennom FormSubmit).
+Trenger den nye koden ny tilgang (for eksempel «sende e-post» første gang), må du godkjenne det én gang: åpne Apps Script, last siden på nytt, velg funksjonen `godkjennEpost` i nedtrekksmenyen ved siden av **Kjør**, trykk **Kjør**, og godkjenn (Avansert → Gå til … → Tillat). Den sender en testmelding til `BESTILLING_TIL`, så du ser at det virker. `onOpen` kan ikke kjøres fra editoren. Til det er gjort, svarer skriptet `mailed: false` med grunnen i `mailError`, og bestillinger går gjennom FormSubmit.
 
 Filene `.clasp.json`, `.claspignore` og `kalender/appsscript.json` hører til dette. Manifestet sier at nettappen kjører som deg og er åpen for alle, som i oppsettet over.
