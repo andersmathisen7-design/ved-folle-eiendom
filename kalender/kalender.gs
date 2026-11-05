@@ -57,6 +57,15 @@ function onOpen() {
     .addToUi();
 }
 
+// Kjør denne én gang fra editoren (velg «godkjennEpost» ved siden av Kjør) når skriptet skal få lov til å sende e-post.
+// Google viser da tillatelsesvinduet. Den sender en testmelding til BESTILLING_TIL, så du ser at det virker.
+function godkjennEpost() {
+  var kvote = MailApp.getRemainingDailyQuota();
+  MailApp.sendEmail({ to: BESTILLING_TIL, subject: FIRMA + ": e-post fra kalenderen virker", name: FIRMA,
+    body: "Skriptet kan nå sende bestillinger på e-post. Mottakere igjen i dag: " + kvote + "." });
+  Logger.log("Testmelding sendt til " + BESTILLING_TIL + ". Mottakere igjen i dag: " + kvote);
+}
+
 // Lager et nytt, tilfeldig passord, viser det én gang, og logger ut alle enheter.
 function lagNyttPassord() {
   ark_();
@@ -544,7 +553,9 @@ function doPost(e) {
     lock.releaseLock();
   }
   // E-posten sendes utenfor låsen. Svarer vi «mailed: true», hopper nettsiden over FormSubmit.
-  return svar_({ ok: true, id: id, mailed: sendBestillingEpost_(b, id) });
+  var mailed = sendBestillingEpost_(b, id), ut = { ok: true, id: id, mailed: mailed };
+  if (!mailed && SISTE_EPOSTFEIL_) ut.mailError = SISTE_EPOSTFEIL_;
+  return svar_(ut);
 }
 
 // ------------------------------------------------------------------ e-post om bestillingen
@@ -598,6 +609,8 @@ function bestillingEpost_(b, id) {
 
 // Sender bestillingen til eieren (med kopi) og bekreftelsen til kunden. Svarer true når eieren har fått den.
 // Feiler det (kvote, manglende tilgang), svarer vi false, og nettsiden sender gjennom FormSubmit i stedet.
+// Siste feil fra MailApp, så svaret til nettsiden sier hvorfor e-posten ikke gikk (typisk manglende tillatelse).
+var SISTE_EPOSTFEIL_ = "";
 function sendBestillingEpost_(b, id) {
   var m, epost = String(b.email || "").trim(), gyldig = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(epost);
   try {
@@ -607,6 +620,7 @@ function sendBestillingEpost_(b, id) {
     if (gyldig) til.replyTo = epost;
     MailApp.sendEmail(til);
   } catch (e) {
+    SISTE_EPOSTFEIL_ = String((e && e.message) || e);
     return false;
   }
   if (gyldig) {
