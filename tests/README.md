@@ -16,3 +16,7 @@ cd - && NODE_PATH=~/pwtest/node_modules node tests/bestilling.test.js
 ```
 
 Ingen ekte bestilling sendes: alle kall til kalenderen og FormSubmit fanges opp i testen.
+
+## Mot den publiserte siden
+
+`tests/live-scenarier.js` kjører 13 scenarier og alle sidene med skjema mot follobjorkeved.no, med kalenderen og FormSubmit fanget opp (ingen ekte bestilling). Se toppen av filen for kommandoen. Brukes etter publisering og i ukesjobben.
