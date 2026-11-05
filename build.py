@@ -748,6 +748,7 @@ def page_admin():
         <button type="button" role="tab" data-view="kommende" class="on">Kommende</button>
         <button type="button" role="tab" data-view="tidligere">Tidligere</button>
       </div>
+      <label class="check admin-toggle"><input type="checkbox" id="a-show-cancelled"> Vis avbestilte <span id="a-cancelled-n"></span></label>
       <p class="muted small" id="a-updated"></p>
     </div>
     <div id="a-stats" class="admin-stats"></div>

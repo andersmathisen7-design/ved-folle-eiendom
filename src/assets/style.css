@@ -296,6 +296,8 @@ textarea.embed { width: 100%; font-family: ui-monospace, Menlo, Consolas, monosp
 .admin-login .check input { width: auto; }
 .admin-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
 .admin-bar p { margin: 0; }
+.admin-toggle { display: flex; align-items: center; gap: 6px; margin: 0; font-size: .95em; cursor: pointer; }
+.admin-toggle input { width: auto; margin: 0; }
 .admin-tabs { display: flex; gap: 4px; background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 4px; }
 .admin-tabs button { border: 0; background: none; font: inherit; font-weight: 600; padding: .35em 1em; border-radius: 999px; cursor: pointer; color: var(--ink); }
 .admin-tabs button.on { background: var(--green); color: #fff; }
