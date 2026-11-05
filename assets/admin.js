@@ -21,6 +21,9 @@
   };
   token = store.get();
   var orders = [], plans = {}, depot = null, today = "", view = "kommende", fullDays = [];
+  // Avbestilte jobber skjules som standard. Valget huskes på enheten.
+  var CKEY = "folloAdminShowCancelled", showCancelled = false;
+  try { showCancelled = localStorage.getItem(CKEY) === "1"; } catch (e) {}
 
   if (!A.calendarUrl) { $("a-nocal").hidden = false; return; }
 
@@ -90,7 +93,10 @@
 
   function render() {
     var upcoming = view === "kommende";
-    var list = orders.filter(function (o) { return upcoming ? o.date >= today : o.date < today; });
+    var inView = orders.filter(function (o) { return upcoming ? o.date >= today : o.date < today; });
+    var nCancelled = inView.filter(function (o) { return o.status === "Avbestilt"; }).length;
+    $("a-cancelled-n").textContent = nCancelled ? "(" + nCancelled + ")" : "";
+    var list = showCancelled ? inView : inView.filter(function (o) { return o.status !== "Avbestilt"; });
     var byDay = {};
     list.forEach(function (o) { (byDay[o.date] = byDay[o.date] || []).push(o); });
     // Dager som er satt som fulle, vises også når de ikke har bestillinger, så de kan åpnes igjen.
@@ -213,6 +219,13 @@
       document.querySelectorAll(".admin-tabs button").forEach(function (x) { x.classList.toggle("on", x === b); });
       render();
     });
+  });
+
+  $("a-show-cancelled").checked = showCancelled;
+  $("a-show-cancelled").addEventListener("change", function () {
+    showCancelled = this.checked;
+    try { localStorage.setItem(CKEY, showCancelled ? "1" : "0"); } catch (e) {}
+    render();
   });
 
   $("a-login").addEventListener("submit", function (e) {
