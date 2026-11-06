@@ -259,6 +259,28 @@ function endreStatus_(id, status, betalt) {
   return { ok: false, error: "fant ikke bestillingen" };
 }
 
+// Nytt antall sekker. Minutter og lossetid er regnet ut på eiersiden (samme formel som bestillingsskjemaet).
+// Lossetid skrives bare hvis raden har det fra før; ellers regnes den fortsatt ut fra sekker og bæring.
+function endreSekker_(id, sekker, minutter, lossetid) {
+  sekker = Math.round(Number(sekker));
+  minutter = Math.round(Number(minutter));
+  if (!(sekker >= 1 && sekker <= 1000) || !(minutter >= 0 && minutter <= 24 * 60)) return { ok: false, error: "ugyldig" };
+  var sh = ark_(), rows = sh.getDataRange().getValues(), head = rows[0];
+  var iId = head.indexOf("ID"), iSekker = head.indexOf("Sekker"), iMin = head.indexOf("Minutter"), iLoss = head.indexOf("Lossetid");
+  if (iSekker < 0) return { ok: false, error: "mangler Sekker-kolonne" };
+  for (var i = 1; i < rows.length; i++) {
+    var radId = String((iId >= 0 && rows[i][iId]) || "rad-" + (i + 1));
+    if (radId === id) {
+      sh.getRange(i + 1, iSekker + 1).setValue(sekker);
+      if (iMin >= 0) sh.getRange(i + 1, iMin + 1).setValue(minutter);
+      var l = service_(lossetid);
+      if (iLoss >= 0 && rows[i][iLoss] !== "" && l != null) sh.getRange(i + 1, iLoss + 1).setValue(l);
+      return { ok: true };
+    }
+  }
+  return { ok: false, error: "fant ikke bestillingen" };
+}
+
 // ------------------------------------------------------------------ fulle dager
 
 // Dager eieren har satt som fulle på eiersiden. Lagres i skriptegenskapene; passerte dager ryddes bort.
@@ -501,7 +523,7 @@ function doPost(e) {
   // Eiersiden.
   if (b.action === "login") return svar_(loggInn_(b.password, b.remember === true));
   if (b.action === "logout") { loggUt_(b.token); return svar_({ ok: true }); }
-  if (b.action === "list" || b.action === "status" || b.action === "add" || b.action === "full") {
+  if (b.action === "list" || b.action === "status" || b.action === "add" || b.action === "full" || b.action === "sacks") {
     if (!gyldigBillett_(b.token)) return svar_({ ok: false, error: "token" });
     if (b.action === "list") {
       var alle = bestillinger_();
@@ -509,6 +531,7 @@ function doPost(e) {
       return svar_({ ok: true, orders: alle, today: idag_(), plans: planer_(perDag_(alle)), depot: LAGER, fullDays: fulleDager_() });
     }
     if (b.action === "status") return svar_(endreStatus_(String(b.id || ""), String(b.status || ""), b.paid === true));
+    if (b.action === "sacks") return svar_(endreSekker_(String(b.id || ""), b.sacks, b.minutes, b.service));
     if (b.action === "full") return svar_(settFull_(String(b.date || ""), b.full === true));
     if (!/^\d{4}-\d{2}-\d{2}$/.test(String(b.date || "")) || !(Number(b.minutes) >= 0 && Number(b.minutes) <= 24 * 60))
       return svar_({ ok: false, error: "ugyldig" });
