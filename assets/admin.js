@@ -169,6 +169,7 @@
     // Levert, men ikke betalt: kan merkes som betalt senere.
     var btns = !done ? btn("Levert", "Betalt og levert", true) + btn("Levert", "Bare levert", false, true) + btn("Avbestilt", "Avbestill", false, true) :
       (o.status === "Levert" && !o.paid ? btn("Levert", "Marker som betalt", true) : "") + btn("Ny", "Angre", false, true);
+    if (o.status !== "Avbestilt") btns += '<button type="button" class="btn btn-sm btn-ghost" data-sacks="' + esc(o.id) + '">Endre sekker</button>';
     return '<article class="card admin-order st-' + esc(o.status.toLowerCase()) + '">' +
       '<div class="ao-head"><strong>' + (stop ? stop.nr + '. ' : "") + esc(o.name || o.address || o.phone || "(uten navn)") + '</strong>' +
       (done ? '<span class="pill' + (o.status === "Levert" && !o.paid ? " pill-unpaid" : "") + '">' + esc(pill) + '</span>' : "") + '</div>' +
@@ -187,6 +188,8 @@
   $("a-list").addEventListener("click", function (e) {
     var f = e.target.closest("button[data-full]");
     if (f) return setFull(f, f.dataset.date, f.dataset.full === "1");
+    var k = e.target.closest("button[data-sacks]");
+    if (k) return openSacks(k.dataset.sacks);
     var b = e.target.closest("button[data-status]");
     if (!b) return;
     var st = b.dataset.status;
@@ -197,6 +200,59 @@
       return load();
     }).catch(function () { alert("Fikk ikke kontakt med kalenderen."); load(); });
   });
+
+  // Endre antall sekker: først nytt tall, så «Er du sikker?» før noe lagres.
+  // Tiden justeres med forskjellen i lossing/bæring, så kjøretiden og eventuelle faste minutter blir som før.
+  var editing = null, confirmStep = false;
+  var dlg = $("a-sacks-dlg");
+  var svc = function (n, carry) {
+    var carried = !/^\s*(ingen|$)/i.test(carry || "");
+    return (D.unload_minutes || 0) + n * (D.unload_minutes_per_sack || 0) + (carried ? n * (D.carry_minutes_per_sack || 0) : 0);
+  };
+  function sacksStep(two) {
+    confirmStep = two;
+    $("as-step1").hidden = two; $("as-step2").hidden = !two;
+    $("as-ok").disabled = false;
+    $("as-ok").textContent = two ? "Ja, endre" : "Neste";
+    $("as-cancel").textContent = two ? "Tilbake" : "Avbryt";
+  }
+  function openSacks(id) {
+    editing = orders.filter(function (o) { return o.id === id; })[0];
+    if (!editing) return;
+    $("as-who").textContent = (editing.name || editing.address || editing.phone || "(uten navn)") + " · " + dayLabel(editing.date);
+    $("as-n").value = editing.sacks;
+    $("as-msg").className = "form-msg"; $("as-msg").textContent = "";
+    sacksStep(false);
+    if (dlg.showModal) dlg.showModal(); else dlg.setAttribute("open", "");
+    $("as-n").focus(); $("as-n").select();
+  }
+  function closeSacks() { editing = null; if (dlg.close) dlg.close(); else dlg.removeAttribute("open"); }
+  $("as-cancel").addEventListener("click", function () { if (confirmStep) { sacksStep(false); $("as-n").focus(); } else closeSacks(); });
+  $("a-sacks").addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (!editing) return;
+    var msg = $("as-msg"), n = parseInt($("as-n").value, 10);
+    if (!(n >= 1 && n <= 1000)) { msg.className = "form-msg err"; msg.textContent = "Skriv et antall mellom 1 og 1000."; return; }
+    if (n === editing.sacks) { closeSacks(); return; }
+    msg.className = "form-msg"; msg.textContent = "";
+    if (!confirmStep) {
+      $("as-q").innerHTML = "Er du sikker på at du vil endre fra <strong>" + nb(editing.sacks) + "</strong> til <strong>" + nb(n) + " sekker</strong>?";
+      sacksStep(true);
+      $("as-ok").focus();
+      return;
+    }
+    var diff = svc(n, editing.carry) - svc(editing.sacks, editing.carry);
+    var body = { action: "sacks", id: editing.id, sacks: n, minutes: Math.max(0, Math.round(editing.minutes + diff)),
+      service: editing.service == null ? null : Math.max(0, Math.round((editing.service + diff) * 10) / 10) };
+    var ok = $("as-ok");
+    ok.disabled = true; ok.innerHTML = SPIN + "Lagrer …";
+    post(body).then(function (j) {
+      if (!j.ok) { sacksStep(true); msg.className = "form-msg err"; msg.textContent = ERR[j.error] || "Kunne ikke lagre: " + (j.error || "ukjent feil"); return; }
+      closeSacks();
+      load();
+    }).catch(function () { sacksStep(true); msg.className = "form-msg err"; msg.textContent = "Fikk ikke kontakt med kalenderen."; });
+  });
+  dlg.addEventListener("close", function () { editing = null; });
 
   // Sett en dag som full (eller åpne den igjen). Kunder kan da ikke velge dagen i bestillingsskjemaet.
   function setFull(b, date, full) {

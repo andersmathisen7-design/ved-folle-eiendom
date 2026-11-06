@@ -78,6 +78,24 @@
     </details>
     <div id="a-list" aria-live="polite"></div>
   </div>
+  <dialog class="card admin-dialog" id="a-sacks-dlg" aria-labelledby="as-title">
+    <form id="a-sacks" class="form" novalidate>
+      <h2 id="as-title">Endre antall sekker</h2>
+      <p class="muted small" id="as-who"></p>
+      <div id="as-step1">
+        <label for="as-n">Antall sekker</label><input id="as-n" type="number" min="1" max="1000" inputmode="numeric" required>
+        <p class="muted small">Tiden for leveringen regnes ut på nytt. Prisen endres ikke.</p>
+      </div>
+      <div id="as-step2" hidden>
+        <p class="as-confirm" id="as-q"></p>
+      </div>
+      <p class="form-msg" id="as-msg"></p>
+      <div class="ao-btns">
+        <button class="btn" type="submit" id="as-ok">Neste</button>
+        <button class="btn btn-ghost" type="button" id="as-cancel">Avbryt</button>
+      </div>
+    </form>
+  </dialog>
   <div class="card" id="a-nocal" hidden>
     <h1>Kalenderen er ikke satt opp</h1>
     <p>Eiersiden henter bestillingene fra leveringskalenderen (et Google-regneark). Sett den opp som beskrevet i <code>kalender/README.md</code>, og legg adressen inn som <code>calendar_url</code> i <code>config.py</code>.</p>
