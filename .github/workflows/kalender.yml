@@ -1,0 +1,34 @@
+name: Publiser kalenderskriptet
+
+# Laster kalender/kalender.gs opp til Apps Script og lager ny versjon av nettappen (samme adresse),
+# hver gang skriptet endres på main. Krever hemmeligheten CLASPRC_JSON (se kalender/README.md).
+on:
+  push:
+    branches: [main]
+    paths: ["kalender/**", ".clasp.json", ".claspignore"]
+  workflow_dispatch:
+
+concurrency:
+  group: kalender
+  cancel-in-progress: false
+
+jobs:
+  publiser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 20
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm i -g @google/clasp@2.4.2
+      - name: Innlogging til Google (fra hemmeligheten CLASPRC_JSON)
+        env:
+          CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
+        run: |
+          if [ -z "$CLASPRC_JSON" ]; then
+            echo "::error::Hemmeligheten CLASPRC_JSON mangler. Se «Automatisk publisering» i kalender/README.md."; exit 1
+          fi
+          printf '%s' "$CLASPRC_JSON" > "$HOME/.clasprc.json"
+      - run: kalender/publiser.sh
