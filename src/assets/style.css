@@ -334,6 +334,10 @@ textarea.embed { width: 100%; font-family: ui-monospace, Menlo, Consolas, monosp
 .pill-full { background: #fdecea; color: #c0392b; vertical-align: .15em; }
 .ad-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
 .st-avbestilt { opacity: .5; }
+.admin-dialog { border: 0; max-width: 420px; width: calc(100% - 32px); padding: 20px 22px; }
+.admin-dialog::backdrop { background: rgba(0,0,0,.45); }
+.admin-dialog h2 { font-size: 1.2rem; margin: 0 0 4px; }
+.as-confirm { font-size: 1.05rem; margin: 10px 0; }
 .st-avbestilt .ao-main { text-decoration: line-through; }
 /* Lasting: spinner mens kalenderen svarer (Google Apps Script bruker gjerne noen sekunder). */
 .spinner { display: inline-block; width: 1em; height: 1em; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; vertical-align: -.15em; animation: spin .7s linear infinite; }
