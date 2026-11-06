@@ -118,4 +118,16 @@ kalender/publiser.sh                 # clasp push + ny versjon av implementering
 
 Trenger den nye koden ny tilgang (for eksempel «sende e-post» første gang), må du godkjenne det én gang: åpne Apps Script, last siden på nytt, velg funksjonen `godkjennEpost` i nedtrekksmenyen ved siden av **Kjør**, trykk **Kjør**, og godkjenn (Avansert → Gå til … → Tillat). Den sender en testmelding til `BESTILLING_TIL`, så du ser at det virker. `onOpen` kan ikke kjøres fra editoren. Til det er gjort, svarer skriptet `mailed: false` med grunnen i `mailError`, og bestillinger går gjennom FormSubmit.
 
+### Automatisk publisering (GitHub Actions)
+
+Hver push til `main` som endrer `kalender/` publiserer skriptet automatisk (`.github/workflows/kalender.yml`), så Claude kan oppdatere kalenderen uten at du kjører noe. Det trenger innloggingen din som en hemmelighet i GitHub. **Én gang:**
+
+1. Slå på Apps Script API (punkt 1 over), hvis det ikke er gjort.
+2. På PC-en, i en terminal: `npx @google/clasp@2.4.2 login` og logg inn med amkleven@gmail.com. (Bruk akkurat denne versjonen, så filen passer med den GitHub bruker.)
+3. Vis innloggingen: `cat ~/.clasprc.json` (Mac/Linux) eller `type %USERPROFILE%\.clasprc.json` (Windows). Kopier hele teksten.
+4. GitHub → repoet → **Settings → Secrets and variables → Actions → New repository secret**. Navn: `CLASPRC_JSON`, verdi: teksten du kopierte. Lagre.
+5. Test: **Actions → Publiser kalenderskriptet → Run workflow**. Grønn hake = ferdig.
+
+Innloggingen gir tilgang til Apps Script-prosjektene på kontoen. Del den aldri andre steder enn i GitHub-hemmeligheten. Vil du trekke tilgangen tilbake: https://myaccount.google.com/permissions → fjern clasp.
+
 Filene `.clasp.json`, `.claspignore` og `kalender/appsscript.json` hører til dette. Manifestet sier at nettappen kjører som deg og er åpen for alle, som i oppsettet over.
