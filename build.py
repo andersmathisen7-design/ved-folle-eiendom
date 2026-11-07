@@ -214,6 +214,7 @@ def footer():
     <div>
       <p class="footer-brand">{esc(C.BRAND)}</p>
       <p>Tørr bjørkeved levert på døra i hele Follo. Levert av {esc(CO['legal_name'])}, som er et lokalt firma i Ås.</p>
+      <p>Laget av <a href="https://nettsideferdig.no/">Nettsideferdig</a></p>
     </div>
     <div>
       <p class="footer-h">Kontakt</p>
