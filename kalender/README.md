@@ -1,6 +1,6 @@
 # Leveringskalender (valgfritt, men anbefalt)
 
-Kunden velger leveringsdag i skjemaet. Vi kjører bare **mandag og tirsdag**, og har satt av **5 timer** per dag.
+Kunden velger leveringsdag i skjemaet. Vi kjører bare **mandag og fredag**, og har satt av **5 timer** per dag.
 
 ## Slik regnes en dag som full
 
@@ -29,7 +29,7 @@ Alle tallene endrer du i `DELIVERY_DAYS` i `config.py`: dager, timer per dag, kj
 
 ## Uten kalender
 
-Er `calendar_url` tom, vises alle mandager og tirsdager som ledige. Da må dere selv legge fulle dager inn i `closed` i `config.py` og publisere på nytt.
+Er `calendar_url` tom, vises alle mandager og fredager som ledige. Da må dere selv legge fulle dager inn i `closed` i `config.py` og publisere på nytt.
 
 ## Sett opp kalenderen (ca. 5 min, gratis)
 
@@ -54,7 +54,7 @@ Regnearket **«Follo Bjørkeved – leveringskalender»** er allerede laget i Go
 - **Gjetting:** etter 10 feil passord på 15 minutter stenges innloggingen i 15 minutter.
 - **Kundedata** sendes bare til den som er logget inn, og bare med POST, aldri i nettadressen. Eiersiden er skjult for Google og har en streng sikkerhetsregel (Content Security Policy), slik at bare sidens egen kode kan kjøre der.
 - **Arket kan ikke lures:** tekst kundene skriver, lagres alltid som ren tekst. Noe som `=IMPORTXML(…)` blir aldri en formel.
-- **Falske bestillinger:** kalenderen godtar bare mandager og tirsdager fra i morgen og 6 uker fram, og maks 30 nettbestillinger i timen. Avbestill eventuelle falske bestillinger på eiersiden.
+- **Falske bestillinger:** kalenderen godtar bare mandager og fredager fra i morgen og 6 uker fram, og maks 30 nettbestillinger i timen. Avbestill eventuelle falske bestillinger på eiersiden.
 
 ## Eiersiden: follobjorkeved.no/admin/
 

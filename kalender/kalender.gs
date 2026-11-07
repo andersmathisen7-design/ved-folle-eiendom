@@ -32,7 +32,7 @@ var BESTILLING_KOPI = "post@min-eiendom.no";   // ORDER_CC (tom streng = ingen k
 var KOLONNER = ["ID", "Leveringsdag", "Minutter", "Status", "Navn", "Telefon", "Adresse", "Område", "Sekker",
                 "Bæring", "Totalpris", "E-post", "Melding", "Registrert", "Lossetid", "Lat", "Lon", "Fast tid", "Betalt"];
 var STATUSER = ["Ny", "Bekreftet", "Levert", "Avbestilt"];
-var LEVERINGSDAGER = [1, 2];          // 1 = mandag, 2 = tirsdag
+var LEVERINGSDAGER = [1, 5];          // 1 = mandag, 5 = fredag. Gjelder bare nye nettbestillinger; bestillinger som alt ligger i arket, beholder dagen sin.
 var MAKS_DAGER_FRAM = 42;             // nettbestillinger maks 6 uker fram
 var MAKS_NETTBESTILLINGER_PER_TIME = 30;
 var MAKS_FEIL_PASSORD = 10;           // per 15 minutter
