@@ -73,8 +73,8 @@ DELIVERY_FEE = 499
 # Tiden for en bestilling = kjøretid (tur/retur fra Ås) + lossing + lossing per sekk + bæring per sekk.
 # Ås har kort kjøretid, så der får vi plass til flere leveringer på samme dag.
 DELIVERY_DAYS = {
-    "weekdays": [1, 2],            # 1 = mandag, 2 = tirsdag (0 = søndag … 6 = lørdag)
-    "minutes_per_day": 5 * 60,     # tid satt av per leveringsdag
+    "weekdays": [1, 5],            # 1 = mandag, 5 = fredag (0 = søndag … 6 = lørdag)
+    "minutes_per_day": 8 * 60,     # tid satt av per leveringsdag (vi kjører hele dagen)
     "weeks_ahead": 4,              # hvor mange uker fram kunden kan velge
     "order_by_hour": 18,           # bestill senest kl. 18 dagen før
     "unload_minutes": 10,          # lossing per bestilling (parkere, hilse på kunden osv.)
@@ -96,7 +96,7 @@ DELIVERY_DAYS = {
     # Dager dere ikke kjører (ferie o.l.), i formatet "ÅÅÅÅ-MM-DD". Helligdager regnes ut automatisk.
     "closed": ["2026-12-28", "2026-12-29"],
     # Kalenderen som teller bestillinger per dag (Google Apps Script, se kalender/README.md).
-    # Tom = alle mandager og tirsdager vises som ledige, og dere må legge fulle dager i "closed" selv.
+    # Tom = alle mandager og fredager vises som ledige, og dere må legge fulle dager i "closed" selv.
     "calendar_url": "https://script.google.com/macros/s/AKfycbywB7MTobGWc7yZpYMUrDLxELynBpAUuXCpgC6NCbZJJnPJa4iRA8Xc5tNjWBRhB_eL/exec",
 }
 
@@ -130,7 +130,7 @@ AREAS = [
         "kommune": "Nordre Follo kommune",
         "places": ["Ski sentrum", "Langhus", "Siggerud", "Kråkstad", "Skotbu", "Finstadjordet", "Hebekk"],
         "postnr": "1400–1409",
-        "intro": "Ski og Langhus ligger rett ved lageret vårt i Ås. Vi kjører ut mandag og tirsdag, og hit er det en kort tur.",
+        "intro": "Ski og Langhus ligger rett ved lageret vårt i Ås. Vi kjører ut hele dagen mandag og fredag, og hit er det en kort tur.",
     },
     {
         "slug": "ved-kolbotn",
@@ -190,7 +190,7 @@ FAQ = [
     ("Kan dere bære veden inn?",
      "Ja. Vi kan sette sekkene i garasjen, i kjelleren eller helt opp til 6. etasje. Du velger dette i bestillingsskjemaet."),
     ("Hvordan bestiller jeg?",
-     "Fyll ut skjemaet på siden og velg leveringsdag. Vi kjører ut på mandager og tirsdager. Du får bekreftelse på e-post med en gang. Du kan også ringe oss på {phone}."),
+     "Fyll ut skjemaet på siden og velg leveringsdag. Vi kjører ut hele dagen på mandager og fredager. Du får bekreftelse på e-post med en gang. Du kan også ringe oss på {phone}."),
     ("Har dere vedabonnement?",
      "Ja. Velg «Fast levering» i bestillingsskjemaet, så kommer vi med samme antall sekker hver 2., 4. eller 6. uke gjennom vinteren. Hver levering koster det samme som en vanlig bestilling, og du betaler for én levering om gangen. Du slipper å huske å bestille, og du kan endre eller stoppe når du vil ved å ringe {phone}."),
     ("Hvordan betaler jeg?",

@@ -329,7 +329,7 @@ def steps_section():
   <div class="wrap">
     <h2>Slik bestiller du</h2>
     <ol class="steps">
-      <li><strong>Fyll ut skjemaet.</strong> Velg antall sekker, bæring og en ledig leveringsdag (mandag eller tirsdag). Du ser prisen med en gang.</li>
+      <li><strong>Fyll ut skjemaet.</strong> Velg antall sekker, bæring og en ledig leveringsdag (mandag eller fredag). Du ser prisen med en gang.</li>
       <li><strong>Du får bekreftelse på e-post.</strong> Den kommer med en gang, med leveringsdagen du valgte.</li>
       <li><strong>Veden kommer.</strong> Vi kjører den hjem til deg og bærer den dit du vil ha den.</li>
     </ol>
@@ -357,7 +357,7 @@ def order_form(area_name="", freq="en-gang", qty=20, chips=(10, 20, 30, 50)):
   <div class="wrap order-grid">
     <div class="order-intro">
       <h2>Bestill bjørkeved{(' i ' + esc(area_name)) if area_name else ''}</h2>
-      <p>Tre korte steg, og du ser prisen hele veien. Vi kjører ut på mandager og tirsdager, og du får bekreftelse på e-post.</p>
+      <p>Tre korte steg, og du ser prisen hele veien. Vi kjører ut hele dagen på mandager og fredager, og du får bekreftelse på e-post.</p>
       <ul class="usp order-usp">
         <li><strong>Tørr bjørkeved</strong>, lagret under tak</li>
         <li>{P['liters']}-liters sekk, ca. {P['kg']} kg, klar til bruk</li>
@@ -414,7 +414,7 @@ def order_form(area_name="", freq="en-gang", qty=20, chips=(10, 20, 30, 50)):
         <label for="f-adresse">Gateadresse</label>
         <input id="f-adresse" name="Adresse" autocomplete="street-address" required>
         <div id="f-dag">
-          <span class="label"><span id="l-dag">Leveringsdag</span> <span class="muted">· mandag og tirsdag, bestill senest kl. {C.DELIVERY_DAYS['order_by_hour']} dagen før</span></span>
+          <span class="label"><span id="l-dag">Leveringsdag</span> <span class="muted">· mandag og fredag, bestill senest kl. {C.DELIVERY_DAYS['order_by_hour']} dagen før</span></span>
           <div class="days" id="f-dager" role="radiogroup" aria-label="Velg leveringsdag"></div>
           <input type="hidden" name="Leveringsdag" id="f-leveringsdag" required>
           <p class="muted small" id="f-dag-msg"></p>
@@ -571,7 +571,7 @@ def page_area(a):
          f"10 sekker koster {kr(10 * P['price'])} uten bæring"
          + (f", pluss hjemlevering {kr(C.DELIVERY_FEE)} per bestilling." if C.DELIVERY_FEE else ".")),
         (f"Hvor raskt kan jeg få ved i {name}?",
-         "Vi kjører ut på mandager og tirsdager. Du velger leveringsdag i skjemaet og får bekreftelse på e-post."),
+         "Vi kjører ut hele dagen på mandager og fredager. Du velger leveringsdag i skjemaet og får bekreftelse på e-post."),
     ] + faq_items()[2:5]
     path = f"/{a['slug']}/"
     title = f"Ved i {name} – tørr bjørkeved levert, {P['price']} kr/sekk | {C.BRAND}"
@@ -640,7 +640,7 @@ def page_vedabonnement():
         ("Kan jeg endre antall sekker, ta pause eller si opp?",
          f"Ja. Ring {CO['phone_display']}, så endrer vi antall, flytter en levering eller stopper abonnementet. Det koster ingenting."),
         ("Når starter og slutter abonnementet?",
-         "Du velger første leveringsdag i skjemaet (vi kjører mandag og tirsdag) og får bekreftelse på e-post. Abonnementet går til du sier fra, og de fleste stopper når fyringssesongen er over."),
+         "Du velger første leveringsdag i skjemaet (vi kjører hele dagen mandag og fredag) og får bekreftelse på e-post. Abonnementet går til du sier fra, og de fleste stopper når fyringssesongen er over."),
         ("Kan jeg få en ekstra levering i en kuldeperiode?",
          "Ja. Ring oss, så legger vi inn en ekstra levering. Den koster det samme som en vanlig bestilling."),
         ("Er vedabonnement billigere enn å kjøpe alt på én gang?",
@@ -1476,7 +1476,7 @@ def llms_txt():
 - Hjemlevering: {kr(C.DELIVERY_FEE) + ' per bestilling' if C.DELIVERY_FEE else 'avtales'}
 - [Vedabonnement]({URL}/vedabonnement/): fast levering hver 2., 4. eller 6. uke, til samme pris per levering som en vanlig bestilling, uten bindingstid
 - Bestilling: skjema på {URL}/#bestill eller telefon {CO['phone']}
-- Leveringsdager: mandag og tirsdag. Kunden velger dag i skjemaet
+- Leveringsdager: mandag og fredag, hele dagen. Kunden velger dag i skjemaet
 - E-post: {CO['email']}
 - Oppdatert: {TODAY}
 
