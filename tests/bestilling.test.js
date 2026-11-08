@@ -130,6 +130,24 @@ const tests = [
     assert.strictEqual(r.seen.formsubmitAttempts, 1);
     assert.ok(/ikke registrert i kalenderen/.test(r.seen.formsubmit[0]["Leveringsdag"]), r.seen.formsubmit[0]["Leveringsdag"]);
   }],
+  ["Leveringsdagene er bare mandager og fredager", async (b) => {
+    const ctx = await b.newContext(), page = await ctx.newPage();
+    await ctx.route("**/gc.zgo.at/**", (r) => r.abort());
+    await ctx.route("**/script.google.com/**", (r) => r.fulfill({ status: 200, headers: CORS, contentType: "application/json", body: JSON.stringify({ booked: {}, fullDays: [] }) }));
+    await page.goto(BASE + "/ved-as/");
+    const dates = await page.$$eval("#f-dager button[data-date]", (bs) => bs.map((x) => x.dataset.date));
+    await ctx.close();
+    assert.ok(dates.length > 0, "ingen leveringsdager");
+    const wd = new Set(dates.map((d) => new Date(d + "T12:00:00Z").getUTCDay()));
+    assert.ok([...wd].every((d) => d === 1 || d === 5), "andre dager enn mandag og fredag: " + dates);
+    assert.ok(wd.has(5), "ingen fredager: " + dates);
+  }],
+  ["Gammelt kalenderskript avviser dagen («dato»): bestillingen sendes likevel, med merknad", async (b) => {
+    const r = await order(b, { calendar: { ok: false, error: "dato", booked: {} } });
+    assert.ok(r.url.endsWith("/takk/"), "kom ikke til /takk/: " + r.error);
+    assert.strictEqual(r.seen.formsubmitAttempts, 1);
+    assert.ok(/ikke registrert i kalenderen/.test(r.seen.formsubmit[0]["Leveringsdag"]), r.seen.formsubmit[0]["Leveringsdag"]);
+  }],
   ["FormSubmit svarer 522: tre forsøk, så feilmelding med e-postlenke", async (b) => {
     const r = await order(b, { calendar: { ok: true, id: "abc12345" }, formsubmit: 522 });
     assert.ok(!r.url.endsWith("/takk/"), "havnet på takkesiden selv om alt feilet");

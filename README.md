@@ -56,7 +56,7 @@ Tester for skjemaet og e-posten fra kalenderen ligger i `tests/` (kjøres lokalt
 
 ## Leveringsdager
 
-Kunden velger leveringsdag i skjemaet. Dere kjører bare mandag og tirsdag, med 5 timer per dag. Hver bestilling får en beregnet tid ut fra kjøretid til området, antall sekker og bæring. Når tiden er brukt opp, vises dagen som «Fullt». Ås har kortest kjøretid, så der får flere plass på samme dag. Innstillingene ligger i `DELIVERY_DAYS` i `config.py`.
+Kunden velger leveringsdag i skjemaet. Dere kjører mandag og fredag, hele dagen (7,5 timer per dag). Hver bestilling får en beregnet tid ut fra kjøretid til området, antall sekker og bæring. Når tiden er brukt opp, vises dagen som «Fullt». Ås har kortest kjøretid, så der får flere plass på samme dag. Innstillingene ligger i `DELIVERY_DAYS` i `config.py`.
 
 For at fulle dager skal oppdateres automatisk, må dere sette opp leveringskalenderen (et gratis Google-regneark). Se **[kalender/README.md](kalender/README.md)**.
 

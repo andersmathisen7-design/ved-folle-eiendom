@@ -181,7 +181,7 @@
   } catch (e) {}
   calc();
 
-  // Leveringsdag. Vi kjører bare på dagene i S.days.weekdays (mandag og tirsdag), og hver dag har en fast mengde tid.
+  // Leveringsdag. Vi kjører bare på dagene i S.days.weekdays (mandag og fredag), og hver dag har en fast mengde tid.
   // Kalenderen (Google Apps Script, se kalender/README.md) regner ut den raskeste ruten for hver dag. Når kunden har skrevet
   // adressen, spør vi kalenderen hvilke dager adressen får plass; to bestillinger i samme nabolag deler da kjøringen.
   // Før det (eller uten kalender) brukes et anslag: kjøretid til området + lossing (fast + per sekk) + bæring per sekk.
@@ -207,7 +207,7 @@
       hol = Object.assign(holidays(today.getFullYear()), holidays(today.getFullYear() + 1));
     for (var n = 1; n <= (D.weeks_ahead || 4) * 7; n++) {
       var d = addDays(today, n);
-      if ((D.weekdays || [1, 2]).indexOf(d.getDay()) < 0 || hol[iso(d)] || closed[iso(d)]) continue;
+      if ((D.weekdays || [1, 5]).indexOf(d.getDay()) < 0 || hol[iso(d)] || closed[iso(d)]) continue;
       // Bestill senest kl. order_by_hour dagen før.
       var cutoff = addDays(d, -1); cutoff.setHours(D.order_by_hour == null ? 18 : D.order_by_hour);
       if (now < cutoff) out.push(d);
@@ -346,6 +346,11 @@
       if (j.ok) { reserved = dayInput.value; mailedByCalendar = j.mailed === true; return true; }
       // Andre feil enn «full» eller «for sent»: bestillingen sendes likevel, med en merknad.
       if (!j.full && j.error !== "dato") { data["Leveringsdag"] += " (ikke registrert i kalenderen)"; return true; }
+      // «dato» for en dag skjemaet fortsatt tilbyr: kalenderskriptet har andre leveringsdager enn nettsiden (f.eks. ikke
+      // publisert på nytt etter at dagene ble endret). Bestillingen sendes likevel på e-post, så den ikke går tapt.
+      if (j.error === "dato" && deliveryDays().some(function (d) { return iso(d) === dayInput.value; })) {
+        data["Leveringsdag"] += " (ikke registrert i kalenderen)"; return true;
+      }
       if (j.booked) booked = j.booked;
       setFull(j.fullDays);
       if (ledig && j.full) ledig.fits[dayInput.value] = false;

@@ -1,6 +1,6 @@
 # Leveringskalender (valgfritt, men anbefalt)
 
-Kunden velger leveringsdag i skjemaet. Vi kjører bare **mandag og tirsdag**, og har satt av **5 timer** per dag.
+Kunden velger leveringsdag i skjemaet. Vi kjører **mandag og fredag**, hele dagen, og har satt av **7,5 timer** per dag.
 
 ## Slik regnes en dag som full
 
@@ -8,7 +8,7 @@ Kalenderen legger en rute for hver dag: fra lageret i Ås, innom alle som skal h
 
 > kjøretiden for hele runden + lossing (10 min per bestilling + 0,5 min per sekk) + bæring (0,5 min per sekk, bare hvis kunden har valgt bæring)
 
-blir mer enn 5 timer.
+blir mer enn 7,5 timer.
 
 Kjøretiden hentes fra to gratis tjenester uten nøkkel eller konto:
 
@@ -29,7 +29,7 @@ Alle tallene endrer du i `DELIVERY_DAYS` i `config.py`: dager, timer per dag, kj
 
 ## Uten kalender
 
-Er `calendar_url` tom, vises alle mandager og tirsdager som ledige. Da må dere selv legge fulle dager inn i `closed` i `config.py` og publisere på nytt.
+Er `calendar_url` tom, vises alle mandager og fredager som ledige. Da må dere selv legge fulle dager inn i `closed` i `config.py` og publisere på nytt.
 
 ## Sett opp kalenderen (ca. 5 min, gratis)
 
@@ -54,13 +54,13 @@ Regnearket **«Follo Bjørkeved – leveringskalender»** er allerede laget i Go
 - **Gjetting:** etter 10 feil passord på 15 minutter stenges innloggingen i 15 minutter.
 - **Kundedata** sendes bare til den som er logget inn, og bare med POST, aldri i nettadressen. Eiersiden er skjult for Google og har en streng sikkerhetsregel (Content Security Policy), slik at bare sidens egen kode kan kjøre der.
 - **Arket kan ikke lures:** tekst kundene skriver, lagres alltid som ren tekst. Noe som `=IMPORTXML(…)` blir aldri en formel.
-- **Falske bestillinger:** kalenderen godtar bare mandager og tirsdager fra i morgen og 6 uker fram, og maks 30 nettbestillinger i timen. Avbestill eventuelle falske bestillinger på eiersiden.
+- **Falske bestillinger:** kalenderen godtar bare mandager og fredager fra i morgen og 6 uker fram, og maks 30 nettbestillinger i timen. Avbestill eventuelle falske bestillinger på eiersiden.
 
 ## Eiersiden: follobjorkeved.no/admin/
 
 Her ser dere alle bestillingene, sortert etter leveringsdag. Logg inn med passordet fra menyen **Vedlevering** i regnearket. Kryss av for «Husk meg» på din egen telefon.
 
-- **Per dag:** antall leveringer, **antall sekker som skal på bilen**, og hvor mye av de 5 timene som er brukt.
+- **Per dag:** antall leveringer, **antall sekker som skal på bilen**, og hvor mye av de 7,5 timene som er brukt.
 - **Per bestilling:** navn, antall sekker, bæring, pris, beregnet tid og melding. Trykk på adressen for å åpne den i Google Maps, og på telefonnummeret for å ringe.
 - **Betalt og levert** eller **Bare levert** når veden er kjørt ut. Er den bare levert, står det «Levert, ikke betalt», og du kan trykke **Marker som betalt** når pengene er kommet. Øverst ser du hvor mange som er levert, men ikke betalt. Kolonnen **Betalt** i arket blir `ja`. **Avbestill** gjør tiden ledig igjen for andre kunder. Trykket feil? Trykk **Angre**.
 - **Sett dagen som full:** knappen ved hver dag, eller «Sett en dag som full» for en dag uten bestillinger. Kundene ser da dagen som «Fullt» i skjemaet. Bestillinger som er lagt inn, blir stående. Trykk **Åpne dagen igjen** for å angre.
