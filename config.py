@@ -74,7 +74,7 @@ DELIVERY_FEE = 499
 # Ås har kort kjøretid, så der får vi plass til flere leveringer på samme dag.
 DELIVERY_DAYS = {
     "weekdays": [1, 5],            # 1 = mandag, 5 = fredag (0 = søndag … 6 = lørdag)
-    "minutes_per_day": 8 * 60,     # tid satt av per leveringsdag (vi kjører hele dagen)
+    "minutes_per_day": 450,         # tid satt av per leveringsdag: hele dagen = 7,5 timer
     "weeks_ahead": 4,              # hvor mange uker fram kunden kan velge
     "order_by_hour": 18,           # bestill senest kl. 18 dagen før
     "unload_minutes": 10,          # lossing per bestilling (parkere, hilse på kunden osv.)
