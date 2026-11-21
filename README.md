@@ -1,6 +1,6 @@
 # Follo Bjørkeved – nettside for vedsalg
 
-Dette er en rask, statisk nettside for salg av bjørkeved i Follo. Den er laget for lokalt søk på Google og for AI-søk som ChatGPT, Gemini og Perplexity. Bestillinger går rett til e-post.
+Dette er en rask, statisk nettside for salg av bjørkeved i Follo. Den er laget for lokalt søk på Google og for AI-søk som ChatGPT, Gemini og Perplexity. Bestillinger går til appen Nettsideferdig, som sender dem til oss på e-post.
 
 Markedsplan og analyse med tall og kilder finner du i **[ANALYSE.md](ANALYSE.md)**.
 
@@ -14,7 +14,7 @@ Markedsplan og analyse med tall og kilder finner du i **[ANALYSE.md](ANALYSE.md)
 | `/fyre-i-dag/` | «Lønner det seg å fyre i dag?»: dagens strømpris time for time mot ved. Innstillingene ligger i `STROM` i `config.py` |
 | `/verktoy/`, `/widget/…` | Vedkalkulator og strøm mot ved som andre kan bygge inn på sine nettsider |
 | `/data/`, `/presse/` | Åpne data (CSV, CC BY 4.0) og en side for journalister |
-| `/admin/` | Ikke i søk. Eiersiden med bestillinger per leveringsdag (krever passord) |
+| `/admin/` | Ikke i søk. Sender videre til eiersiden i appen: https://folloes.app.nettsideferdig.no/admin/ |
 | `/takk/` | Takkeside etter bestilling. Brukes til å måle konverteringer i Google Ads og Meta |
 | `/llms.txt` | Faktaark skrevet for AI-søkemotorer |
 | `sitemap.xml`, `robots.txt` | Lages automatisk |
@@ -34,33 +34,26 @@ python3 build.py          # lager nettsiden i public/
 
 Hver push til `main` publiseres automatisk med GitHub Actions.
 
-## Bestillinger på e-post
+## Bestillinger: appen Nettsideferdig
 
-Bestillingen går to veier, så den ikke er avhengig av én tjeneste:
+Bestillingsskjemaet går til appen Nettsideferdig (`APP_URL` i `config.py`, https://folloes.app.nettsideferdig.no), ikke til FormSubmit eller Google-regnearket:
 
-1. **Leveringskalenderen (Google Apps Script)** får alle opplysningene når kunden trykker Send, legger dem i regnearket, og sender e-posten til `BESTILLING_TIL` i `kalender/kalender.gs` (skal være lik `ORDER_EMAIL`) med kopi til `BESTILLING_KOPI`. Kunden får bekreftelse. Se [kalender/README.md](kalender/README.md).
-2. **FormSubmit** brukes bare hvis kalenderen ikke svarer, eller ikke fikk sendt e-posten. Da prøver skjemaet opptil tre ganger, med 10 sekunders grense per forsøk, før kunden får en e-postlenke og telefonnummeret.
+- Leveringsdagene og «Fullt»/«Ledig» kommer fra `GET /api/leveringsdager` når adressen er skrevet (kjøretid, lossing og bæring regnes i appen). Området legges til adressen som kommune, så Kartverket finner den.
+- Bestillingen sendes til `POST /api/bestill-levering` (bare ID-er og antall, ingen beløp; appen regner prisen og sender kunden bekreftelse på e-post). Er dagen blitt full (409), velger kunden en ny dag.
+- Varen heter «Bjørkeved 40 L» i appen (`APP_VARE`), og bæringen er tillegg med nøyaktig samme navn som i `CARRY_OPTIONS`. Vedabonnement sendes som fast levering (`fast_uker` 2, 4 eller 6).
+- Eiersiden (bestillinger, fulle dager, ferie) er appens admin. `/admin/` på nettsiden sender dit.
+- Prisene på siden står i `config.py`, men det er prisene i appen som gjelder. Endres de, endres begge.
+- `APP_URL=http://127.0.0.1:8790 python3 build.py` bygger mot en lokal (falsk) app.
 
-FormSubmit sender til `ORDER_EMAIL` i `config.py` ([FormSubmit](https://formsubmit.co) er gratis og trenger ingen server):
+Svarer ikke appen, får kunden en feilmelding med telefonnummeret.
 
-1. Når siden er ute, sender du én testbestilling.
-2. FormSubmit sender da en aktiverings-e-post til adressen. Klikk **Activate**.
-3. Etter det kommer alle bestillinger som e-post med en tabell over hva kunden har bestilt. Kunden får også en automatisk bekreftelse.
-4. Anbefalt: I aktiverings-e-posten får du en tilfeldig kode. Sett den inn som `ORDER_EMAIL` i stedet for e-postadressen. Da vises ikke adressen i kildekoden, og du får mindre spam.
+`kalender/` (Google-regnearket) og workflowen `kalender.yml` brukes ikke lenger av nettsiden.
 
-Adressene i `ORDER_CC` i `config.py` (nå post@min-eiendom.no) får en kopi av hver bestilling.
-
-Hvis begge veiene feiler, ser kunden en lenke som åpner bestillingen som ferdig utfylt e-post, og telefonnummeret.
-
-Tester for skjemaet og e-posten fra kalenderen ligger i `tests/` (kjøres lokalt, se [tests/README.md](tests/README.md)).
+Tester for skjemaet ligger i `tests/` (kjøres lokalt, se [tests/README.md](tests/README.md)).
 
 ## Leveringsdager
 
-Kunden velger leveringsdag i skjemaet. Dere kjører mandag og fredag, hele dagen (7,5 timer per dag). Hver bestilling får en beregnet tid ut fra kjøretid til området, antall sekker og bæring. Når tiden er brukt opp, vises dagen som «Fullt». Ås har kortest kjøretid, så der får flere plass på samme dag. Innstillingene ligger i `DELIVERY_DAYS` i `config.py`.
-
-For at fulle dager skal oppdateres automatisk, må dere sette opp leveringskalenderen (et gratis Google-regneark). Se **[kalender/README.md](kalender/README.md)**.
-
-**Eiersiden** `/admin/` viser alle bestillinger per leveringsdag, med antall sekker per dag, status (ny, bekreftet, levert, betalt og levert, avbestilt), knapp for å sette en dag som full, telefonbestillinger og kjøreliste til utskrift. Den bruker samme kalender. Se kalender/README.md.
+Kunden velger leveringsdag i skjemaet. Dere kjører mandag og fredag. Hvilke dager som har plass til adressen og bestillingen, avgjør appen. Før kunden har skrevet adressen (og hvis appen ikke svarer), vises dagene i `DELIVERY_DAYS` i `config.py`. Ferie og fulle dager settes i appen (og ferie gjerne også i `closed`).
 
 ## Hosting (gratis): GitHub Pages
 

@@ -10,9 +10,10 @@
     form_invalid: "Trykket Send, men et felt manglet",
     antall_valgt: "Endret antall sekker til", bestilt_antall: "Bestilte antall sekker",
     dag_valgt: "Valgte leveringsdag",
-    hyppighet_valgt: "Valgte hvor ofte", bestilt_hyppighet: "Bestilte med hyppighet"
+    hyppighet_valgt: "Valgte hvor ofte", bestilt_hyppighet: "Bestilte med hyppighet",
+    contact_start: "Begynte på kontaktskjema", contact_sent: "Kontaktskjema sendt", contact_error: "Feil ved sending av kontaktskjema"
   };
-  var track = function (name, params) {
+  var track = window.siteTrack = function (name, params) {
     try { if (window.gtag) gtag("event", name, params || {}); } catch (e) {}
     try { if (window.fbq) fbq("trackCustom", name, params || {}); } catch (e) {}
     try {
@@ -24,18 +25,25 @@
     } catch (e) {}
   };
 
+  // Feilteksten fra appen som setning: «fant ikke adressen; skriv gate …» → «Fant ikke adressen. Skriv gate ….»
+  var setning = window.siteSetning = function (t) {
+    return String(t).replace(/^\s*./, function (c) { return c.toUpperCase(); })
+      .replace(/;\s*(.)/g, function (_, c) { return ". " + c.toUpperCase(); }).replace(/\.?\s*$/, ".");
+  };
+
   document.querySelectorAll('[data-track="tel"]').forEach(function (a) {
     a.addEventListener("click", function () { track("click_tel"); });
   });
 
   // Mobil: vis "Bestill"-knapp nederst når bestillingsskjemaet ikke er synlig.
   var cta = document.querySelector(".sticky-cta");
-  var orderSec = document.getElementById("bestill");
+  var orderSec = document.getElementById("bestill") || document.getElementById("kontakt");
+  if (cta && orderSec) cta.setAttribute("href", "#" + orderSec.id);
   if (cta && orderSec && "IntersectionObserver" in window) {
     var heroVisible = true, orderVisible = false;
     var upd = function () { cta.classList.toggle("show", !heroVisible && !orderVisible); };
     new IntersectionObserver(function (e) { orderVisible = e[0].isIntersecting; upd(); }).observe(orderSec);
-    var hero = document.querySelector(".hero");
+    var hero = document.querySelector(".hero, .phero");
     if (hero) new IntersectionObserver(function (e) { heroVisible = e[0].isIntersecting; upd(); }).observe(hero);
   }
 
@@ -171,26 +179,62 @@
     if (e.target === qty || e.target === carry) priceCheck();
     if (e.target === freq) track("hyppighet_valgt:" + freqKey());
   });
-  form.querySelector('[name="Side"]').value = location.pathname;
-  // Husk kampanjen (utm_*) kunden kom fra, så vi ser hvilken reklame som gir bestillinger.
-  try {
-    var q = new URLSearchParams(location.search), utm = [];
-    ["utm_source", "utm_medium", "utm_campaign"].forEach(function (k) { if (q.get(k)) utm.push(q.get(k)); });
-    if (utm.length) sessionStorage.setItem("utm", utm.join(" / "));
-    form.querySelector('[name="Kampanje"]').value = sessionStorage.getItem("utm") || document.referrer || "direkte";
-  } catch (e) {}
   calc();
 
-  // Leveringsdag. Vi kjører bare på dagene i S.days.weekdays (mandag og fredag), og hver dag har en fast mengde tid.
-  // Kalenderen (Google Apps Script, se kalender/README.md) regner ut den raskeste ruten for hver dag. Når kunden har skrevet
-  // adressen, spør vi kalenderen hvilke dager adressen får plass; to bestillinger i samme nabolag deler da kjøringen.
-  // Før det (eller uten kalender) brukes et anslag: kjøretid til området + lossing (fast + per sekk) + bæring per sekk.
+  // Appen Nettsideferdig (S.app) tar imot bestillingen og bestemmer leveringsdagene. Kall med tidsgrense; gir {status, j}.
+  var APP = S.app || "";
+  function api(sti, opts, ms) {
+    opts = opts || {};
+    var ctl = typeof AbortController === "function" ? new AbortController() : null;
+    var timer = ctl ? setTimeout(function () { ctl.abort(); }, ms || 15000) : null;
+    if (ctl) opts.signal = ctl.signal;
+    return fetch(APP + sti, opts).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (j) { clearTimeout(timer); return { status: r.status, j: j || {} }; });
+    }, function (err) {
+      clearTimeout(timer);
+      throw (err && err.name === "AbortError") ? new Error("Tidsavbrudd " + Math.round((ms || 15000) / 1000) + " s") : err;
+    });
+  }
+  // Varen, tilleggene og fast levering fra appen (GET /api/oppsett), hentet én gang.
+  var oppsett = null, oppsettP = null;
+  function loadOppsett() {
+    if (oppsett) return Promise.resolve(oppsett);
+    if (!oppsettP) oppsettP = api("/api/oppsett").then(function (r) {
+      if (r.status !== 200 || !r.j.varer) throw new Error("Oppsett " + r.status);
+      oppsett = r.j; return oppsett;
+    }).catch(function (e) { oppsettP = null; throw e; });
+    return oppsettP;
+  }
+  var lik = function (a, b) { return String(a || "").trim().toLowerCase() === String(b || "").trim().toLowerCase(); };
+  function vareId(o) {
+    var v = (o.varer || []).filter(function (x) { return lik(x.navn, S.appVare); })[0];
+    if (!v) throw new Error("Fant ikke varen " + S.appVare);
+    return v.id;
+  }
+  // Bæringen er et tillegg i appen med samme navn som teksten i CARRY_OPTIONS. «ingen» er ingen tillegg.
+  // Finnes ikke tillegget, sendes bestillingen uten, og bæringen står i meldingen (carryNote).
+  function tillegg(o) {
+    var key = carry.value, label = (S.carry || {})[key];
+    if (!label || key === "ingen") return { ids: [], note: "" };
+    var t = ((o.levering || {}).tillegg || []).filter(function (x) { return lik(x.navn, label); })[0];
+    return t ? { ids: [t.id], note: "" } : { ids: [], note: "Bæring: " + label + "." };
+  }
+  // Vedabonnement: «2-uker» → fast_uker 2, når appen tilbyr fast levering hver 2., 4. eller 6. uke.
+  function fastUker(o) {
+    var n = parseInt(freqKey(), 10) || 0, ok = ((o.levering || {}).fast_uker || []);
+    return n && ok.indexOf(n) >= 0 ? n : 0;
+  }
+
+  // Leveringsdag. Når kunden har skrevet adressen, spør vi appen hvilke dager adressen og bestillingen får plass
+  // (GET /api/leveringsdager: kjøretid, lossing og bæring). En dag som ikke er i svaret, er ikke ledig.
+  // Før det vises dagene appen kjører (uten adresse), eller den lokale beregningen hvis appen ikke svarer.
   var D = S.days || {}, dayBox = form.querySelector("#f-dager"), dayInput = form.querySelector("#f-leveringsdag"),
-    dayMsg = form.querySelector("#f-dag-msg"), area = form.querySelector("#f-sted"), booked = {}, closed = {}, full = {}, reserved = null,
-    addr = form.querySelector("#f-adresse"), ledig = null;
+    dayMsg = form.querySelector("#f-dag-msg"), area = form.querySelector("#f-sted"), closed = {}, full = {},
+    addr = form.querySelector("#f-adresse"), baseDays = null, ledig = null;
   var pad = function (n) { return (n < 10 ? "0" : "") + n; };
   var iso = function (d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); };
   var addDays = function (d, n) { return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n); };
+  var fromIso = function (k) { var p = k.split("-"); return new Date(+p[0], +p[1] - 1, +p[2]); };
   (D.closed || []).forEach(function (k) { closed[k] = true; });
   function holidays(y) {
     // Påskedag (gregoriansk), så de bevegelige helligdagene regnes ut fra den.
@@ -202,7 +246,7 @@
     ["01-01", "05-01", "05-17", "12-24", "12-25", "12-26", "12-31"].forEach(function (md) { out[y + "-" + md] = true; });
     return out;
   }
-  function deliveryDays() {
+  function localDays() {
     var now = new Date(), today = new Date(now.getFullYear(), now.getMonth(), now.getDate()), out = [],
       hol = Object.assign(holidays(today.getFullYear()), holidays(today.getFullYear() + 1));
     for (var n = 1; n <= (D.weeks_ahead || 4) * 7; n++) {
@@ -210,51 +254,62 @@
       if ((D.weekdays || [1, 5]).indexOf(d.getDay()) < 0 || hol[iso(d)] || closed[iso(d)]) continue;
       // Bestill senest kl. order_by_hour dagen før.
       var cutoff = addDays(d, -1); cutoff.setHours(D.order_by_hour == null ? 18 : D.order_by_hour);
-      if (now < cutoff) out.push(d);
+      if (now < cutoff) out.push(iso(d));
     }
     return out;
   }
-  // Lossing og bæring hos kunden. Kjøringen kommer i tillegg.
-  function serviceMinutes() {
-    var n = Math.max(0, parseInt(qty.value, 10) || 0);
-    var carried = (parseInt(carry.options[carry.selectedIndex].dataset.fee, 10) || 0) > 0;
-    return (D.unload_minutes || 0) + n * (D.unload_minutes_per_sack || 0) + (carried ? n * (D.carry_minutes_per_sack || 0) : 0);
+  // Adressen slik appen (Kartverket) finner den: gateadressen og kommunen til området («Kolbotnveien 20, Nordre Follo»).
+  function addrQuery() {
+    var a = addr.value.trim().replace(/\s+/g, " "), k = (S.areaKommune || {})[area.value];
+    if (k && a.toLowerCase().indexOf(k.toLowerCase()) < 0) a += ", " + k;
+    return a;
   }
-  function orderMinutes() {
-    var drive = (D.drive_minutes || {})[area.value];
-    if (drive == null) drive = (D.drive_minutes || {})["Annet"] || 60;
-    return Math.round(drive + serviceMinutes());
+  function sacks() { return Math.max(0, parseInt(qty.value, 10) || 0); }
+  function ledigKey() { return [addrQuery(), sacks(), carry.value].join("|"); }
+  function deliveryDays() {
+    if (ledig && ledig.addr === addrQuery()) return ledig.list;
+    return baseDays || localDays();
   }
-  function ledigKey() { return [addr.value.trim(), area.value, orderMinutes(), serviceMinutes()].join("|"); }
   function dayLabel(d) {
     var t = d.toLocaleDateString("nb-NO", { weekday: "long", day: "numeric", month: "long" });
     return t.charAt(0).toUpperCase() + t.slice(1);
   }
-  // En dag passer hvis bestillingen får plass i tiden som er igjen. En tom dag tar alltid imot (også store bestillinger).
-  // Dager eieren har satt som fulle på eiersiden, tar ikke imot noe.
-  function setFull(list) { if (list) { full = {}; list.forEach(function (k) { full[k] = true; }); } }
+  // Med svar fra appen for denne adressen er bare dagene med «ledig: true» ledige. Dager som ble fulle da kunden
+  // sendte (409), er fulle uansett.
   function fits(k) {
     if (full[k]) return false;
-    if (ledig && ledig.key === ledigKey() && k in ledig.fits) return ledig.fits[k];
-    var used = booked[k] || 0; return used === 0 || used + orderMinutes() <= (D.minutes_per_day || 300);
+    if (ledig && ledig.addr === addrQuery()) return ledig.days[k] === true;
+    return true;
   }
-  // Spør kalenderen hvilke dager akkurat denne adressen får plass. Feiler det, brukes anslaget.
   var ledigTimer = null;
-  function checkLedig() {
+  function checkLedig(force) {
     clearTimeout(ledigTimer);
-    if (!D.calendar_url || addr.value.trim().length < 5) return;
+    if (addr.value.trim().length < 5 || !sacks()) { if (ledig) { ledig = null; renderDays(); } return; }
     ledigTimer = setTimeout(function () {
-      var key = ledigKey();
-      if (ledig && ledig.key === key) return;
-      fetch(D.calendar_url, {
-        method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: "ledig", address: addr.value.trim(), area: area.value, minutes: orderMinutes(),
-          service: serviceMinutes(), capacity: D.minutes_per_day || 300 })
-      }).then(function (r) { return r.json(); }).then(function (j) {
-        if (!j.ok || key !== ledigKey()) return;
-        ledig = { key: key, fits: j.fits || {} };
-        if (j.booked) booked = j.booked;
-        setFull(j.fullDays);
+      var key = ledigKey(), q = addrQuery();
+      if (!force && ledig && ledig.key === key) return;
+      loadOppsett().then(function (o) {
+        var t = tillegg(o).ids;
+        return api("/api/leveringsdager?adresse=" + encodeURIComponent(q) + "&linjer=" + vareId(o) + ":" + sacks() +
+          (t.length ? "&tillegg=" + t.join(",") : ""));
+      }).then(function (r) {
+        if (key !== ledigKey()) return;
+        if (r.status === 200 && r.j.ok && r.j.dager) {
+          var days = {};
+          r.j.dager.forEach(function (d) { days[d.dato] = d.ledig === true; });
+          ledig = { key: key, addr: q, list: r.j.dager.map(function (d) { return d.dato; }), days: days, adresse: r.j.adresse || q };
+          if (dayMsg.dataset.addr) { delete dayMsg.dataset.addr; dayMsg.textContent = ""; }
+        } else if (r.status === 400) {
+          // Ukjent adresse eller for langt unna: ingen dager kan velges før adressen er rettet.
+          ledig = { key: key, addr: q, list: deliveryDays(), days: {}, adresse: q, feil: true };
+          dayMsg.dataset.addr = "1";
+          dayMsg.innerHTML = "";
+          dayMsg.appendChild(document.createTextNode(setning((r.j.feil || [])[0] || "Fant ikke adressen") + " "));
+          var tel = document.createElement("a");
+          tel.href = "tel:" + String(S.phone).replace(/\s/g, ""); tel.textContent = S.phone;
+          dayMsg.appendChild(document.createTextNode("Sjekk gateadressen og området, eller ring oss på "));
+          dayMsg.appendChild(tel); dayMsg.appendChild(document.createTextNode("."));
+        } else return; // 429, 503 o.l.: anslaget står
         renderDays();
       }).catch(function () {});
     }, 700);
@@ -264,14 +319,14 @@
   // noe klikk, og dagen ble ikke valgt. Derfor også én klikklytter på boksen, ikke på hver knapp.
   function renderDays() {
     if (!dayBox) return;
-    var days = deliveryDays(), mins = orderMinutes(), cap = D.minutes_per_day || 300, any = false;
+    var days = deliveryDays(), any = false, bad = ledig && ledig.addr === addrQuery() && ledig.feil;
     var buttons = Array.prototype.slice.call(dayBox.querySelectorAll("button[data-date]"));
-    var same = buttons.length === days.length && buttons.every(function (b, i) { return b.dataset.date === iso(days[i]); });
+    var same = buttons.length === days.length && buttons.every(function (b, i) { return b.dataset.date === days[i]; });
     if (!same) {
       dayBox.innerHTML = "";
-      buttons = days.map(function (d) {
-        var b = document.createElement("button");
-        b.type = "button"; b.setAttribute("role", "radio"); b.dataset.date = iso(d); b.dataset.label = dayLabel(d);
+      buttons = days.map(function (k) {
+        var d = fromIso(k), b = document.createElement("button");
+        b.type = "button"; b.setAttribute("role", "radio"); b.dataset.date = k; b.dataset.label = dayLabel(d);
         var t = d.toLocaleDateString("nb-NO", { weekday: "short", day: "numeric", month: "short" }).replace(/\./g, "");
         b.innerHTML = "<strong></strong><span></span>";
         b.firstChild.textContent = t.charAt(0).toUpperCase() + t.slice(1);
@@ -280,16 +335,18 @@
       });
     }
     buttons.forEach(function (b) {
-      var k = b.dataset.date, ok = fits(k), left = cap - (booked[k] || 0), on = dayInput.value === k && ok;
+      var k = b.dataset.date, ok = fits(k), on = dayInput.value === k && ok;
       b.disabled = !ok;
       b.setAttribute("aria-checked", String(on));
       if (on) b.classList.add("on"); else b.classList.remove("on");
-      b.lastChild.textContent = !ok ? "Fullt" : (booked[k] && left < mins * 2) ? "Få plasser" : "Ledig";
+      b.lastChild.textContent = bad ? "–" : !ok ? "Fullt" : "Ledig";
       if (ok) any = true;
     });
-    if (dayInput.value && !(days.some(function (d) { return iso(d) === dayInput.value; }) && fits(dayInput.value))) {
+    if (dayInput.value && !(days.indexOf(dayInput.value) >= 0 && fits(dayInput.value))) {
       dayInput.value = "";
-      dayMsg.textContent = "Dagen du valgte, har ikke plass til denne bestillingen lenger. Velg en annen dag.";
+      if (!bad) dayMsg.textContent = "Dagen du valgte, har ikke plass til denne bestillingen lenger. Velg en annen dag.";
+    } else if (bad) {
+      // Meldingen om adressen står.
     } else if (!any) {
       dayMsg.innerHTML = "Alle leveringsdagene de neste ukene er fulle. Ring oss på <a href=\"tel:" +
         String(S.phone).replace(/\s/g, "") + "\">" + S.phone + "</a>, så finner vi en dag.";
@@ -310,11 +367,14 @@
     if (b && b !== dayBox && !b.disabled) pickDay(b.dataset.date);
   });
   renderDays();
-  if (D.calendar_url) {
-    fetch(D.calendar_url).then(function (r) { return r.json(); }).then(function (j) {
-      booked = j.booked || {}; setFull(j.fullDays); (j.closed || []).forEach(function (k) { closed[k] = true; }); renderDays();
-    }).catch(function () {});
-  }
+  // Dagene appen kjører (helligdager, ferie og frist er regnet der), før adressen er skrevet.
+  if (APP) api("/api/leveringsdager").then(function (r) {
+    if (r.status === 200 && r.j.ok && r.j.dager && r.j.dager.length) {
+      baseDays = r.j.dager.map(function (d) { return d.dato; });
+      renderDays();
+    }
+  }).catch(function () {});
+  if (APP) loadOppsett().catch(function () {});
   ["input", "change"].forEach(function (t) {
     form.addEventListener(t, function (e) {
       if (e.target === qty || e.target === carry || e.target === area || e.target === addr) { renderDays(); checkLedig(); }
@@ -323,45 +383,6 @@
   form.querySelectorAll(".qty-btn, .chips button").forEach(function (b) {
     b.addEventListener("click", function () { renderDays(); checkLedig(); });
   });
-
-  // Hold av tiden i kalenderen før bestillingen sendes. Svarer kalenderen at dagen er full, må kunden velge en annen dag.
-  // Kalenderen (Google Apps Script) sender også bestillingen til oss på e-post og bekreftelsen til kunden. Svarer den
-  // «mailed: true», er bestillingen framme, og FormSubmit trengs ikke. Feiler kalenderen (nett, oppsett) eller er
-  // skriptet en gammel versjon uten e-post, sendes bestillingen gjennom FormSubmit som før.
-  var mailedByCalendar = false;
-  function reserve(data, extra) {
-    if (!D.calendar_url || reserved === dayInput.value) return Promise.resolve(true);
-    mailedByCalendar = false;
-    return fetch(D.calendar_url, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" }, // text/plain gir ingen CORS-forhåndsforespørsel
-      body: JSON.stringify({ date: dayInput.value, minutes: orderMinutes(), service: serviceMinutes(), capacity: D.minutes_per_day || 300,
-        area: data["Område"], sacks: +data["Antall sekker"], phone: data["Telefon"],
-        address: data["Adresse"], carry: data["Bæring"], total: data["Beregnet totalpris"],
-        email: data.email || "",
-        frequency: extra.frequency || "",
-        // Vedabonnement: hyppigheten står først i meldingen, så eieren ser den på eiersiden.
-        message: (freqKey() !== "en-gang" ? "Vedabonnement: " + data["Hyppighet"].toLowerCase() + ". " : "") + (data["Melding"] || "") })
-    }).then(function (r) { return r.json(); }).then(function (j) {
-      if (j.ok) { reserved = dayInput.value; mailedByCalendar = j.mailed === true; return true; }
-      // Andre feil enn «full» eller «for sent»: bestillingen sendes likevel, med en merknad.
-      if (!j.full && j.error !== "dato") { data["Leveringsdag"] += " (ikke registrert i kalenderen)"; return true; }
-      // «dato» for en dag skjemaet fortsatt tilbyr: kalenderskriptet har andre leveringsdager enn nettsiden (f.eks. ikke
-      // publisert på nytt etter at dagene ble endret). Bestillingen sendes likevel på e-post, så den ikke går tapt.
-      if (j.error === "dato" && deliveryDays().some(function (d) { return iso(d) === dayInput.value; })) {
-        data["Leveringsdag"] += " (ikke registrert i kalenderen)"; return true;
-      }
-      if (j.booked) booked = j.booked;
-      setFull(j.fullDays);
-      if (ledig && j.full) ledig.fits[dayInput.value] = false;
-      dayMsg.dataset.keep = "1";
-      renderDays();
-      dayMsg.textContent = j.error === "dato" ? "Den dagen er det for sent å bestille til. Velg en annen dag." :
-        "Beklager, dagen ble akkurat full. Velg en annen dag og trykk Send igjen.";
-      if (j.error === "dato") { closed[dayInput.value] = true; dayInput.value = ""; renderDays(); }
-      return false;
-    }).catch(function () { data["Leveringsdag"] += " (ikke registrert i kalenderen)"; return true; });
-  }
 
   function validate() {
     var ok = true, first = null, missing = [];
@@ -383,6 +404,9 @@
     return ok;
   }
 
+  var telLink = function () { return "<a href=\"tel:" + String(S.phone).replace(/\s/g, "") + "\">" + S.phone + "</a>"; };
+  var escHtml = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]; }); };
+
   form.addEventListener("submit", function (ev) {
     ev.preventDefault();
     msg.className = "form-msg"; msg.textContent = "";
@@ -396,34 +420,63 @@
     var data = {};
     new FormData(form).forEach(function (v, k) { data[k] = v; });
     data["Bæring"] = carry.options[carry.selectedIndex].text;
-    delete data._baering;
     var dayBtn = dayBox && dayBox.querySelector('[data-date="' + dayInput.value + '"]');
     var dayText = dayBtn ? dayBtn.dataset.label : dayInput.value;
     var repeat = freqKey() !== "en-gang";
-    if (repeat) data["Beregnet totalpris"] += " per levering";
     data["Leveringsdag"] = (repeat ? "Første levering: " : "") + dayText;
-    data["Beregnet tid"] = orderMinutes() + " min (kjøring, lossing og bæring)";
-    data._subject = (repeat ? "Nytt vedabonnement: " : "Ny vedbestilling: ") + data["Antall sekker"] + " sekker" +
-      (repeat ? " " + data["Hyppighet"].replace("Fast levering ", "") : "") + " – " + data["Adresse"] + ", " + data["Område"] +
-      " – " + dayText.toLowerCase();
-    // E-post er påkrevd og sjekket i validate(), så kunden får alltid automatisk bekreftelse fra FormSubmit.
-    var epost = data["E-post"].trim();
-    delete data["E-post"];
-    data.email = epost;
-    data._replyto = epost;
-    data._autoresponse = "Takk for bestillingen hos " + S.brand + "! Vi har mottatt bestilling på " +
-      data["Antall sekker"] + " sekker bjørkeved (beregnet " + fmt(total) + (repeat ? " per levering, " + data["Hyppighet"].toLowerCase() : "") + "). Veden kommer på dagen du valgte. " +
-      (repeat ? "Første leveringsdag: " : "Ønsket leveringsdag: ") + dayText.toLowerCase() + ". Spørsmål? Ring " + S.phone + ".";
-    delete data._next;
+    var dato = dayInput.value;
 
     var btn = form.querySelector('button[type="submit"]');
     var setBtn = function (busy) { btn.disabled = busy; btn.querySelector(".btn-label").textContent = busy ? "Sender …" : "Send bestilling"; };
     setBtn(true);
 
-    reserve(data, { frequency: repeat ? data["Hyppighet"] : "" }).then(function (go) {
-      if (!go) { setBtn(false); return; }
-      if (mailedByCalendar) { track("bestilt_via:kalender"); done(data, total); return; }
-      send(data, total, setBtn);
+    loadOppsett().then(function (o) {
+      var t = tillegg(o), fu = fastUker(o), melding = [];
+      // Vedabonnement uten fast levering i appen: hyppigheten står først i meldingen, så eieren ser den.
+      if (repeat && !fu) melding.push("Vedabonnement: " + data["Hyppighet"].toLowerCase() + ".");
+      if (t.note) melding.push(t.note);
+      if ((data["Melding"] || "").trim()) melding.push(data["Melding"].trim());
+      var body = {
+        linjer: [{ vare_id: vareId(o), antall: sacks() }], tillegg: t.ids,
+        adresse: ledig && ledig.addr === addrQuery() && !ledig.feil ? ledig.adresse : addrQuery(),
+        dato: dato, navn: data["Navn"].trim(), telefon: data["Telefon"].replace(/[^+0-9 ()-]/g, "").trim(),
+        epost: data["E-post"].trim(), melding: melding.join(" ").slice(0, 500)
+      };
+      if (fu) body.fast_uker = fu;
+      // Ingen nye forsøk: en bestilling som kom fram uten at svaret gjorde det, skal ikke komme to ganger.
+      return api("/api/bestill-levering", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }, 25000);
+    }).then(function (r) {
+      if (r.status === 200 && r.j.ok) { track("bestilt_via:app"); done(data, total); return; }
+      setBtn(false);
+      var feil = (r.j.feil || [])[0] || ("Feil " + r.status);
+      if (r.status === 409) {
+        // Dagen ble full (eller kan ikke velges lenger): kunden velger en annen dag og sender igjen.
+        full[dato] = true;
+        if (ledig) ledig.days[dato] = false;
+        dayInput.value = "";
+        dayMsg.dataset.keep = "1";
+        renderDays();
+        dayMsg.textContent = "Beklager, dagen ble akkurat full. Velg en annen dag og trykk Send igjen.";
+        form.querySelector("#f-dag").classList.add("invalid");
+        msg.className = "form-msg err";
+        msg.textContent = "Beklager, dagen ble akkurat full. Velg en annen dag og trykk Send igjen.";
+        checkLedig(true);
+        track("order_error:dagen er full");
+        return;
+      }
+      var mark = /adresse|langt/i.test(feil) ? addr : /e-post|epost/i.test(feil) ? form.querySelector("#f-epost") :
+        /telefon/i.test(feil) ? form.querySelector("#f-tlf") : /navn/i.test(feil) ? form.querySelector("#f-navn") : null;
+      if (mark && r.status === 400) mark.classList.add("invalid");
+      msg.className = "form-msg err";
+      msg.innerHTML = (r.status === 400 ? escHtml(setning(feil)) + " Rett det og send igjen, eller ring oss på " :
+        "Beklager, bestillingen kom ikke fram. Prøv igjen om litt, eller ring oss på ") + telLink() + ".";
+      track("order_error:" + String(r.status) + " " + String(feil).replace(/[^\wæøåÆØÅ .-]/g, "").trim().slice(0, 36));
+    }).catch(function (err) {
+      setBtn(false);
+      msg.className = "form-msg err";
+      msg.innerHTML = "Beklager, bestillingen kom ikke fram. Sjekk nettet og prøv igjen, eller ring oss på " + telLink() + ".";
+      // Grunnen står i hendelsesnavnet (f.eks. «order_error:Failed to fetch»), for GoatCounter lagrer bare én tittel per hendelse.
+      track("order_error:" + String((err && err.message) || "ukjent").replace(/[^\wæøåÆØÅ .-]/g, "").trim().slice(0, 40));
     });
   });
 
@@ -438,55 +491,9 @@
       sessionStorage.setItem("lastOrder", JSON.stringify({
         qty: data["Antall sekker"], carry: data["Bæring"], total: fmt(total),
         day: data["Leveringsdag"].replace("Første levering: ", ""), freq: freqKey() !== "en-gang" ? data["Hyppighet"] : "",
-        address: data["Adresse"] + ", " + data["Område"]
+        address: data["Adresse"] + (data["Område"] && data["Område"] !== "Annet" ? ", " + data["Område"] : "")
       }));
     } catch (e) {}
     location.href = (S.base || "") + "/takk/";
-  }
-
-  // Reserveløsningen når kalenderen ikke sendte e-posten: FormSubmit. Den feiler av og til («Load failed», «Failed to fetch»,
-  // «Server Error»). 4.11.2026 svarte den 522 fra Cloudflare etter 20 sekunder på alt. Derfor avbrytes hvert forsøk etter
-  // 10 sekunder, og vi prøver på nytt to ganger før kunden får feilmelding. Uke 44 i 2026 feilet 5 av 9 innsendinger.
-  // Ulempe: kom den første fram likevel, kan dere få samme bestilling to ganger (samme telefonnummer).
-  var RETRY_MS = [1500, 4000], FORMSUBMIT_TIMEOUT_MS = 10000;
-  function send(data, total, setBtn, attempt) {
-    attempt = attempt || 0;
-    var ctl = typeof AbortController === "function" ? new AbortController() : null;
-    var timer = ctl ? setTimeout(function () { ctl.abort(); }, FORMSUBMIT_TIMEOUT_MS) : null;
-    fetch(S.endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify(data),
-      signal: ctl ? ctl.signal : undefined
-    }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
-      .then(function (res) {
-        clearTimeout(timer);
-        if (!res.ok || String(res.j.success) !== "true") throw new Error(res.j.message || "Feil");
-        if (attempt) track("order_retry_ok:" + (attempt + 1));
-        track("bestilt_via:formsubmit");
-        done(data, total);
-      })
-      .catch(function (err) {
-        clearTimeout(timer);
-        if (err && err.name === "AbortError") err = new Error("Tidsavbrudd " + (FORMSUBMIT_TIMEOUT_MS / 1000) + " s");
-        if (attempt < RETRY_MS.length) {
-          setTimeout(function () { send(data, total, setBtn, attempt + 1); }, RETRY_MS[attempt]);
-          return;
-        }
-        setBtn(false);
-        // Bestillingen skal ikke gå tapt: la kunden sende den som vanlig e-post med alt ferdig utfylt.
-        var lines = [];
-        Object.keys(data).forEach(function (k) {
-          if (k.charAt(0) !== "_" && data[k]) lines.push(k + ": " + data[k]);
-        });
-        var mailto = "mailto:" + S.orderEmail + "?subject=" + encodeURIComponent(data._subject) +
-          (S.orderCc ? "&cc=" + encodeURIComponent(S.orderCc) : "") +
-          "&body=" + encodeURIComponent(lines.join("\n"));
-        msg.className = "form-msg err";
-        msg.innerHTML = "Beklager, bestillingen kom ikke fram. <a href=\"" + mailto + "\">Send den på e-post i stedet</a> " +
-          "(alt er fylt ut for deg), eller ring oss på <a href=\"tel:" + S.phone.replace(/\s/g, "") + "\">" + S.phone + "</a>.";
-        // Grunnen står i hendelsesnavnet (f.eks. «order_error:Failed to fetch»), for GoatCounter lagrer bare én tittel per hendelse.
-        track("order_error:" + String((err && err.message) || "ukjent").replace(/[^\wæøåÆØÅ .-]/g, "").trim().slice(0, 40));
-      });
   }
 })();

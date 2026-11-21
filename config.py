@@ -8,13 +8,12 @@ SITE_URL = "https://follobjorkeved.no"
 
 BRAND = "Follo Bjørkeved"
 
-# Bestillinger sendes hit (via FormSubmit.co). Første bestilling utløser en
-# aktiverings-e-post til denne adressen som må bekreftes én gang.
-# Etter aktivering gir FormSubmit en tilfeldig kode (f.eks. "a1b2c3...") som kan
-# settes inn her i stedet for e-postadressen, slik at adressen ikke er synlig i kildekoden.
-ORDER_EMAIL = "amkleven@gmail.com"
-# Disse får en kopi av hver bestilling (FormSubmit _cc). Trenger ingen aktivering.
-ORDER_CC = ["post@min-eiendom.no"]
+# Appen Nettsideferdig tar imot vedbestillingene. Den lagrer dem (data i EU), sender dem til oss på e-post og sender
+# kunden bekreftelse. Leveringsdagene, «Fullt»/«Ledig», ruten (Kartverket og OSRM) og prisene på levering og bæring
+# bestemmes der. Eiersiden (bestillinger, fulle dager) er appens admin: https://folloes.app.nettsideferdig.no/admin/
+APP_URL = "https://folloes.app.nettsideferdig.no"
+# Varen i appen (Oppsett → Varer). Skjemaet finner den på navnet.
+APP_VARE = "Bjørkeved 40 L"
 
 COMPANY = {
     "legal_name": "Follo Eiendomsservice AS",
@@ -41,7 +40,8 @@ PRODUCT = {
     "diameter_cm": "5–12",
 }
 
-# Bæring, tillegg i kroner per sekk.
+# Bæring, tillegg i kroner per sekk. Teksten (andre verdi) må være nøyaktig lik navnet på tillegget i appen
+# (Oppsett → Levering), for skjemaet finner tillegget på navnet. «ingen» er ingen tillegg.
 CARRY_OPTIONS = [
     ("ingen", "Ingen bæring – settes ved innkjørsel", 0),
     ("ute-15", "Utendørs 0–15 meter", 12),
@@ -69,35 +69,15 @@ FREQUENCY_OPTIONS = [
 # Hjemlevering i kroner per bestilling (samme som gammel side). None = "avtales".
 DELIVERY_FEE = 499
 
-# Leveringsdager. Kunden velger dag i skjemaet. En dag blir «full» når de bestilte leveringene fyller tiden.
-# Tiden for en bestilling = kjøretid (tur/retur fra Ås) + lossing + lossing per sekk + bæring per sekk.
-# Ås har kort kjøretid, så der får vi plass til flere leveringer på samme dag.
+# Leveringsdager. Kunden velger dag i skjemaet. Hvilke dager som er ledige for adressen og bestillingen, avgjør appen
+# (APP_URL: kjøretid, lossing, bæring og plass per dag). Verdiene her brukes bare til dagene som vises før kunden har
+# skrevet adressen, og hvis appen ikke svarer. En dag appen ikke gir, er ikke ledig.
 DELIVERY_DAYS = {
     "weekdays": [1, 5],            # 1 = mandag, 5 = fredag (0 = søndag … 6 = lørdag)
-    "minutes_per_day": 450,         # tid satt av per leveringsdag: hele dagen = 7,5 timer
     "weeks_ahead": 4,              # hvor mange uker fram kunden kan velge
     "order_by_hour": 18,           # bestill senest kl. 18 dagen før
-    "unload_minutes": 10,          # lossing per bestilling (parkere, hilse på kunden osv.)
-    "unload_minutes_per_sack": 0.5, # minutter per sekk for å ta den ut av bilen, også uten bæring
-    "carry_minutes_per_sack": 0.5, # ekstra minutter per sekk når veden skal bæres
-    # Kjøretid tur/retur fra lageret i Ås, i minutter. Navnene må være de samme som i AREAS.
-    # Kalenderen regner ut den ekte ruten for hver dag. Disse tallene er bare anslaget før kunden har skrevet adressen,
-    # og reserven hvis adressen ikke finnes eller rutetjenesten ikke svarer.
-    "drive_minutes": {
-        "Ås": 20,
-        "Ski og Langhus": 35,
-        "Kolbotn og Oppegård": 50,
-        "Vestby og Son": 45,
-        "Drøbak": 45,
-        "Nesodden": 70,
-        "Enebakk": 60,
-        "Annet": 60,
-    },
-    # Dager dere ikke kjører (ferie o.l.), i formatet "ÅÅÅÅ-MM-DD". Helligdager regnes ut automatisk.
+    # Dager dere ikke kjører (ferie o.l.), i formatet "ÅÅÅÅ-MM-DD". Helligdager regnes ut automatisk. Sett dem også i appen.
     "closed": ["2026-12-28", "2026-12-29"],
-    # Kalenderen som teller bestillinger per dag (Google Apps Script, se kalender/README.md).
-    # Tom = alle mandager og fredager vises som ledige, og dere må legge fulle dager i "closed" selv.
-    "calendar_url": "https://script.google.com/macros/s/AKfycbxnOd3V9s9Pwa3en9uV5ud4s9PIBJLf4dX0SCRabbhrwpkmPLwaEnSqN4LHNnBydsir/exec",
 }
 
 # Google Search Console-bekreftelse (meta-tag på forsiden).
