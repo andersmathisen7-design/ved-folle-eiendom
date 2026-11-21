@@ -460,6 +460,22 @@ def order_form(area_name="", freq="en-gang", qty=20, chips=(10, 20, 30, 50)):
       <p class="form-msg" id="form-msg" role="alert"></p>
       <p class="muted small">Når du sender skjemaet, får vi adressen og kontaktinfoen din. Vi bruker det bare til å levere veden. Les mer i <a href="/personvern/">personvernerklæringen</a>.</p>
     </form>
+    <noscript><p class="form-msg err">Bestillingen trenger JavaScript. Slå det på, eller ring oss på <a href="tel:{tel}">{CO['phone_display']}</a>.</p></noscript>
+    <script>
+    // Vern som står i selve siden (aldri mellomlagret for seg): kjører ikke bestillingsskriptet (app.js), eller krasjer
+    // det, skal kunden få beskjed i stedet for at ingenting skjer (21.11.2026: et gammelt app.js stoppet bestillingen stille).
+    (function () {{
+      var f = document.getElementById("order-form"); if (!f) return;
+      f.addEventListener("submit", function (e) {{
+        if (f.getAttribute("data-klar") === "1") return;
+        e.preventDefault();
+        var m = document.getElementById("form-msg");
+        m.className = "form-msg err";
+        m.innerHTML = "Beklager, bestillingen kunne ikke sendes. Last siden på nytt og prøv igjen, eller ring oss på <a href=\\"tel:{tel}\\">{CO['phone_display']}</a>.";
+        try {{ if (window.goatcounter && goatcounter.count) goatcounter.count({{ path: "order_error:skriptet kjorte ikke", title: "Bestilling: skriptet kjørte ikke", event: true }}); }} catch (x) {{}}
+      }});
+    }})();
+    </script>
   </div>
 </section>"""
 

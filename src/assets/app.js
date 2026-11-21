@@ -407,8 +407,20 @@
   var telLink = function () { return "<a href=\"tel:" + String(S.phone).replace(/\s/g, "") + "\">" + S.phone + "</a>"; };
   var escHtml = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]; }); };
 
+  // Noe uventet krasjet under sendingen: kunden får alltid beskjed, aldri en knapp som ikke gjør noe.
+  function uventet(err) {
+    var b = form.querySelector('button[type="submit"]');
+    if (b) { b.disabled = false; var l = b.querySelector(".btn-label"); if (l) l.textContent = "Send bestilling"; }
+    msg.className = "form-msg err";
+    msg.innerHTML = "Beklager, noe gikk galt, og bestillingen ble ikke sendt. Last siden på nytt og prøv igjen, eller ring oss på " + telLink() + ".";
+    track("order_error:js " + String((err && err.message) || "ukjent").replace(/[^\wæøåÆØÅ .-]/g, "").trim().slice(0, 36));
+  }
+
   form.addEventListener("submit", function (ev) {
     ev.preventDefault();
+    try { send(); } catch (err) { uventet(err); }
+  });
+  function send() {
     msg.className = "form-msg"; msg.textContent = "";
     if (form._honey && form._honey.value) return;
     if (!validate()) {
@@ -478,7 +490,9 @@
       // Grunnen står i hendelsesnavnet (f.eks. «order_error:Failed to fetch»), for GoatCounter lagrer bare én tittel per hendelse.
       track("order_error:" + String((err && err.message) || "ukjent").replace(/[^\wæøåÆØÅ .-]/g, "").trim().slice(0, 40));
     });
-  });
+  }
+  // Vernet i siden (build.py) slipper innsendingen gjennom bare når dette skriptet har koblet seg på skjemaet.
+  form.setAttribute("data-klar", "1");
 
   // Bestillingen er framme: mål den, husk oppsummeringen til takkesiden, og gå dit.
   function done(data, total) {

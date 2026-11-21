@@ -246,6 +246,34 @@ const tests = [
     assert.ok((await events(page)).includes("form_invalid:Navn"));
     await ctx.close();
   }],
+  ["Bestillingsskriptet kjører ikke (gammelt eller ødelagt app.js): kunden får beskjed, og ingenting sendes", async (b) => {
+    const ctx = await b.newContext(), page = await ctx.newPage();
+    const seen = await mockApp(ctx, {});
+    await ctx.route(/\/assets\/app\.js/, (r) => r.fulfill({ contentType: "application/javascript", body: "document.querySelector('[name=\"Side\"]').value = 1;" }));
+    await page.goto(BASE + "/ved-as/");
+    await page.fill("#f-adresse", "Storgata 1");
+    await page.fill("#f-navn", "Kari Nordmann");
+    await page.click("#order-form button[type=submit]");
+    await page.waitForSelector("#form-msg.err", { state: "visible", timeout: 5000 });
+    const tekst = await page.$eval("#form-msg", (el) => el.textContent);
+    assert.ok(/kunne ikke sendes/.test(tekst) && /48 99 39 00/.test(tekst), "feil melding: " + tekst);
+    assert.ok(!page.url().includes("?"), "skjemaet ble sendt av nettleseren: " + page.url());
+    assert.strictEqual(seen.bestill.length, 0);
+    assert.ok((await events(page)).includes("order_error:skriptet kjorte ikke"));
+    await ctx.close();
+  }],
+  ["Noe krasjer under sendingen: kunden får beskjed, og knappen kan brukes igjen", async (b) => {
+    const ctx = await b.newContext(), page = await ctx.newPage();
+    await mockApp(ctx, {});
+    await fyllUt(page, {});
+    await page.click("#f-dager button:not([disabled])");
+    await page.evaluate(() => document.querySelector("#order-form .btn-label").remove()); // setBtn kaster
+    const tekst = await send(page, 5000);
+    assert.ok(/noe gikk galt/i.test(tekst), "feil melding: " + tekst);
+    assert.ok(!(await page.$eval("#order-form button[type=submit]", (el) => el.disabled)), "knappen er låst");
+    assert.ok((await events(page)).some((e) => e.startsWith("order_error:js ")));
+    await ctx.close();
+  }],
   ["/admin/ sender videre til appens admin, og ingen side nevner FormSubmit eller Google-regnearket", async () => {
     const fs = require("fs");
     const admin = fs.readFileSync(path.join(ROOT, "public", "admin", "index.html"), "utf8");
