@@ -19,6 +19,13 @@ import artikler_build as AB
 
 ROOT = Path(__file__).parent
 SRC = ROOT / "src"
+
+
+def asset(navn):
+    """/assets/<navn>?v=<innholdets hash>: ny adresse når fila endres, så nettlesere aldri bruker et gammelt skript
+    med en ny side (21.11.2026: mellomlagret app.js stoppet vedbestillingen etter byttet til appen)."""
+    import hashlib
+    return f"/assets/{navn}?v={hashlib.sha256((SRC / 'assets' / navn).read_bytes()).hexdigest()[:10]}"
 OUT = ROOT / "public"
 TODAY = date.today().isoformat()
 # I GitHub Actions settes SITE_URL/BASE_PATH automatisk (se .github/workflows/pages.yml),
@@ -182,7 +189,7 @@ def head(title, desc, path, ld="", noindex=False):
 <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
 <link rel="preload" as="image" href="/img/bjorkeved-levering-follo-768.webp" imagesrcset="/img/bjorkeved-levering-follo-768.webp 768w, /img/bjorkeved-levering-follo-1536.webp 1536w" imagesizes="(min-width: 900px) 50vw, 100vw">
-<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="{asset("style.css")}">
 {ld}
 {analytics_head()}
 </head>
@@ -236,7 +243,7 @@ def footer():
 </footer>
 <a class="sticky-cta btn" href="#bestill">Bestill ved – {P['price']} kr/sekk</a>
 <script>window.SITE={json.dumps(site_js_config(), ensure_ascii=False)};</script>
-<script src="/assets/app.js" defer></script>
+<script src="{asset("app.js")}" defer></script>
 </body>
 </html>
 """
@@ -718,7 +725,7 @@ def page_admin():
 <title>Eiersiden | {esc(C.BRAND)}</title>
 <meta http-equiv="refresh" content="0; url={to}">
 <link rel="icon" href="/favicon.ico">
-<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="{asset("style.css")}">
 </head>
 <body>
 <main class="section"><div class="wrap narrow center">
@@ -1006,7 +1013,7 @@ def page_fyre():
     {cta_block()}
   </div>
 </section>""" + order_form()
-    script = f'<script>window.FYRE={json.dumps(js_cfg_fyre())};</script><script src="/assets/fyre.js" defer></script>'
+    script = f'<script>window.FYRE={json.dumps(js_cfg_fyre())};</script><script src="{asset('fyre.js')}" defer></script>'
     return head(title, desc, path, ld) + body + footer().replace("</body>", script + "\n</body>")
 
 
@@ -1067,7 +1074,7 @@ b.addEventListener("change",c);m.addEventListener("change",c);c();}})();</script
 def widget_fyre():
     inner = "<h2>Lønner det seg å fyre med ved i dag?</h2>" + fyre_widget_markup(compact=True) + \
         f'<p class="credit">Tjeneste fra <a href="{URL}/fyre-i-dag/" target="_blank" rel="noopener">{esc(C.BRAND)}</a></p>'
-    script = f'<script>window.FYRE={json.dumps(js_cfg_fyre())};</script><script src="/assets/fyre.js" defer></script>'
+    script = f'<script>window.FYRE={json.dumps(js_cfg_fyre())};</script><script src="{asset('fyre.js')}" defer></script>'
     return widget_page("Lønner det seg å fyre i dag?", inner, script)
 
 
