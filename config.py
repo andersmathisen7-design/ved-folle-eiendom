@@ -87,6 +87,11 @@ GOOGLE_SITE_VERIFICATION = "vnXKmoMZizKbBLImYNoyt1EmqXKDaXkpEYQngFIkxhA"
 # Dashbord: https://follobjorkeved.goatcounter.com
 GOATCOUNTER = "follobjorkeved"
 
+# Besøk telles også i Nettsideferdigs egen statistikk (uten cookies, bare summer per døgn).
+# Agentene leser den med GET /agent/besok?site=follobjorkeved (nettsidebyra: drift/apper.json, "statistikk": true).
+STATS_URL = "https://sidefabrikken.nettsideferdig.workers.dev"
+STATS_SITE = "follobjorkeved"
+
 # Valgfritt: måle-ID-er. La stå tomme til kontoene er opprettet.
 # GA4: "G-XXXXXXX". Google Ads: "AW-XXXXXXX" og konverteringsetikett "AW-XXXXXXX/abcDEF".
 GA4_ID = ""
