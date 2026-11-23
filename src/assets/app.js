@@ -7,7 +7,8 @@
     bestilt_via: "Bestillingen gikk via",
     purchase_lead_view: "Så takkesiden", article_cta: "Klikket bestill i artikkel",
     calculator_to_order: "Brukte vedkalkulatoren", price_check: "Sjekket pris i skjemaet",
-    form_invalid: "Trykket Send, men et felt manglet",
+    form_invalid: "Trykket Send, men et felt manglet", kontakt_utfylt: "Fylte ut navn, telefon og e-post",
+    send_trykket: "Trykket Send bestilling",
     antall_valgt: "Endret antall sekker til", bestilt_antall: "Bestilte antall sekker",
     dag_valgt: "Valgte leveringsdag",
     hyppighet_valgt: "Valgte hvor ofte", bestilt_hyppighet: "Bestilte med hyppighet",
@@ -181,6 +182,14 @@
   });
   calc();
 
+  // Navn, telefon og e-post fylt ut (én gang): skiller «stoppet før kontaktinfo» fra «stoppet før Send».
+  var kontaktTalt = false;
+  form.addEventListener("change", function () {
+    if (kontaktTalt) return;
+    var fylt = ["#f-navn", "#f-tlf", "#f-epost"].every(function (id) { var el = form.querySelector(id); return el && el.value.trim(); });
+    if (fylt) { kontaktTalt = true; track("kontakt_utfylt"); }
+  });
+
   // Appen Nettsideferdig (S.app) tar imot bestillingen og bestemmer leveringsdagene. Kall med tidsgrense; gir {status, j}.
   var APP = S.app || "";
   function api(sti, opts, ms) {
@@ -281,10 +290,17 @@
     if (ledig && ledig.addr === addrQuery()) return ledig.days[k] === true;
     return true;
   }
+  // Adressen appen fant (Kartverket), så kunden ser at det er riktig sted før bestillingen sendes.
+  var adrFunnet = form.querySelector("#f-adr-funnet");
+  function visAdresse(t) {
+    if (!adrFunnet) return;
+    adrFunnet.textContent = t ? "Vi leverer til: " + t : "";
+    adrFunnet.hidden = !t;
+  }
   var ledigTimer = null;
   function checkLedig(force) {
     clearTimeout(ledigTimer);
-    if (addr.value.trim().length < 5 || !sacks()) { if (ledig) { ledig = null; renderDays(); } return; }
+    if (addr.value.trim().length < 5 || !sacks()) { visAdresse(""); if (ledig) { ledig = null; renderDays(); } return; }
     ledigTimer = setTimeout(function () {
       var key = ledigKey(), q = addrQuery();
       if (!force && ledig && ledig.key === key) return;
@@ -298,10 +314,12 @@
           var days = {};
           r.j.dager.forEach(function (d) { days[d.dato] = d.ledig === true; });
           ledig = { key: key, addr: q, list: r.j.dager.map(function (d) { return d.dato; }), days: days, adresse: r.j.adresse || q };
+          visAdresse(r.j.adresse || "");
           if (dayMsg.dataset.addr) { delete dayMsg.dataset.addr; dayMsg.textContent = ""; }
         } else if (r.status === 400) {
           // Ukjent adresse eller for langt unna: ingen dager kan velges før adressen er rettet.
           ledig = { key: key, addr: q, list: deliveryDays(), days: {}, adresse: q, feil: true };
+          visAdresse("");
           dayMsg.dataset.addr = "1";
           dayMsg.innerHTML = "";
           dayMsg.appendChild(document.createTextNode(setning((r.j.feil || [])[0] || "Fant ikke adressen") + " "));
@@ -418,6 +436,7 @@
 
   form.addEventListener("submit", function (ev) {
     ev.preventDefault();
+    track("send_trykket");
     try { send(); } catch (err) { uventet(err); }
   });
   function send() {

@@ -421,6 +421,7 @@ def order_form(area_name="", freq="en-gang", qty=20, chips=(10, 20, 30, 50)):
         <select id="f-sted" name="Område" required>{area_opts}<option>Annet</option></select>
         <label for="f-adresse">Gateadresse</label>
         <input id="f-adresse" name="Adresse" autocomplete="street-address" required>
+        <p class="muted small" id="f-adr-funnet" aria-live="polite" hidden></p>
         <div id="f-dag">
           <span class="label"><span id="l-dag">Leveringsdag</span> <span class="muted">· mandag og fredag, bestill senest kl. {C.DELIVERY_DAYS['order_by_hour']} dagen før</span></span>
           <div class="days" id="f-dager" role="radiogroup" aria-label="Velg leveringsdag"></div>

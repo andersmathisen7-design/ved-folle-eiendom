@@ -138,7 +138,10 @@ const tests = [
     await fyllUt(page, { antall: 25, baering: "etg-2" });
     await page.waitForTimeout(1200);
     const knapper = await page.$$eval("#f-dager button", (bs) => bs.map((x) => [x.dataset.date, x.disabled, x.lastChild.textContent]));
+    // Kunden ser adressen appen fant (23.11.2026: en skrivefeil kunne gi levering til en annen adresse uten at noen så det).
+    const funnet = await page.$eval("#f-adr-funnet", (el) => [el.hidden, el.textContent]);
     await ctx.close();
+    assert.deepStrictEqual(funnet, [false, "Vi leverer til: Storgata 1, 1430 ÅS"]);
     assert.deepStrictEqual(knapper.map((k) => k[0]), DAGER);
     assert.deepStrictEqual(knapper[0].slice(1), [true, "Fullt"]);
     assert.deepStrictEqual(knapper[1].slice(1), [false, "Ledig"]);
@@ -168,6 +171,7 @@ const tests = [
     const ev = await events(page);
     assert.ok(ev.includes("generate_lead"), "generate_lead mangler: " + ev);
     assert.ok(ev.includes("bestilt_via:app"), "bestilt_via:app mangler: " + ev);
+    assert.ok(ev.includes("kontakt_utfylt") && ev.includes("send_trykket"), "kontakt_utfylt/send_trykket mangler: " + ev);
     assert.ok(ev.includes("purchase_lead_view"), "takkesiden viste ikke oppsummeringen: " + ev);
     const takk = await page.$eval("#takk-summary", (el) => el.textContent);
     assert.ok(/20 sekker/.test(takk) && /Storgata 1/.test(takk), takk);
@@ -217,8 +221,10 @@ const tests = [
     await page.fill("#f-adresse", "Finnesikkeveien 99");
     await page.waitForFunction(() => /adressen/i.test(document.querySelector("#f-dag-msg").textContent), null, { timeout: 5000 });
     const ledige = await page.$$eval("#f-dager button:not([disabled])", (bs) => bs.length);
+    const funnet = await page.$eval("#f-adr-funnet", (el) => el.hidden);
     await ctx.close();
     assert.strictEqual(ledige, 0);
+    assert.strictEqual(funnet, true, "ingen «Vi leverer til» når adressen ikke ble funnet");
   }],
   ["Appen svarer ikke på leveringsdagene: bare mandager og fredager vises (lokal beregning)", async (b) => {
     const ctx = await b.newContext(), page = await ctx.newPage();
