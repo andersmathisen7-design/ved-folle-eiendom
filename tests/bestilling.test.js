@@ -55,6 +55,7 @@ const OPPSETT = {
 async function mockApp(ctx, opts) {
   const seen = { oppsett: 0, dager: [], bestill: [], henvendelse: [] };
   await ctx.route("**/gc.zgo.at/**", (r) => r.abort());
+  await ctx.route("**/*.nettsideferdig.workers.dev/**", (r) => r.abort()); // Nettsideferdigs besøkstelling: ikke tell testbesøk
   await ctx.route(APP, async (route) => {
     const req = route.request(), url = new URL(req.url());
     const svar = (status, j) => route.fulfill({ status, headers: CORS, contentType: "application/json", body: JSON.stringify(j) });
@@ -223,6 +224,7 @@ const tests = [
   ["Appen svarer ikke på leveringsdagene: bare mandager og fredager vises (lokal beregning)", async (b) => {
     const ctx = await b.newContext(), page = await ctx.newPage();
     await ctx.route("**/gc.zgo.at/**", (r) => r.abort());
+  await ctx.route("**/*.nettsideferdig.workers.dev/**", (r) => r.abort()); // Nettsideferdigs besøkstelling: ikke tell testbesøk
     await ctx.route(APP, (r) => r.abort("failed"));
     await page.goto(BASE + "/ved-as/");
     await page.waitForTimeout(500);
